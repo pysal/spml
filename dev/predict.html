@@ -1121,7 +1121,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_html"><style>#sk-container-id-1 {
+<div class="output text_html"><style>.sk-global {
   /* Definition of color scheme common for light and dark mode */
   --sklearn-color-text: #000;
   --sklearn-color-text-muted: #666;
@@ -1138,7 +1138,7 @@
   --sklearn-color-fitted-level-3: cornflowerblue;
 }
 
-#sk-container-id-1.light {
+.sk-global.light {
   /* Specific color for light theme */
   --sklearn-color-text-on-default-background: black;
   --sklearn-color-background: white;
@@ -1146,25 +1146,24 @@
   --sklearn-color-icon: #696969;
 }
 
-#sk-container-id-1.dark {
+.sk-global.dark {
   --sklearn-color-text-on-default-background: white;
   --sklearn-color-background: #111;
   --sklearn-color-border-box: white;
   --sklearn-color-icon: #878787;
 }
 
-#sk-container-id-1 {
+.sk-global {
   color: var(--sklearn-color-text);
 }
 
-#sk-container-id-1 pre {
+.sk-global pre {
   padding: 0;
 }
 
-#sk-container-id-1 input.sk-hidden--visually {
+.sk-global input.sk-hidden--visually {
   border: 0;
-  clip: rect(1px 1px 1px 1px);
-  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(100%);
   height: 1px;
   margin: -1px;
   overflow: hidden;
@@ -1173,7 +1172,7 @@
   width: 1px;
 }
 
-#sk-container-id-1 div.sk-dashed-wrapped {
+.sk-global div.sk-dashed-wrapped {
   border: 1px dashed var(--sklearn-color-line);
   margin: 0 0.4em 0.5em 0.4em;
   box-sizing: border-box;
@@ -1181,7 +1180,7 @@
   background-color: var(--sklearn-color-background);
 }
 
-#sk-container-id-1 div.sk-container {
+.sk-global div.sk-container {
   /* jupyter's `normalize.less` sets `[hidden] { display: none; }`
      but bootstrap.min.css set `[hidden] { display: none !important; }`
      so we also need the `!important` here to be able to override the
@@ -1191,7 +1190,7 @@
   position: relative;
 }
 
-#sk-container-id-1 div.sk-text-repr-fallback {
+.sk-global div.sk-text-repr-fallback {
   display: none;
 }
 
@@ -1207,14 +1206,14 @@ div.sk-item {
 
 /* Parallel-specific style estimator block */
 
-#sk-container-id-1 div.sk-parallel-item::after {
+.sk-global div.sk-parallel-item::after {
   content: "";
   width: 100%;
   border-bottom: 2px solid var(--sklearn-color-text-on-default-background);
   flex-grow: 1;
 }
 
-#sk-container-id-1 div.sk-parallel {
+.sk-global div.sk-parallel {
   display: flex;
   align-items: stretch;
   justify-content: center;
@@ -1222,28 +1221,28 @@ div.sk-item {
   position: relative;
 }
 
-#sk-container-id-1 div.sk-parallel-item {
+.sk-global div.sk-parallel-item {
   display: flex;
   flex-direction: column;
 }
 
-#sk-container-id-1 div.sk-parallel-item:first-child::after {
+.sk-global div.sk-parallel-item:first-child::after {
   align-self: flex-end;
   width: 50%;
 }
 
-#sk-container-id-1 div.sk-parallel-item:last-child::after {
+.sk-global div.sk-parallel-item:last-child::after {
   align-self: flex-start;
   width: 50%;
 }
 
-#sk-container-id-1 div.sk-parallel-item:only-child::after {
+.sk-global div.sk-parallel-item:only-child::after {
   width: 0;
 }
 
 /* Serial-specific style estimator block */
 
-#sk-container-id-1 div.sk-serial {
+.sk-global div.sk-serial {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1261,14 +1260,14 @@ clickable and can be expanded/collapsed.
 
 /* Pipeline and ColumnTransformer style (default) */
 
-#sk-container-id-1 div.sk-toggleable {
+.sk-global div.sk-toggleable {
   /* Default theme specific background. It is overwritten whether we have a
   specific estimator or a Pipeline/ColumnTransformer */
   background-color: var(--sklearn-color-background);
 }
 
 /* Toggleable label */
-#sk-container-id-1 label.sk-toggleable__label {
+.sk-global label.sk-toggleable__label {
   cursor: pointer;
   display: flex;
   width: 100%;
@@ -1281,13 +1280,13 @@ clickable and can be expanded/collapsed.
   gap: 0.5em;
 }
 
-#sk-container-id-1 label.sk-toggleable__label .caption {
+.sk-global label.sk-toggleable__label .caption {
   font-size: 0.6rem;
   font-weight: lighter;
   color: var(--sklearn-color-text-muted);
 }
 
-#sk-container-id-1 label.sk-toggleable__label-arrow:before {
+.sk-global label.sk-toggleable__label-arrow:before {
   /* Arrow on the left of the label */
   content: "▸";
   float: left;
@@ -1295,25 +1294,25 @@ clickable and can be expanded/collapsed.
   color: var(--sklearn-color-icon);
 }
 
-#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {
+.sk-global label.sk-toggleable__label-arrow:hover:before {
   color: var(--sklearn-color-text);
 }
 
 /* Toggleable content - dropdown */
 
-#sk-container-id-1 div.sk-toggleable__content {
+.sk-global div.sk-toggleable__content {
   display: none;
   text-align: left;
   /* unfitted */
   background-color: var(--sklearn-color-unfitted-level-0);
 }
 
-#sk-container-id-1 div.sk-toggleable__content.fitted {
+.sk-global div.sk-toggleable__content.fitted {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-0);
 }
 
-#sk-container-id-1 div.sk-toggleable__content pre {
+.sk-global div.sk-toggleable__content pre {
   margin: 0.2em;
   border-radius: 0.25em;
   color: var(--sklearn-color-text);
@@ -1321,78 +1320,78 @@ clickable and can be expanded/collapsed.
   background-color: var(--sklearn-color-unfitted-level-0);
 }
 
-#sk-container-id-1 div.sk-toggleable__content.fitted pre {
+.sk-global div.sk-toggleable__content.fitted pre {
   /* unfitted */
   background-color: var(--sklearn-color-fitted-level-0);
 }
 
-#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {
+.sk-global input.sk-toggleable__control:checked~div.sk-toggleable__content {
   /* Expand drop-down */
   display: block;
   width: 100%;
   overflow: visible;
 }
 
-#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {
+.sk-global input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {
   content: "▾";
 }
 
 /* Pipeline/ColumnTransformer-specific style */
 
-#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {
+.sk-global div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {
   color: var(--sklearn-color-text);
   background-color: var(--sklearn-color-unfitted-level-2);
 }
 
-#sk-container-id-1 div.sk-label.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
+.sk-global div.sk-label.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
   background-color: var(--sklearn-color-fitted-level-2);
 }
 
 /* Estimator-specific style */
 
 /* Colorize estimator box */
-#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {
+.sk-global div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {
   /* unfitted */
   background-color: var(--sklearn-color-unfitted-level-2);
 }
 
-#sk-container-id-1 div.sk-estimator.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
+.sk-global div.sk-estimator.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-2);
 }
 
-#sk-container-id-1 div.sk-label label.sk-toggleable__label,
-#sk-container-id-1 div.sk-label label {
+.sk-global div.sk-label label.sk-toggleable__label,
+.sk-global div.sk-label label {
   /* The background is the default theme color */
   color: var(--sklearn-color-text-on-default-background);
 }
 
 /* On hover, darken the color of the background */
-#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {
+.sk-global div.sk-label:hover label.sk-toggleable__label {
   color: var(--sklearn-color-text);
   background-color: var(--sklearn-color-unfitted-level-2);
 }
 
 /* Label box, darken color on hover, fitted */
-#sk-container-id-1 div.sk-label.fitted:hover label.sk-toggleable__label.fitted {
+.sk-global div.sk-label.fitted:hover label.sk-toggleable__label.fitted {
   color: var(--sklearn-color-text);
   background-color: var(--sklearn-color-fitted-level-2);
 }
 
 /* Estimator label */
 
-#sk-container-id-1 div.sk-label label {
+.sk-global div.sk-label label {
   font-family: monospace;
   font-weight: bold;
   line-height: 1.2em;
 }
 
-#sk-container-id-1 div.sk-label-container {
+.sk-global div.sk-label-container {
   text-align: center;
 }
 
 /* Estimator-specific */
-#sk-container-id-1 div.sk-estimator {
+.sk-global div.sk-estimator {
   font-family: monospace;
   border: 1px dotted var(--sklearn-color-border-box);
   border-radius: 0.25em;
@@ -1402,18 +1401,18 @@ clickable and can be expanded/collapsed.
   background-color: var(--sklearn-color-unfitted-level-0);
 }
 
-#sk-container-id-1 div.sk-estimator.fitted {
+.sk-global div.sk-estimator.fitted {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-0);
 }
 
 /* on hover */
-#sk-container-id-1 div.sk-estimator:hover {
+.sk-global div.sk-estimator:hover {
   /* unfitted */
   background-color: var(--sklearn-color-unfitted-level-2);
 }
 
-#sk-container-id-1 div.sk-estimator.fitted:hover {
+.sk-global div.sk-estimator.fitted:hover {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-2);
 }
@@ -1504,7 +1503,7 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 
 /* "?"-specific style due to the `<a>` HTML tag */
 
-#sk-container-id-1 a.estimator_doc_link {
+.sk-global a.estimator_doc_link {
   float: right;
   font-size: 1rem;
   line-height: 1em;
@@ -1519,7 +1518,7 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
   border: var(--sklearn-color-unfitted-level-1) 1pt solid;
 }
 
-#sk-container-id-1 a.estimator_doc_link.fitted {
+.sk-global a.estimator_doc_link.fitted {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-0);
   border: var(--sklearn-color-fitted-level-1) 1pt solid;
@@ -1527,16 +1526,24 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 }
 
 /* On hover */
-#sk-container-id-1 a.estimator_doc_link:hover {
+.sk-global a.estimator_doc_link:hover {
   /* unfitted */
   background-color: var(--sklearn-color-unfitted-level-3);
   color: var(--sklearn-color-background);
   text-decoration: none;
 }
 
-#sk-container-id-1 a.estimator_doc_link.fitted:hover {
+.sk-global a.estimator_doc_link.fitted:hover {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-3);
+}
+
+.sk-top-container.sk-global {
+  /* pydata-sphinx-theme hides overflow, so scrolling is disabled.
+   We need to set it to !important and add tabindex="0" in the HTML
+   to allow keyboard-only users to navigate the display. */
+  overflow-x: scroll !important;
+  max-width: 100%;
 }
 
 .estimator-table {
@@ -1572,11 +1579,11 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
     background-color: #f6f6f6;
 }
 
-.estimator-table .parameters-table tr:hover {
+.estimator-table .parameters-table tr:hover td {
     background-color: #e0e0e0;
 }
 
-.estimator-table table td {
+.estimator-table table :is(td, th) {
     border: 1px solid rgba(106, 105, 104, 0.232);
 }
 
@@ -1600,7 +1607,7 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
     background-color: transparent;
 }
 
-.default td {
+.default td, .estimator-table th {
     color: black;
     text-align: left !important;
 }
@@ -1608,6 +1615,10 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 .user-set td i,
 .default td i {
     color: black;
+}
+
+td.fitted-att-type {
+    white-space: preserve nowrap;
 }
 
 /*
@@ -1622,6 +1633,14 @@ a.param-doc-link:visited {
     color: inherit;
     display: block;
     padding: .5em;
+}
+
+@supports(anchor-name: --doc-link) {
+    a.param-doc-link,
+    a.param-doc-link:link,
+    a.param-doc-link:visited {
+    anchor-name: --doc-link;
+    }
 }
 
 /* "hack" to make the entire area of the cell containing the link clickable */
@@ -1650,6 +1669,14 @@ a.param-doc-link::before {
     border: thin solid var(--sklearn-color-unfitted-level-3);
 }
 
+@supports(position-area: center right) {
+    .param-doc-description {
+    position-area: center right;
+    position: fixed;
+    margin-left: 0;
+    }
+}
+
 /* Fitted state for parameter tooltips */
 .fitted .param-doc-description {
     /* fitted */
@@ -1671,7 +1698,128 @@ a.param-doc-link::before {
     height: 14px;
     cursor: pointer;
 }
-</style><body><div id="sk-container-id-1" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>GWLogisticRegression(bandwidth=150, keep_models=True)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox" checked><label for="sk-estimator-id-1" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>GWLogisticRegression</div></div><div><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted" data-param-prefix="">
+
+.features {
+  font-family: monospace;
+  cursor: pointer;
+  background-color: var(--sklearn-color-unfitted-level-0);
+  border: 1px dotted var(--sklearn-color-border-box);
+  border-radius: .20em;
+  margin-bottom: 0.5em;
+  font-size: inherit; /* Needed for jupyter */
+}
+
+.features.fitted {
+  background-color: var(--sklearn-color-fitted-level-0);
+}
+
+.features summary {
+  cursor: pointer;
+  display: flex;
+  margin-bottom: 0;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  padding: .25em;
+}
+
+.features details[open] > summary {
+  color: var(--sklearn-color-text);
+  background-color: var(--sklearn-color-unfitted-level-2);
+  border-radius: .20em 0 0 0;
+}
+
+.features.fitted details[open] > summary {
+  background-color: var(--sklearn-color-fitted-level-2);
+  border-radius: .20em 0 0 0;
+}
+
+.features details > summary .arrow::before {
+  content: "▸";
+  color: grey;
+}
+
+.features details[open] > summary .arrow::before {
+  content: "▾";
+}
+
+.features details:hover > summary {
+  margin: 0;
+  background-color: var(--sklearn-color-unfitted-level-2);
+}
+
+.features.fitted details:hover > summary {
+  margin: 0;
+  background-color: var(--sklearn-color-fitted-level-2);
+}
+
+.features .features-container {
+  max-width: 15em;
+  max-height: 10em;
+  overflow: auto;
+  scrollbar-width: thin;
+  padding: .25em 0.1rem;
+  background-color: var(--sklearn-color-unfitted-level-0);
+  border-radius: 0 0 .5em .5em;
+}
+
+.features.fitted .features-container {
+  background-color: var(--sklearn-color-fitted-level-0);
+}
+
+.features .image-container {
+  block-size: 1em;
+  inline-size: 1em;
+  padding: 0;
+  margin: 0%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.features .copy-paste-icon {
+  background-size: 1em 1em;
+  width: 1em;
+  height: 1em;
+  filter: grayscale(100%) opacity(60%);
+}
+
+.features .features-container table {
+  width: 100%;
+  margin: 0.01em;
+}
+
+.features .features-container table tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+.features .features-container table tr:nth-child(even) {
+  background-color: #f6f6f6;
+}
+
+.features .features-container table tr:hover {
+  background-color: #e0e0e0;
+}
+
+.features .features-container table {
+  table-layout: inherit;
+}
+
+.features .features-container table td {
+  text-align: left;
+  padding: 0 0.5em;
+  border: 1px solid rgba(106, 105, 104, 0.232);
+  white-space: nowrap;
+  color: var(--sklearn-color-text);
+}
+
+.total_features {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5em;
+}
+</style><body><div id="sk-container-id-1" tabindex="0" class="sk-top-container sk-global"><div class="sk-text-repr-fallback"><pre>GWLogisticRegression(bandwidth=150, keep_models=True)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually sk-global" id="sk-estimator-id-1" type="checkbox" checked><label for="sk-estimator-id-1" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>GWLogisticRegression</div></div><div><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted" data-param-prefix="">
         <div class="estimator-table">
             <details>
                 <summary>Parameters</summary>
@@ -1685,6 +1833,16 @@ a.param-doc-link::before {
             ></i></td>
             <td class="param">bandwidth</td>
             <td class="value">150</td>
+        </tr>
+    
+
+        <tr class="user-set">
+            <td><i class="copy-paste-icon"
+                 onclick="copyToClipboard('keep_models',
+                          this.parentElement.nextElementSibling)"
+            ></i></td>
+            <td class="param">keep_models</td>
+            <td class="value">True</td>
         </tr>
     
 
@@ -1755,16 +1913,6 @@ a.param-doc-link::before {
             ></i></td>
             <td class="param">strict</td>
             <td class="value">False</td>
-        </tr>
-    
-
-        <tr class="user-set">
-            <td><i class="copy-paste-icon"
-                 onclick="copyToClipboard('keep_models',
-                          this.parentElement.nextElementSibling)"
-            ></i></td>
-            <td class="param">keep_models</td>
-            <td class="value">True</td>
         </tr>
     
 
@@ -1851,7 +1999,163 @@ a.param-doc-link::before {
                 </table>
             </details>
         </div>
-    </div></div></div></div></div><script>function copyToClipboard(text, element) {
+    
+        <div class="estimator-table">
+            <details>
+                <summary>Fitted attributes</summary>
+                <table class="parameters-table">
+                    <tbody>
+                        <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        </tr>
+                        
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">aic_</a></td>
+           <td class="fitted-att-type">float64</td>
+           <td>995.3</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">aicc_</a></td>
+           <td class="fitted-att-type">float64</td>
+           <td>1025</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">bic_</a></td>
+           <td class="fitted-att-type">float64</td>
+           <td>1584</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">effective_df_</a></td>
+           <td class="fitted-att-type">float64</td>
+           <td>117.1</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">feature_names_in_</a></td>
+           <td class="fitted-att-type">ndarray[object](6,)</td>
+           <td>[&#x27;HR70&#x27;,&#x27;HR80&#x27;,&#x27;HR90&#x27;,&#x27;HC60&#x27;,&#x27;HC70&#x27;,&#x27;HC80&#x27;]</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">hat_values_</a></td>
+           <td class="fitted-att-type">Series[float64](1270,)</td>
+           <td>51167    0.06...dtype: float64</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">local_class_support_</a></td>
+           <td class="fitted-att-type">Series[int64](1270,)</td>
+           <td>51167    2
+47..., dtype: int64</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">local_coef_</a></td>
+           <td class="fitted-att-type">DataFrame</td>
+           <td>           HR...s x 6 columns]</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">local_intercept_</a></td>
+           <td class="fitted-att-type">Series[float64](1270,)</td>
+           <td>51167   -2.02...dtype: float64</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">log_likelihood_</a></td>
+           <td class="fitted-att-type">float64</td>
+           <td>-379.5</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">pred_</a></td>
+           <td class="fitted-att-type">Series[boolean](1270,)</td>
+           <td>FIPS
+51167   ...dtype: boolean</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">pred_pooled_</a></td>
+           <td class="fitted-att-type">ndarray[bool](161850,)</td>
+           <td>[ True,False,False,..., True, True, True]</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">prediction_rate_</a></td>
+           <td class="fitted-att-type">float64</td>
+           <td>0.8496</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">proba_</a></td>
+           <td class="fitted-att-type">DataFrame</td>
+           <td>             ...s x 2 columns]</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">y_pooled_</a></td>
+           <td class="fitted-att-type">ndarray[bool](161850,)</td>
+           <td>[False,False,False,...,False, True,False]</td>
+
+
+       </tr>
+    
+                    </tbody>
+                </table>
+            </details>
+        </div>
+    </div></div></div></div></div><script>/*  Authors: The scikit-learn developers
+ SPDX-License-Identifier: BSD-3-Clause
+*/
+
+function copyToClipboard(text, element) {
     // Get the parameter prefix from the closest toggleable content
     const toggleableContent = element.closest('.sk-toggleable__content');
     const paramPrefix = toggleableContent ? toggleableContent.dataset.paramPrefix : '';
@@ -1888,6 +2192,13 @@ a.param-doc-link::before {
 document.querySelectorAll('.copy-paste-icon').forEach(function(element) {
     const toggleableContent = element.closest('.sk-toggleable__content');
     const paramPrefix = toggleableContent ? toggleableContent.dataset.paramPrefix : '';
+
+    const parent = element.parentElement;
+    if (!parent || !parent.nextElementSibling) {
+        console.warn('Expected copy-paste icon is missing from the DOM structure');
+        return;
+    }
+
     const paramName = element.parentElement.nextElementSibling
         .textContent.trim().split(' ')[0];
     const fullParamName = paramPrefix ? `${paramPrefix}${paramName}` : paramName;
@@ -1895,7 +2206,51 @@ document.querySelectorAll('.copy-paste-icon').forEach(function(element) {
     element.setAttribute('title', fullParamName);
 });
 
+/**
+ * Copy the list of feature names formatted as a Python list.
+ *
+ * @param {HTMLElement} element - The copy button inside a `.features` block; its siblings
+ *   contain a `details` element and a table containing feature named.
+ * @returns {boolean} Always returns `false` so callers can prevent the default click behavior.
+ */
+function copyFeatureNamesToClipboard(element) {
+    var detailsElem = element.closest('.features').querySelector('details');
+    var wasOpen = detailsElem.open;
+    detailsElem.open = true;
+    var content = element.closest('.features').querySelector('tbody')
+                  .innerText.trim();
+    if (!wasOpen) detailsElem.open = false;
+    const rows = content.split('\n').map(row => `    "${row}"`);
+    const formattedText = `[\n${rows.join(',\n')},\n]`;
+    const originalHTML = element.innerHTML.replace('✔', '');
+    const originalStyle = element.style;
+    const copyMark = document.createElement('span');
+    copyMark.innerHTML = '✔';
+    copyMark.style.color = 'blue';
+    copyMark.style.fontSize = '1em';
 
+    navigator.clipboard.writeText(formattedText)
+        .then(() => {
+            element.style.display = 'none';
+            element.parentElement.appendChild(copyMark);
+
+            setTimeout(() => {
+                copyMark.remove();
+                element.innerHTML = originalHTML;
+                element.style = originalStyle;
+            }, 1000);
+        })
+        .catch(err => {
+            console.error('Failed to copy:', err);
+            element.style.color = 'orange';
+            element.innerHTML = "Failed!";
+            setTimeout(() => {
+                element.innerHTML = originalHTML;
+                element.style = originalStyle;
+            }, 1000);
+        });
+    return false;
+}
 /**
  * Adapted from Skrub
  * https://github.com/skrub-data/skrub/blob/403466d1d5d4dc76a7ef569b3f8228db59a31dc3/skrub/_reporting/_data/templates/report.js#L789
@@ -2007,29 +2362,29 @@ forceTheme('sk-container-id-1');</script></body></div></div>
   </thead>
   <tbody>
     <tr>
-      <th>01065</th>
-      <td>0.788388</td>
-      <td>0.211612</td>
+      <th>47071</th>
+      <td>0.293011</td>
+      <td>0.706989</td>
     </tr>
     <tr>
-      <th>37057</th>
-      <td>0.483624</td>
-      <td>0.516376</td>
+      <th>22093</th>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
-      <th>13215</th>
-      <td>0.066258</td>
-      <td>0.933742</td>
+      <th>13143</th>
+      <td>0.530551</td>
+      <td>0.469449</td>
     </tr>
     <tr>
-      <th>48387</th>
-      <td>0.696203</td>
-      <td>0.303797</td>
+      <th>40079</th>
+      <td>0.907495</td>
+      <td>0.092505</td>
     </tr>
     <tr>
-      <th>40149</th>
-      <td>0.501851</td>
-      <td>0.498149</td>
+      <th>48051</th>
+      <td>0.340043</td>
+      <td>0.659957</td>
     </tr>
     <tr>
       <th>...</th>
@@ -2037,29 +2392,29 @@ forceTheme('sk-container-id-1');</script></body></div></div>
       <td>...</td>
     </tr>
     <tr>
-      <th>21037</th>
-      <td>0.254229</td>
-      <td>0.745771</td>
+      <th>48487</th>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
-      <th>48331</th>
-      <td>0.371856</td>
-      <td>0.628144</td>
+      <th>05041</th>
+      <td>0.003268</td>
+      <td>0.996732</td>
     </tr>
     <tr>
-      <th>48161</th>
-      <td>0.895399</td>
-      <td>0.104601</td>
+      <th>48303</th>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
-      <th>54087</th>
-      <td>0.727167</td>
-      <td>0.272833</td>
+      <th>48409</th>
+      <td>0.583425</td>
+      <td>0.416575</td>
     </tr>
     <tr>
-      <th>54103</th>
-      <td>0.785562</td>
-      <td>0.214438</td>
+      <th>51770</th>
+      <td>0.161737</td>
+      <td>0.838263</td>
     </tr>
   </tbody>
 </table>
@@ -2076,7 +2431,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/55d0547899091dd3f63e9a150a3efa7257563400c4485a0cee9cd65332e1e955.png" src="_images/55d0547899091dd3f63e9a150a3efa7257563400c4485a0cee9cd65332e1e955.png" />
+<img alt="_images/925092dca3ba7767bfcf588907b0fb7595674d2d976f3f8d23e407f5f6d5ba08.png" src="_images/925092dca3ba7767bfcf588907b0fb7595674d2d976f3f8d23e407f5f6d5ba08.png" />
 </div>
 </div>
 <p>The missing values have been linked to models that were not fitted. You can check all of those visually by plotting the focal prediction.</p>
@@ -2089,7 +2444,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/ea2bd974232677650c5071f9618ccd932b83cbaa866b24edc08dc7bf8e7c61fd.png" src="_images/ea2bd974232677650c5071f9618ccd932b83cbaa866b24edc08dc7bf8e7c61fd.png" />
+<img alt="_images/ee282a7761fb7e7df121964ccca269e858a3aba4183b5a348d9fc5f2ac4cb3d6.png" src="_images/ee282a7761fb7e7df121964ccca269e858a3aba4183b5a348d9fc5f2ac4cb3d6.png" />
 </div>
 </div>
 <p>Filter it out and measure the performance on the left-out sample.</p>
@@ -2104,7 +2459,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7910447761194029
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7952755905511811
 </code></pre></div>
 </div>
 </div>
@@ -2156,29 +2511,29 @@ forceTheme('sk-container-id-1');</script></body></div></div>
   </thead>
   <tbody>
     <tr>
-      <th>01065</th>
-      <td>0.760188</td>
-      <td>0.239812</td>
+      <th>47071</th>
+      <td>0.413341</td>
+      <td>0.586659</td>
     </tr>
     <tr>
-      <th>37057</th>
-      <td>0.460483</td>
-      <td>0.539517</td>
+      <th>22093</th>
+      <td>0.262773</td>
+      <td>0.737227</td>
     </tr>
     <tr>
-      <th>13215</th>
-      <td>0.226910</td>
-      <td>0.773090</td>
+      <th>13143</th>
+      <td>0.496431</td>
+      <td>0.503569</td>
     </tr>
     <tr>
-      <th>48387</th>
-      <td>0.692112</td>
-      <td>0.307888</td>
+      <th>40079</th>
+      <td>0.901888</td>
+      <td>0.098112</td>
     </tr>
     <tr>
-      <th>40149</th>
-      <td>0.537188</td>
-      <td>0.462812</td>
+      <th>48051</th>
+      <td>0.341638</td>
+      <td>0.658362</td>
     </tr>
     <tr>
       <th>...</th>
@@ -2186,29 +2541,29 @@ forceTheme('sk-container-id-1');</script></body></div></div>
       <td>...</td>
     </tr>
     <tr>
-      <th>21037</th>
-      <td>0.246988</td>
-      <td>0.753012</td>
+      <th>48487</th>
+      <td>0.887127</td>
+      <td>0.112873</td>
     </tr>
     <tr>
-      <th>48331</th>
-      <td>0.424579</td>
-      <td>0.575421</td>
+      <th>05041</th>
+      <td>0.020225</td>
+      <td>0.979775</td>
     </tr>
     <tr>
-      <th>48161</th>
-      <td>0.831630</td>
-      <td>0.168370</td>
+      <th>48303</th>
+      <td>0.001097</td>
+      <td>0.998903</td>
     </tr>
     <tr>
-      <th>54087</th>
-      <td>0.755368</td>
-      <td>0.244632</td>
+      <th>48409</th>
+      <td>0.618223</td>
+      <td>0.381777</td>
     </tr>
     <tr>
-      <th>54103</th>
-      <td>0.782285</td>
-      <td>0.217715</td>
+      <th>51770</th>
+      <td>0.175689</td>
+      <td>0.824311</td>
     </tr>
   </tbody>
 </table>
@@ -2225,7 +2580,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/4caf063fc7abc794de1bb4f4473ddb6f83702d0b3c15ab060e799a73d1c79fc4.png" src="_images/4caf063fc7abc794de1bb4f4473ddb6f83702d0b3c15ab060e799a73d1c79fc4.png" />
+<img alt="_images/c0bdb037db6889601375ad22c6bb5a6703dfd3e25087271f4e0b8488a79641dc.png" src="_images/c0bdb037db6889601375ad22c6bb5a6703dfd3e25087271f4e0b8488a79641dc.png" />
 </div>
 </div>
 <p>This is one of the benefits of the ensemble prediction. Another is theoretical spatial robustness. Nevertheless, the actual metrics are typically very similar between the models.</p>
@@ -2239,7 +2594,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.8028169014084507
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7605633802816901
 </code></pre></div>
 </div>
 </div>
@@ -2283,29 +2638,29 @@ forceTheme('sk-container-id-1');</script></body></div></div>
   </thead>
   <tbody>
     <tr>
-      <th>01065</th>
-      <td>0.756659</td>
-      <td>0.243341</td>
+      <th>47071</th>
+      <td>0.310767</td>
+      <td>0.689233</td>
     </tr>
     <tr>
-      <th>37057</th>
-      <td>0.452928</td>
-      <td>0.547072</td>
+      <th>22093</th>
+      <td>0.572653</td>
+      <td>0.427347</td>
     </tr>
     <tr>
-      <th>13215</th>
-      <td>0.056911</td>
-      <td>0.943089</td>
+      <th>13143</th>
+      <td>0.526974</td>
+      <td>0.473026</td>
     </tr>
     <tr>
-      <th>48387</th>
-      <td>0.660310</td>
-      <td>0.339690</td>
+      <th>40079</th>
+      <td>0.880470</td>
+      <td>0.119530</td>
     </tr>
     <tr>
-      <th>40149</th>
-      <td>0.558201</td>
-      <td>0.441799</td>
+      <th>48051</th>
+      <td>0.393369</td>
+      <td>0.606631</td>
     </tr>
     <tr>
       <th>...</th>
@@ -2313,29 +2668,29 @@ forceTheme('sk-container-id-1');</script></body></div></div>
       <td>...</td>
     </tr>
     <tr>
-      <th>21037</th>
-      <td>0.348780</td>
-      <td>0.651220</td>
+      <th>48487</th>
+      <td>0.225192</td>
+      <td>0.774808</td>
     </tr>
     <tr>
-      <th>48331</th>
-      <td>0.394060</td>
-      <td>0.605940</td>
+      <th>05041</th>
+      <td>0.028139</td>
+      <td>0.971861</td>
     </tr>
     <tr>
-      <th>48161</th>
-      <td>0.842335</td>
-      <td>0.157665</td>
+      <th>48303</th>
+      <td>0.011818</td>
+      <td>0.988182</td>
     </tr>
     <tr>
-      <th>54087</th>
-      <td>0.727117</td>
-      <td>0.272883</td>
+      <th>48409</th>
+      <td>0.597176</td>
+      <td>0.402824</td>
     </tr>
     <tr>
-      <th>54103</th>
-      <td>0.804906</td>
-      <td>0.195094</td>
+      <th>51770</th>
+      <td>0.150111</td>
+      <td>0.849889</td>
     </tr>
   </tbody>
 </table>
@@ -2352,7 +2707,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7816901408450704
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7394366197183099
 </code></pre></div>
 </div>
 </div>
@@ -2396,7 +2751,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_html"><style>#sk-container-id-2 {
+<div class="output text_html"><style>.sk-global {
   /* Definition of color scheme common for light and dark mode */
   --sklearn-color-text: #000;
   --sklearn-color-text-muted: #666;
@@ -2413,7 +2768,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
   --sklearn-color-fitted-level-3: cornflowerblue;
 }
 
-#sk-container-id-2.light {
+.sk-global.light {
   /* Specific color for light theme */
   --sklearn-color-text-on-default-background: black;
   --sklearn-color-background: white;
@@ -2421,25 +2776,24 @@ forceTheme('sk-container-id-1');</script></body></div></div>
   --sklearn-color-icon: #696969;
 }
 
-#sk-container-id-2.dark {
+.sk-global.dark {
   --sklearn-color-text-on-default-background: white;
   --sklearn-color-background: #111;
   --sklearn-color-border-box: white;
   --sklearn-color-icon: #878787;
 }
 
-#sk-container-id-2 {
+.sk-global {
   color: var(--sklearn-color-text);
 }
 
-#sk-container-id-2 pre {
+.sk-global pre {
   padding: 0;
 }
 
-#sk-container-id-2 input.sk-hidden--visually {
+.sk-global input.sk-hidden--visually {
   border: 0;
-  clip: rect(1px 1px 1px 1px);
-  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(100%);
   height: 1px;
   margin: -1px;
   overflow: hidden;
@@ -2448,7 +2802,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
   width: 1px;
 }
 
-#sk-container-id-2 div.sk-dashed-wrapped {
+.sk-global div.sk-dashed-wrapped {
   border: 1px dashed var(--sklearn-color-line);
   margin: 0 0.4em 0.5em 0.4em;
   box-sizing: border-box;
@@ -2456,7 +2810,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
   background-color: var(--sklearn-color-background);
 }
 
-#sk-container-id-2 div.sk-container {
+.sk-global div.sk-container {
   /* jupyter's `normalize.less` sets `[hidden] { display: none; }`
      but bootstrap.min.css set `[hidden] { display: none !important; }`
      so we also need the `!important` here to be able to override the
@@ -2466,7 +2820,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
   position: relative;
 }
 
-#sk-container-id-2 div.sk-text-repr-fallback {
+.sk-global div.sk-text-repr-fallback {
   display: none;
 }
 
@@ -2482,14 +2836,14 @@ div.sk-item {
 
 /* Parallel-specific style estimator block */
 
-#sk-container-id-2 div.sk-parallel-item::after {
+.sk-global div.sk-parallel-item::after {
   content: "";
   width: 100%;
   border-bottom: 2px solid var(--sklearn-color-text-on-default-background);
   flex-grow: 1;
 }
 
-#sk-container-id-2 div.sk-parallel {
+.sk-global div.sk-parallel {
   display: flex;
   align-items: stretch;
   justify-content: center;
@@ -2497,28 +2851,28 @@ div.sk-item {
   position: relative;
 }
 
-#sk-container-id-2 div.sk-parallel-item {
+.sk-global div.sk-parallel-item {
   display: flex;
   flex-direction: column;
 }
 
-#sk-container-id-2 div.sk-parallel-item:first-child::after {
+.sk-global div.sk-parallel-item:first-child::after {
   align-self: flex-end;
   width: 50%;
 }
 
-#sk-container-id-2 div.sk-parallel-item:last-child::after {
+.sk-global div.sk-parallel-item:last-child::after {
   align-self: flex-start;
   width: 50%;
 }
 
-#sk-container-id-2 div.sk-parallel-item:only-child::after {
+.sk-global div.sk-parallel-item:only-child::after {
   width: 0;
 }
 
 /* Serial-specific style estimator block */
 
-#sk-container-id-2 div.sk-serial {
+.sk-global div.sk-serial {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2536,14 +2890,14 @@ clickable and can be expanded/collapsed.
 
 /* Pipeline and ColumnTransformer style (default) */
 
-#sk-container-id-2 div.sk-toggleable {
+.sk-global div.sk-toggleable {
   /* Default theme specific background. It is overwritten whether we have a
   specific estimator or a Pipeline/ColumnTransformer */
   background-color: var(--sklearn-color-background);
 }
 
 /* Toggleable label */
-#sk-container-id-2 label.sk-toggleable__label {
+.sk-global label.sk-toggleable__label {
   cursor: pointer;
   display: flex;
   width: 100%;
@@ -2556,13 +2910,13 @@ clickable and can be expanded/collapsed.
   gap: 0.5em;
 }
 
-#sk-container-id-2 label.sk-toggleable__label .caption {
+.sk-global label.sk-toggleable__label .caption {
   font-size: 0.6rem;
   font-weight: lighter;
   color: var(--sklearn-color-text-muted);
 }
 
-#sk-container-id-2 label.sk-toggleable__label-arrow:before {
+.sk-global label.sk-toggleable__label-arrow:before {
   /* Arrow on the left of the label */
   content: "▸";
   float: left;
@@ -2570,25 +2924,25 @@ clickable and can be expanded/collapsed.
   color: var(--sklearn-color-icon);
 }
 
-#sk-container-id-2 label.sk-toggleable__label-arrow:hover:before {
+.sk-global label.sk-toggleable__label-arrow:hover:before {
   color: var(--sklearn-color-text);
 }
 
 /* Toggleable content - dropdown */
 
-#sk-container-id-2 div.sk-toggleable__content {
+.sk-global div.sk-toggleable__content {
   display: none;
   text-align: left;
   /* unfitted */
   background-color: var(--sklearn-color-unfitted-level-0);
 }
 
-#sk-container-id-2 div.sk-toggleable__content.fitted {
+.sk-global div.sk-toggleable__content.fitted {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-0);
 }
 
-#sk-container-id-2 div.sk-toggleable__content pre {
+.sk-global div.sk-toggleable__content pre {
   margin: 0.2em;
   border-radius: 0.25em;
   color: var(--sklearn-color-text);
@@ -2596,78 +2950,78 @@ clickable and can be expanded/collapsed.
   background-color: var(--sklearn-color-unfitted-level-0);
 }
 
-#sk-container-id-2 div.sk-toggleable__content.fitted pre {
+.sk-global div.sk-toggleable__content.fitted pre {
   /* unfitted */
   background-color: var(--sklearn-color-fitted-level-0);
 }
 
-#sk-container-id-2 input.sk-toggleable__control:checked~div.sk-toggleable__content {
+.sk-global input.sk-toggleable__control:checked~div.sk-toggleable__content {
   /* Expand drop-down */
   display: block;
   width: 100%;
   overflow: visible;
 }
 
-#sk-container-id-2 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {
+.sk-global input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {
   content: "▾";
 }
 
 /* Pipeline/ColumnTransformer-specific style */
 
-#sk-container-id-2 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {
+.sk-global div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {
   color: var(--sklearn-color-text);
   background-color: var(--sklearn-color-unfitted-level-2);
 }
 
-#sk-container-id-2 div.sk-label.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
+.sk-global div.sk-label.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
   background-color: var(--sklearn-color-fitted-level-2);
 }
 
 /* Estimator-specific style */
 
 /* Colorize estimator box */
-#sk-container-id-2 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {
+.sk-global div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {
   /* unfitted */
   background-color: var(--sklearn-color-unfitted-level-2);
 }
 
-#sk-container-id-2 div.sk-estimator.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
+.sk-global div.sk-estimator.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-2);
 }
 
-#sk-container-id-2 div.sk-label label.sk-toggleable__label,
-#sk-container-id-2 div.sk-label label {
+.sk-global div.sk-label label.sk-toggleable__label,
+.sk-global div.sk-label label {
   /* The background is the default theme color */
   color: var(--sklearn-color-text-on-default-background);
 }
 
 /* On hover, darken the color of the background */
-#sk-container-id-2 div.sk-label:hover label.sk-toggleable__label {
+.sk-global div.sk-label:hover label.sk-toggleable__label {
   color: var(--sklearn-color-text);
   background-color: var(--sklearn-color-unfitted-level-2);
 }
 
 /* Label box, darken color on hover, fitted */
-#sk-container-id-2 div.sk-label.fitted:hover label.sk-toggleable__label.fitted {
+.sk-global div.sk-label.fitted:hover label.sk-toggleable__label.fitted {
   color: var(--sklearn-color-text);
   background-color: var(--sklearn-color-fitted-level-2);
 }
 
 /* Estimator label */
 
-#sk-container-id-2 div.sk-label label {
+.sk-global div.sk-label label {
   font-family: monospace;
   font-weight: bold;
   line-height: 1.2em;
 }
 
-#sk-container-id-2 div.sk-label-container {
+.sk-global div.sk-label-container {
   text-align: center;
 }
 
 /* Estimator-specific */
-#sk-container-id-2 div.sk-estimator {
+.sk-global div.sk-estimator {
   font-family: monospace;
   border: 1px dotted var(--sklearn-color-border-box);
   border-radius: 0.25em;
@@ -2677,18 +3031,18 @@ clickable and can be expanded/collapsed.
   background-color: var(--sklearn-color-unfitted-level-0);
 }
 
-#sk-container-id-2 div.sk-estimator.fitted {
+.sk-global div.sk-estimator.fitted {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-0);
 }
 
 /* on hover */
-#sk-container-id-2 div.sk-estimator:hover {
+.sk-global div.sk-estimator:hover {
   /* unfitted */
   background-color: var(--sklearn-color-unfitted-level-2);
 }
 
-#sk-container-id-2 div.sk-estimator.fitted:hover {
+.sk-global div.sk-estimator.fitted:hover {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-2);
 }
@@ -2779,7 +3133,7 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 
 /* "?"-specific style due to the `<a>` HTML tag */
 
-#sk-container-id-2 a.estimator_doc_link {
+.sk-global a.estimator_doc_link {
   float: right;
   font-size: 1rem;
   line-height: 1em;
@@ -2794,7 +3148,7 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
   border: var(--sklearn-color-unfitted-level-1) 1pt solid;
 }
 
-#sk-container-id-2 a.estimator_doc_link.fitted {
+.sk-global a.estimator_doc_link.fitted {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-0);
   border: var(--sklearn-color-fitted-level-1) 1pt solid;
@@ -2802,16 +3156,24 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 }
 
 /* On hover */
-#sk-container-id-2 a.estimator_doc_link:hover {
+.sk-global a.estimator_doc_link:hover {
   /* unfitted */
   background-color: var(--sklearn-color-unfitted-level-3);
   color: var(--sklearn-color-background);
   text-decoration: none;
 }
 
-#sk-container-id-2 a.estimator_doc_link.fitted:hover {
+.sk-global a.estimator_doc_link.fitted:hover {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-3);
+}
+
+.sk-top-container.sk-global {
+  /* pydata-sphinx-theme hides overflow, so scrolling is disabled.
+   We need to set it to !important and add tabindex="0" in the HTML
+   to allow keyboard-only users to navigate the display. */
+  overflow-x: scroll !important;
+  max-width: 100%;
 }
 
 .estimator-table {
@@ -2847,11 +3209,11 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
     background-color: #f6f6f6;
 }
 
-.estimator-table .parameters-table tr:hover {
+.estimator-table .parameters-table tr:hover td {
     background-color: #e0e0e0;
 }
 
-.estimator-table table td {
+.estimator-table table :is(td, th) {
     border: 1px solid rgba(106, 105, 104, 0.232);
 }
 
@@ -2875,7 +3237,7 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
     background-color: transparent;
 }
 
-.default td {
+.default td, .estimator-table th {
     color: black;
     text-align: left !important;
 }
@@ -2883,6 +3245,10 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 .user-set td i,
 .default td i {
     color: black;
+}
+
+td.fitted-att-type {
+    white-space: preserve nowrap;
 }
 
 /*
@@ -2897,6 +3263,14 @@ a.param-doc-link:visited {
     color: inherit;
     display: block;
     padding: .5em;
+}
+
+@supports(anchor-name: --doc-link) {
+    a.param-doc-link,
+    a.param-doc-link:link,
+    a.param-doc-link:visited {
+    anchor-name: --doc-link;
+    }
 }
 
 /* "hack" to make the entire area of the cell containing the link clickable */
@@ -2925,6 +3299,14 @@ a.param-doc-link::before {
     border: thin solid var(--sklearn-color-unfitted-level-3);
 }
 
+@supports(position-area: center right) {
+    .param-doc-description {
+    position-area: center right;
+    position: fixed;
+    margin-left: 0;
+    }
+}
+
 /* Fitted state for parameter tooltips */
 .fitted .param-doc-description {
     /* fitted */
@@ -2946,7 +3328,128 @@ a.param-doc-link::before {
     height: 14px;
     cursor: pointer;
 }
-</style><body><div id="sk-container-id-2" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>GWLinearRegression(bandwidth=150, keep_models=True)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-2" type="checkbox" checked><label for="sk-estimator-id-2" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>GWLinearRegression</div></div><div><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted" data-param-prefix="">
+
+.features {
+  font-family: monospace;
+  cursor: pointer;
+  background-color: var(--sklearn-color-unfitted-level-0);
+  border: 1px dotted var(--sklearn-color-border-box);
+  border-radius: .20em;
+  margin-bottom: 0.5em;
+  font-size: inherit; /* Needed for jupyter */
+}
+
+.features.fitted {
+  background-color: var(--sklearn-color-fitted-level-0);
+}
+
+.features summary {
+  cursor: pointer;
+  display: flex;
+  margin-bottom: 0;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  padding: .25em;
+}
+
+.features details[open] > summary {
+  color: var(--sklearn-color-text);
+  background-color: var(--sklearn-color-unfitted-level-2);
+  border-radius: .20em 0 0 0;
+}
+
+.features.fitted details[open] > summary {
+  background-color: var(--sklearn-color-fitted-level-2);
+  border-radius: .20em 0 0 0;
+}
+
+.features details > summary .arrow::before {
+  content: "▸";
+  color: grey;
+}
+
+.features details[open] > summary .arrow::before {
+  content: "▾";
+}
+
+.features details:hover > summary {
+  margin: 0;
+  background-color: var(--sklearn-color-unfitted-level-2);
+}
+
+.features.fitted details:hover > summary {
+  margin: 0;
+  background-color: var(--sklearn-color-fitted-level-2);
+}
+
+.features .features-container {
+  max-width: 15em;
+  max-height: 10em;
+  overflow: auto;
+  scrollbar-width: thin;
+  padding: .25em 0.1rem;
+  background-color: var(--sklearn-color-unfitted-level-0);
+  border-radius: 0 0 .5em .5em;
+}
+
+.features.fitted .features-container {
+  background-color: var(--sklearn-color-fitted-level-0);
+}
+
+.features .image-container {
+  block-size: 1em;
+  inline-size: 1em;
+  padding: 0;
+  margin: 0%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.features .copy-paste-icon {
+  background-size: 1em 1em;
+  width: 1em;
+  height: 1em;
+  filter: grayscale(100%) opacity(60%);
+}
+
+.features .features-container table {
+  width: 100%;
+  margin: 0.01em;
+}
+
+.features .features-container table tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+.features .features-container table tr:nth-child(even) {
+  background-color: #f6f6f6;
+}
+
+.features .features-container table tr:hover {
+  background-color: #e0e0e0;
+}
+
+.features .features-container table {
+  table-layout: inherit;
+}
+
+.features .features-container table td {
+  text-align: left;
+  padding: 0 0.5em;
+  border: 1px solid rgba(106, 105, 104, 0.232);
+  white-space: nowrap;
+  color: var(--sklearn-color-text);
+}
+
+.total_features {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5em;
+}
+</style><body><div id="sk-container-id-2" tabindex="0" class="sk-top-container sk-global"><div class="sk-text-repr-fallback"><pre>GWLinearRegression(bandwidth=150, keep_models=True)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually sk-global" id="sk-estimator-id-2" type="checkbox" checked><label for="sk-estimator-id-2" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>GWLinearRegression</div></div><div><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted" data-param-prefix="">
         <div class="estimator-table">
             <details>
                 <summary>Parameters</summary>
@@ -2960,6 +3463,16 @@ a.param-doc-link::before {
             ></i></td>
             <td class="param">bandwidth</td>
             <td class="value">150</td>
+        </tr>
+    
+
+        <tr class="user-set">
+            <td><i class="copy-paste-icon"
+                 onclick="copyToClipboard('keep_models',
+                          this.parentElement.nextElementSibling)"
+            ></i></td>
+            <td class="param">keep_models</td>
+            <td class="value">True</td>
         </tr>
     
 
@@ -3033,16 +3546,6 @@ a.param-doc-link::before {
         </tr>
     
 
-        <tr class="user-set">
-            <td><i class="copy-paste-icon"
-                 onclick="copyToClipboard('keep_models',
-                          this.parentElement.nextElementSibling)"
-            ></i></td>
-            <td class="param">keep_models</td>
-            <td class="value">True</td>
-        </tr>
-    
-
         <tr class="default">
             <td><i class="copy-paste-icon"
                  onclick="copyToClipboard('temp_folder',
@@ -3086,7 +3589,164 @@ a.param-doc-link::before {
                 </table>
             </details>
         </div>
-    </div></div></div></div></div><script>function copyToClipboard(text, element) {
+    
+        <div class="estimator-table">
+            <details>
+                <summary>Fitted attributes</summary>
+                <table class="parameters-table">
+                    <tbody>
+                        <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        </tr>
+                        
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">RSS_</a></td>
+           <td class="fitted-att-type">Series[float64](1270,)</td>
+           <td>focal
+01001  ...dtype: float64</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">TSS_</a></td>
+           <td class="fitted-att-type">Series[float64](1270,)</td>
+           <td>37053    1733...dtype: float64</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">aic_</a></td>
+           <td class="fitted-att-type">float64</td>
+           <td>6868</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">aicc_</a></td>
+           <td class="fitted-att-type">float64</td>
+           <td>6902</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">bic_</a></td>
+           <td class="fitted-att-type">float64</td>
+           <td>7576</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">effective_df_</a></td>
+           <td class="fitted-att-type">float64</td>
+           <td>136.6</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">feature_names_in_</a></td>
+           <td class="fitted-att-type">ndarray[object](6,)</td>
+           <td>[&#x27;HR70&#x27;,&#x27;HR80&#x27;,&#x27;HR90&#x27;,&#x27;HC60&#x27;,&#x27;HC70&#x27;,&#x27;HC80&#x27;]</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">hat_values_</a></td>
+           <td class="fitted-att-type">Series[float64](1270,)</td>
+           <td>37053    0.09...dtype: float64</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">local_coef_</a></td>
+           <td class="fitted-att-type">DataFrame</td>
+           <td>           HR...s x 6 columns]</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">local_intercept_</a></td>
+           <td class="fitted-att-type">Series[float64](1270,)</td>
+           <td>37053    10.3...dtype: float64</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">local_r2_</a></td>
+           <td class="fitted-att-type">Series[float64](1270,)</td>
+           <td>01001    0.46...dtype: float64</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">log_likelihood_</a></td>
+           <td class="fitted-att-type">float64</td>
+           <td>-3296</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">pred_</a></td>
+           <td class="fitted-att-type">Series[float64](1270,)</td>
+           <td>FIPS
+37053   ...dtype: float64</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">resid_</a></td>
+           <td class="fitted-att-type">Series[float64](1270,)</td>
+           <td>FIPS
+37053   ...dtype: float64</td>
+
+
+       </tr>
+    
+
+       <tr class="default">
+           <td class="param"><a class="param-doc-link" style="text-decoration:none;">y_bar_</a></td>
+           <td class="fitted-att-type">Series[float64](1270,)</td>
+           <td>37053    17.4...dtype: float64</td>
+
+
+       </tr>
+    
+                    </tbody>
+                </table>
+            </details>
+        </div>
+    </div></div></div></div></div><script>/*  Authors: The scikit-learn developers
+ SPDX-License-Identifier: BSD-3-Clause
+*/
+
+function copyToClipboard(text, element) {
     // Get the parameter prefix from the closest toggleable content
     const toggleableContent = element.closest('.sk-toggleable__content');
     const paramPrefix = toggleableContent ? toggleableContent.dataset.paramPrefix : '';
@@ -3123,6 +3783,13 @@ a.param-doc-link::before {
 document.querySelectorAll('.copy-paste-icon').forEach(function(element) {
     const toggleableContent = element.closest('.sk-toggleable__content');
     const paramPrefix = toggleableContent ? toggleableContent.dataset.paramPrefix : '';
+
+    const parent = element.parentElement;
+    if (!parent || !parent.nextElementSibling) {
+        console.warn('Expected copy-paste icon is missing from the DOM structure');
+        return;
+    }
+
     const paramName = element.parentElement.nextElementSibling
         .textContent.trim().split(' ')[0];
     const fullParamName = paramPrefix ? `${paramPrefix}${paramName}` : paramName;
@@ -3130,7 +3797,51 @@ document.querySelectorAll('.copy-paste-icon').forEach(function(element) {
     element.setAttribute('title', fullParamName);
 });
 
+/**
+ * Copy the list of feature names formatted as a Python list.
+ *
+ * @param {HTMLElement} element - The copy button inside a `.features` block; its siblings
+ *   contain a `details` element and a table containing feature named.
+ * @returns {boolean} Always returns `false` so callers can prevent the default click behavior.
+ */
+function copyFeatureNamesToClipboard(element) {
+    var detailsElem = element.closest('.features').querySelector('details');
+    var wasOpen = detailsElem.open;
+    detailsElem.open = true;
+    var content = element.closest('.features').querySelector('tbody')
+                  .innerText.trim();
+    if (!wasOpen) detailsElem.open = false;
+    const rows = content.split('\n').map(row => `    "${row}"`);
+    const formattedText = `[\n${rows.join(',\n')},\n]`;
+    const originalHTML = element.innerHTML.replace('✔', '');
+    const originalStyle = element.style;
+    const copyMark = document.createElement('span');
+    copyMark.innerHTML = '✔';
+    copyMark.style.color = 'blue';
+    copyMark.style.fontSize = '1em';
 
+    navigator.clipboard.writeText(formattedText)
+        .then(() => {
+            element.style.display = 'none';
+            element.parentElement.appendChild(copyMark);
+
+            setTimeout(() => {
+                copyMark.remove();
+                element.innerHTML = originalHTML;
+                element.style = originalStyle;
+            }, 1000);
+        })
+        .catch(err => {
+            console.error('Failed to copy:', err);
+            element.style.color = 'orange';
+            element.innerHTML = "Failed!";
+            setTimeout(() => {
+                element.innerHTML = originalHTML;
+                element.style = originalStyle;
+            }, 1000);
+        });
+    return false;
+}
 /**
  * Adapted from Skrub
  * https://github.com/skrub-data/skrub/blob/403466d1d5d4dc76a7ef569b3f8228db59a31dc3/skrub/_reporting/_data/templates/report.js#L789
