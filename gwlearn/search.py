@@ -188,7 +188,10 @@ class BandwidthSearch:
         self._supports_ic = model()._supports_ic
 
     def fit(
-        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,
+        geometry: gpd.GeoSeries | None = None,
     ) -> "BandwidthSearch":
         """
         Fit the searcher by evaluating candidate bandwidths on the provided data.
@@ -251,10 +254,13 @@ class BandwidthSearch:
     @property
     def _ic_metrics(self) -> list[str]:
         """IC metric names included automatically when the model supports them."""
-        return ["aicc", "aic", "bic"] if self._supports_ic else []
+        metrics = ["aicc", "aic", "bic"] if self._supports_ic else []
+        if self.criterion == "cv_score":
+            metrics.append("cv_score")
+        return metrics
 
     def _score(
-        self, X: pd.DataFrame, y: pd.Series, bw: int | float
+        self, X: pd.DataFrame, y: pd.Series | None, bw: int | float
     ) -> tuple[float, list[float]]:
         """Fit the model and report criterion score.
 
@@ -263,8 +269,10 @@ class BandwidthSearch:
         met = self._ic_metrics.copy()
         if self.metrics is not None:
             met += self.metrics
+        if self.criterion == "cv_score" and "cv_score" not in met:
+            met.append("cv_score")
 
-        if len(np.unique(y)) == 1:
+        if y is not None and len(np.unique(y)) == 1:
             return (np.inf, [np.nan] * len(met))
 
         gwm = self.model(
@@ -277,7 +285,12 @@ class BandwidthSearch:
             strict=False,
             verbose=self.verbose == 2,
             **self._model_kwargs,
-        ).fit(X=X, y=y, geometry=self.geometry)
+        ).fit(
+            X=X,
+            y=y,
+            geometry=self.geometry,
+            **({"cv": True} if "cv_score" in met else {}),
+        )
 
         if hasattr(gwm, "prediction_rate_") and gwm.prediction_rate_ == 0:
             # prediction rate should report 0, everything else is undefined
@@ -335,7 +348,7 @@ class BandwidthSearch:
         assert self.criterion is not None
         return all_metrics[met.index(self.criterion)], all_metrics
 
-    def _interval(self, X: pd.DataFrame, y: pd.Series) -> None:
+    def _interval(self, X: pd.DataFrame, y: pd.Series | None) -> None:
         """Fit models using the equal interval search.
 
         Parameters
@@ -373,7 +386,9 @@ class BandwidthSearch:
             ),
         ).T
 
-    def _golden_section(self, X: pd.DataFrame, y: pd.Series, tolerance: float) -> None:
+    def _golden_section(
+        self, X: pd.DataFrame, y: pd.Series | None, tolerance: float
+    ) -> None:
         delta = 0.38197
         if self.fixed:
             pairwise_distance = pdist(self.geometry.get_coordinates())

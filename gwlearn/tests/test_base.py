@@ -255,6 +255,7 @@ def test_fit_with_keep_models_path(sample_data):
         assert len(model_files) > 0
 
 
+@pytest.mark.filterwarnings("ignore::sklearn.exceptions.ConvergenceWarning")
 @pytest.mark.parametrize("kernel", _kernel_functions)
 def test_fit_different_kernels(sample_data, kernel):
     """Test fitting with different kernel functions."""

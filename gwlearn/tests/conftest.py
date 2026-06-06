@@ -1,6 +1,19 @@
 import geopandas as gpd
+import numpy as np
 import pytest
 from geodatasets import get_path
+
+
+@pytest.fixture(scope="session")
+def sample_decomposition_data():
+    """Return standardised multivariate data for unsupervised decomposition tests."""
+    gdf = gpd.read_file(get_path("geoda.guerry"))
+    gdf = gdf.set_geometry(gdf.centroid)
+    cols = ["Crm_prs", "Litercy", "Wealth", "Donatns", "Infants"]
+    X = gdf[cols].astype(float)
+    X = (X - X.mean()) / X.std()  # standardise as per Harris et al. (2011)
+    geometry = gdf.geometry
+    return X, geometry
 
 
 @pytest.fixture(scope="session")
