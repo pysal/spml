@@ -91,6 +91,6 @@ jobs:
           pytest -v --color=yes --doctest-only gwlearn
 
       - name: codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
