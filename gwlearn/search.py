@@ -254,10 +254,17 @@ class BandwidthSearch:
     @property
     def _ic_metrics(self) -> list[str]:
         """IC metric names included automatically when the model supports them."""
-        metrics = ["aicc", "aic", "bic"] if self._supports_ic else []
-        if self.criterion == "cv_score":
-            metrics.append("cv_score")
-        return metrics
+        return ["aicc", "aic", "bic"] if self._supports_ic else []
+
+    @property
+    def _reported_metrics(self) -> list[str]:
+        """All metrics evaluated during the search, including defaults, custom, and cv_score."""
+        met = self._ic_metrics.copy()
+        if self.metrics is not None:
+            met.extend(self.metrics)
+        if self.criterion == "cv_score" and "cv_score" not in met:
+            met.append("cv_score")
+        return met
 
     def _score(
         self, X: pd.DataFrame, y: pd.Series | None, bw: int | float
@@ -266,11 +273,7 @@ class BandwidthSearch:
 
         In case of invariant y in a local model, returns np.inf
         """
-        met = self._ic_metrics.copy()
-        if self.metrics is not None:
-            met += self.metrics
-        if self.criterion == "cv_score" and "cv_score" not in met:
-            met.append("cv_score")
+        met = self._reported_metrics
 
         if y is not None and len(np.unique(y)) == 1:
             return (np.inf, [np.nan] * len(met))
@@ -289,6 +292,7 @@ class BandwidthSearch:
             X=X,
             y=y,
             geometry=self.geometry,
+            # Request local CV reconstruction score calculation only if requested as a metric
             **({"cv": True} if "cv_score" in met else {}),
         )
 
@@ -381,9 +385,7 @@ class BandwidthSearch:
         self.scores_ = pd.Series(scores, name=self.criterion)
         self.metrics_ = pd.DataFrame(
             metrics,
-            index=pd.Index(
-                self._ic_metrics + self.metrics if self.metrics else self._ic_metrics
-            ),
+            index=pd.Index(self._reported_metrics),
         ).T
 
     def _golden_section(
@@ -472,7 +474,5 @@ class BandwidthSearch:
         self.scores_ = pd.Series(scores)
         self.metrics_ = pd.DataFrame(
             metrics,
-            index=pd.Index(
-                self._ic_metrics + self.metrics if self.metrics else self._ic_metrics
-            ),
+            index=pd.Index(self._reported_metrics),
         ).T
