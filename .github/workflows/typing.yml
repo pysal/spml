@@ -27,11 +27,11 @@ jobs:
             - name: Install uv
               uses: astral-sh/setup-uv@v7
 
-            - name: Install gwlearn
+            - name: Install spatialml
               run: |
                   uv venv
                   uv pip install ty
                   uv pip install .
 
             - name: Run checks
-              run: uv run ty check gwlearn
+              run: uv run ty check spatialml

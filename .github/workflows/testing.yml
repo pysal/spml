@@ -75,12 +75,12 @@ jobs:
       - name: run tests
         run: |
           pytest \
-          gwlearn/ \
+          spatialml/ \
           --verbose \
           -r a \
           --numprocesses logical \
           --color yes \
-          --cov gwlearn \
+          --cov spatialml \
           --cov-append \
           --cov-report term-missing \
           --cov-report xml . \
@@ -88,7 +88,7 @@ jobs:
       - name: doctest
         if: contains(matrix.environment-file, 'latest') && contains(matrix.os, 'ubuntu')
         run: |
-          pytest -v --color=yes --doctest-only gwlearn
+          pytest -v --color=yes --doctest-only spatialml
 
       - name: codecov
         uses: codecov/codecov-action@v7

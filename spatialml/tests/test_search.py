@@ -7,8 +7,8 @@ import pandas as pd
 import pytest
 from shapely.geometry import Point
 
-from gwlearn.linear_model import GWLogisticRegression
-from gwlearn.search import BandwidthSearch
+from spatialml.linear_model import GWLogisticRegression
+from spatialml.search import BandwidthSearch
 
 
 def test_bandwidth_search_init(sample_data):

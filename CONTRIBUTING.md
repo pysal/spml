@@ -1,4 +1,4 @@
-# Contributing to gwlearn
+# Contributing to spatial ML
 
 First off, thanks for taking the time to contribute! ❤️
 
@@ -17,17 +17,17 @@ looks forward to your contributions. 🎉
 ## I Have a Question
 
 > If you want to ask a question, we assume that you have read the available
-> [Documentation](https://pysal.org/gwlearn).
+> [Documentation](https://pysal.org/spatialml).
 
 Before you ask a question, it is best to search for existing
-[Issues](https:/github.com/pysal/gwlearn/issues) that might help you. In case you have
+[Issues](https:/github.com/pysal/spatialml/issues) that might help you. In case you have
 found a suitable issue and still need clarification, you can write your question in this
 issue. It is also advisable to search the internet for answers first.
 
 If you then still feel the need to ask a question and need clarification, we recommend
 the following:
 
-- Open an [Issue](https:/github.com/pysal/gwlearn/issues/new).
+- Open an [Issue](https:/github.com/pysal/spatialml/issues/new).
 - Provide as much context as you can about what you're running into.
 - Provide project and platform versions, depending on what seems relevant.
 
@@ -52,10 +52,10 @@ us fix any potential bug as fast as possible.
 - Make sure that you are using the latest version.
 - Determine if your bug is really a bug and not an error on your side e.g. using
   incompatible environment components/versions (Make sure that you have read the
-  [documentation](https://pysal.org/gwlearn).)
+  [documentation](https://pysal.org/spatialml).)
 - To see if other users have experienced (and potentially already solved) the same issue
   you are having, check if there is not already a bug report existing for your bug or
-  error in the [bug tracker](https:/github.com/pysal/gwlearn/issues?q=label%3Abug).
+  error in the [bug tracker](https:/github.com/pysal/spatialml/issues?q=label%3Abug).
 - Also make sure to search the internet (including Stack Overflow) to see if users
   outside of the GitHub community have discussed the issue.
 - Collect information about the bug:
@@ -72,7 +72,7 @@ us fix any potential bug as fast as possible.
 We use GitHub issues to track bugs and errors. If you run into an issue with the
 project:
 
-- Open an [Issue](https:/github.com/pysal/gwlearn/issues/new). (Since we can't be sure
+- Open an [Issue](https:/github.com/pysal/spatialml/issues/new). (Since we can't be sure
   at this point whether it is a bug or not, we ask you not to talk about a bug yet and
   not to label the issue.)
 - Explain the behavior you would expect and the actual behavior.
@@ -94,7 +94,7 @@ Once it's filed:
 
 ### Suggesting Enhancements
 
-This section guides you through submitting an enhancement suggestion for gwlearn,
+This section guides you through submitting an enhancement suggestion for spatialml,
 **including completely new features and minor improvements to existing functionality**.
 Following these guidelines will help maintainers and the community to understand your
 suggestion and find related suggestions.
@@ -103,9 +103,9 @@ suggestion and find related suggestions.
 #### Before Submitting an Enhancement
 
 - Make sure that you are using the latest version.
-- Read the [documentation](https://pysal.org/gwlearn) carefully and find out if the
+- Read the [documentation](https://pysal.org/spatialml) carefully and find out if the
   functionality is already covered, maybe by an individual configuration.
-- Perform a [search](https:/github.com/pysal/gwlearn/issues) to see if the enhancement
+- Perform a [search](https:/github.com/pysal/spatialml/issues) to see if the enhancement
   has already been suggested. If it has, add a comment to the existing issue instead of
   opening a new one.
 - Find out whether your idea fits with the scope and aims of the project. It's up to you
@@ -118,7 +118,7 @@ suggestion and find related suggestions.
 #### How Do I Submit a Good Enhancement Suggestion?
 
 Enhancement suggestions are tracked as
-[GitHub issues](https:/github.com/pysal/gwlearn/issues).
+[GitHub issues](https:/github.com/pysal/spatialml/issues).
 
 - Use a **clear and descriptive title** for the issue to identify the suggestion.
 - Provide a **step-by-step description of the suggested enhancement** in as many details
@@ -126,7 +126,7 @@ Enhancement suggestions are tracked as
 - **Describe the current behavior** and **explain which behavior you expected to see
   instead** and why. At this point you can also tell which alternatives do not work for
   you.
-- **Explain why this enhancement would be useful** to most gwlearn users. You may also
+- **Explain why this enhancement would be useful** to most spatialml users. You may also
   want to point out the other projects that solved it better and which could serve as
   inspiration.
 
@@ -141,10 +141,10 @@ pixi install
 Or with conda using the environment files with `latest` in the `ci` folder:
 
 ```sh
-conda env create -f ci/py313_latest.yaml -n gwlearn
+conda env create -f ci/py313_latest.yaml -n spatialml
 ```
 
-To install `gwlearn` to the Conda environment in an editable form, clone the repository,
+To install `spatialml` to the Conda environment in an editable form, clone the repository,
 navigate to the main directory and install it with pip:
 
 ```sh
@@ -168,7 +168,7 @@ When submitting a pull request:
   robustness & consistency in code throughout the project and `ty` for type hint
   checking. Ruff is included in the `pre-commit` hook and both style and type hints will
   be checked on every PR.
-- `gwlearn` supports Python versions according to
+- `spatialml` supports Python versions according to
   [SPEC0](https://scientific-python.org/specs/spec-0000/). When possible, do not
   introduce additional dependencies. If that is necessary, make sure they can be treated
   as optional.

@@ -10,15 +10,15 @@ import sys
 
 from packaging.version import Version
 
-sys.path.insert(0, os.path.abspath("../gwlearn/"))
+sys.path.insert(0, os.path.abspath("../spatialml/"))
 
-import gwlearn
+import spatialml
 
-project = "gwlearn"
+project = "spatialml"
 copyright = "2025-, Martin Fleischmann & PySAL Developers"
 author = "Martin Fleischmann"
 
-version = Version(gwlearn.__version__).public  # remove commit hash
+version = Version(spatialml.__version__).public  # remove commit hash
 release = version
 
 language = "en"
@@ -85,10 +85,10 @@ html_theme_options = {
         "repo": "fontawesome/brands/github",
         "edit": "material/file-code",
     },
-    "site_url": "https://pysal.org/gwlearn",
-    "repo_url": "https://github.com/pysal/gwlearn/",
+    "site_url": "https://pysal.org/spatialml",
+    "repo_url": "https://github.com/pysal/spatialml/",
     "edit_uri": "blob/main/docs/source",
-    "repo_name": "pysal/gwlearn",
+    "repo_name": "pysal/spatialml",
     "features": [
         # "navigation.expand",
         # "navigation.tabs",
@@ -142,7 +142,7 @@ html_theme_options = {
         },
     ],
     "version_dropdown": True,
-    "version_json": "https://pysal.org/gwlearn/versions.json",
+    "version_json": "https://pysal.org/spatialml/versions.json",
 }
 nb_execution_mode = "cache"
 nb_execution_timeout = -1
@@ -163,15 +163,15 @@ def linkcode_resolve(domain, info):
         import os
 
         fn = inspect.getsourcefile(obj)
-        fn = os.path.relpath(fn, start=os.path.dirname(gwlearn.__file__))
+        fn = os.path.relpath(fn, start=os.path.dirname(spatialml.__file__))
         source, lineno = inspect.getsourcelines(obj)
         return fn, lineno, lineno + len(source) - 1
 
     if domain != "py" or not info["module"]:
         return None
     try:
-        filename = "gwlearn/%s#L%d-L%d" % find_source()  # noqa: UP031
+        filename = "spatialml/%s#L%d-L%d" % find_source()  # noqa: UP031
     except Exception:
         filename = info["module"].replace(".", "/") + ".py"
     tag = "main" if "dev" in release else ("v" + release)
-    return f"https://github.com/pysal/gwlearn/blob/{tag}/{filename}"
+    return f"https://github.com/pysal/spatialml/blob/{tag}/{filename}"

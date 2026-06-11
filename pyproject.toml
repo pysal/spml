@@ -5,8 +5,8 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 
 [project]
-name = "gwlearn"
-description = "Geographically weighted modeling based on scikit-learn."
+name = "spatialml"
+description = "Spatial modeling based on scikit-learn."
 dynamic = ["version"]
 authors = [
    { name = "Martin Fleischmann", email = "martin@martinfleischmann.net" },
@@ -31,14 +31,14 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://pysal.org/gwlearn/"
-Documentation = "https://pysal.org/gwlearn/"
-Repository = "https://github.com/pysal/gwlearn.git"
-Issues = "https://github.com/pysal/gwlearn/issues"
-Changelog = "https://github.com/pysal/gwlearn/releases"
+Homepage = "https://pysal.org/spatialml/"
+Documentation = "https://pysal.org/spatialml/"
+Repository = "https://github.com/pysal/spatialml.git"
+Issues = "https://github.com/pysal/spatialml/issues"
+Changelog = "https://github.com/pysal/spatialml/releases"
 
 [tool.setuptools.packages.find]
-include = ["gwlearn", "gwlearn.*"]
+include = ["spatialml", "spatialml.*"]
 
 [tool.ruff]
 line-length = 88
@@ -68,7 +68,7 @@ no-matching-overload = "ignore"
 unresolved-import = "ignore"
 
 [tool.coverage.run]
-source = ["./gwlearn"]
+source = ["./spatialml"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -79,44 +79,8 @@ exclude_lines = [
     "except ImportError",
 ]
 ignore_errors = true
-omit = ["gwlearn/tests/*"]
+omit = ["spatialml/tests/*"]
 
-[tool.pixi.workspace]
-channels = ["conda-forge"]
-platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
-
-[tool.pixi.dependencies]
-geopandas = ">=1.0.1"
-libpysal = ">=4.12.1"
-pandas = ">=2.2.3"
-geodatasets = ">=2024.8.0"
-scikit-learn = ">=1.6.1"
-joblib = ">=1.4.2"
-scipy = ">=1.15.2"
-ipykernel = ">=6.29.5"
-numpy = ">=2.2.4"
-pytest = ">=8.3.5"
-pytest-cov = ">=6.0.0"
-pre-commit = ">=4.2.0"
-numpydoc = ">=1.8.0"
-myst-nb = ">=1.2.0"
-sphinx-copybutton = ">=0.5.2"
-sphinx = "<9"
-sphinxcontrib-bibtex = ">=2.6.3"
-ruff = ">=0.11.4"
-mgwr = ">=2.2.1"
-snakeviz = ">=2.2.2"
-pyarrow = ">=20.0.0"
-fsspec = ">=2025.5.1"
-s3fs = ">=2025.5.1"
-osmnx = ">=2.0.7"
-pandarm = ">=0.0.3"
-sphinx-immaterial = ">=0.13.8"
-pytest-doctestplus = ">=1.6.0"
-ty = ">=0.0.2"
-
-[tool.pixi.pypi-dependencies]
-gwlearn = { path = ".", editable = true }
 
 [tool.pytest.ini_options]
 filterwarnings = [
