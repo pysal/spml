@@ -10,65 +10,13 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from joblib import dump, load
-from libpysal import graph
+from libpysal import graph, kernels
 from scipy.spatial import KDTree
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.model_selection import train_test_split
 from sklearn.utils.parallel import Parallel, delayed
 
 __all__ = ["BaseClassifier", "BaseRegressor"]
-
-
-def _triangular(distances: np.ndarray, bandwidth: np.ndarray | float) -> np.ndarray:
-    u = np.clip(distances / bandwidth, 0, 1)
-    return 1 - u
-
-
-def _parabolic(distances: np.ndarray, bandwidth: np.ndarray | float) -> np.ndarray:
-    u = np.clip(distances / bandwidth, 0, 1)
-    return 1 - u**2
-
-
-def _gaussian(distances: np.ndarray, bandwidth: np.ndarray | float) -> np.ndarray:
-    u = distances / bandwidth
-    return np.exp(-((u / 2) ** 2))
-
-
-def _bisquare(distances: np.ndarray, bandwidth: np.ndarray | float) -> np.ndarray:
-    u = np.clip(distances / bandwidth, 0, 1)
-    return (1 - u**2) ** 2
-
-
-def _cosine(distances: np.ndarray, bandwidth: np.ndarray | float) -> np.ndarray:
-    u = np.clip(distances / bandwidth, 0, 1)
-    return np.cos(np.pi / 2 * u)
-
-
-def _exponential(distances: np.ndarray, bandwidth: np.ndarray | float) -> np.ndarray:
-    u = distances / bandwidth
-    return np.exp(-u)
-
-
-def _boxcar(distances: np.ndarray, bandwidth: np.ndarray | float) -> np.ndarray:
-    r = (distances < bandwidth).astype(int)
-    return r
-
-
-def _tricube(distances: np.ndarray, bandwidth: np.ndarray | float) -> np.ndarray:
-    u = np.clip(distances / bandwidth, 0, 1)
-    return (1 - u**3) ** 3
-
-
-_kernel_functions = {
-    "triangular": _triangular,
-    "parabolic": _parabolic,
-    # "gaussian": _gaussian,
-    "bisquare": _bisquare,
-    "tricube": _tricube,
-    "cosine": _cosine,
-    "boxcar": _boxcar,
-    # "exponential": _exponential,
-}
 
 
 class _BaseModel(BaseEstimator):
@@ -141,33 +89,22 @@ class _BaseModel(BaseEstimator):
                 f"got {self.bandwidth}."
             )
 
-        kernel = (
-            _kernel_functions[self.kernel]
-            if isinstance(self.kernel, str)
-            else self.kernel
-        )
-
         if self.fixed:  # fixed distance
             weights = graph.Graph.build_kernel(
                 self.geometry,
-                kernel=kernel,
+                kernel=self.kernel,
                 bandwidth=self.bandwidth,
                 coplanar=self.coplanar,
+                decay=True,
             )
         else:  # adaptive KNN
             weights = graph.Graph.build_kernel(
                 self.geometry,
-                kernel="identity",
+                kernel=self.kernel,
                 k=self.bandwidth - 1 if self.include_focal else self.bandwidth,
+                bandwidth="adaptive",
                 coplanar=self.coplanar,
-            )
-            # post-process identity weights by the selected kernel
-            # and kernel bandwidth derived from each neighborhood
-            # the epsilon comes from MGWR to avoid division by zero
-            bandwidth = weights._adjacency.groupby(level=0).transform("max") * 1.0000001
-            weights = graph.Graph(
-                adjacency=kernel(weights._adjacency, bandwidth),
-                is_sorted=True,
+                decay=True,
             )
         if self.include_focal:
             weights = weights.assign_self_weight(1)
@@ -459,22 +396,17 @@ class _BaseModel(BaseEstimator):
         if not self.fixed and not isinstance(bw, Integral):
             raise ValueError("Adaptive bandwidth (fixed=False) must be an integer.")
 
-        kernel = (
-            _kernel_functions[self.kernel]
-            if isinstance(self.kernel, str)
-            else self.kernel
-        )
-
         if self.fixed:
             input_ids, indices_array = self.geometry.sindex.query(
                 geometry, predicate="dwithin", distance=self.bandwidth
             )
             local_ids = self._local_models.index[indices_array.flatten()].to_numpy()
-            distance = kernel(
+            distance = kernels.kernel(
                 self.geometry.iloc[indices_array].distance(
                     geometry.iloc[input_ids], align=False
                 ),
                 bw,
+                kernel=self.kernel,
             )
         else:
             training_coords = self.geometry.get_coordinates()
@@ -493,7 +425,7 @@ class _BaseModel(BaseEstimator):
             kernel_bandwidth = (
                 pd.Series(distances).groupby(input_ids).transform("max") + 1e-6
             )  # can't have 0
-            distance = kernel(distances, kernel_bandwidth)
+            distance = kernels.kernel(distances, kernel_bandwidth, kernel=self.kernel)
 
         split_indices = np.where(np.diff(input_ids))[0] + 1
         local_model_ids = np.split(local_ids, split_indices)
@@ -582,13 +514,6 @@ class _BaseModel(BaseEstimator):
             if not self.fixed and not isinstance(bw, Integral):
                 raise ValueError("Adaptive bandwidth (fixed=False) must be an integer.")
 
-        if isinstance(self.kernel, str):
-            if self.kernel not in _kernel_functions:
-                raise ValueError(
-                    f"Invalid kernel '{self.kernel}'. "
-                    f"Supported kernels are: {list(_kernel_functions.keys())} "
-                    "or a callable."
-                )
         elif not callable(self.kernel):
             raise ValueError(
                 "kernel must be either a valid string or a callable function."

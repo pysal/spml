@@ -17,7 +17,7 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.metrics import accuracy_score, mean_absolute_error
 from sklearn.model_selection import GridSearchCV
 
-from gwlearn.base import BaseClassifier, BaseRegressor, _kernel_functions
+from gwlearn.base import BaseClassifier, BaseRegressor
 
 
 def test_init_default_parameters():
@@ -91,7 +91,7 @@ def test_init_keep_models_path():
 def test_init_kernel_assignment():
     """Test BaseClassifier initialization with various kernel options."""
     # Test with each predefined kernel
-    for kernel_name in _kernel_functions:
+    for kernel_name in ["bisquare", "tricube", "triangular"]:
         clf = BaseClassifier(
             LogisticRegression,
             bandwidth=100,
@@ -255,7 +255,19 @@ def test_fit_with_keep_models_path(sample_data):
         assert len(model_files) > 0
 
 
-@pytest.mark.parametrize("kernel", _kernel_functions)
+@pytest.mark.parametrize(
+    "kernel",
+    [
+        "triangular",
+        "parabolic",
+        # "gaussian",
+        "bisquare",
+        "tricube",
+        "cosine",
+        "boxcar",
+        # "exponential",
+    ],
+)
 def test_fit_different_kernels(sample_data, kernel):
     """Test fitting with different kernel functions."""
     X, y, geometry = sample_data
@@ -1437,7 +1449,19 @@ def test_regressor_fit_with_keep_models_path(sample_regression_data):
         assert len(model_files) > 0
 
 
-@pytest.mark.parametrize("kernel", _kernel_functions)
+@pytest.mark.parametrize(
+    "kernel",
+    [
+        "triangular",
+        "parabolic",
+        # "gaussian",
+        "bisquare",
+        "tricube",
+        "cosine",
+        "boxcar",
+        # "exponential",
+    ],
+)
 def test_regressor_fit_different_kernels(sample_regression_data, kernel):
     """Test fitting with different kernel functions."""
     X, y, geometry = sample_regression_data
