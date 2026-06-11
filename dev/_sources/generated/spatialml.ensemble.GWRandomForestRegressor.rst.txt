@@ -1,7 +1,7 @@
-﻿gwlearn.ensemble.GWRandomForestRegressor
-========================================
+﻿spatialml.ensemble.GWRandomForestRegressor
+==========================================
 
-.. currentmodule:: gwlearn.ensemble
+.. currentmodule:: spatialml.ensemble
 
 .. autoclass:: GWRandomForestRegressor
 

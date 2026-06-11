@@ -1,7 +1,7 @@
-﻿gwlearn.base.BaseRegressor
-==========================
+﻿spatialml.base.BaseRegressor
+============================
 
-.. currentmodule:: gwlearn.base
+.. currentmodule:: spatialml.base
 
 .. autoclass:: BaseRegressor
 

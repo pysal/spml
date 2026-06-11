@@ -1,7 +1,7 @@
-﻿gwlearn.ensemble.GWRandomForestClassifier
-=========================================
+﻿spatialml.ensemble.GWRandomForestClassifier
+===========================================
 
-.. currentmodule:: gwlearn.ensemble
+.. currentmodule:: spatialml.ensemble
 
 .. autoclass:: GWRandomForestClassifier
 
