@@ -25,57 +25,8 @@ __all__ = [
     "BaseClassifier",
     "BaseDecomposition",
     "BaseRegressor",
-    "weighted_covariance",
 ]
 
-
-def weighted_covariance(
-    X: pd.DataFrame | np.ndarray,
-    adjacency: pd.Series | np.ndarray,
-) -> np.ndarray | dict[Hashable, np.ndarray]:
-    """Compute local weighted covariance matrix/matrices.
-
-    For now, put the LIBPYSAL related things in gwlearn somewhere with a comment
-    -> put in libpysal in future.
-
-    Parameters
-    ----------
-    X : pandas.DataFrame or numpy.ndarray
-        Feature matrix.
-    adjacency : pandas.Series or numpy.ndarray
-        Adjacency table of weights with MultiIndex (focal, neighbor), or
-        a 1D array of weights for a single neighborhood.
-
-    Returns
-    -------
-    numpy.ndarray or dict
-        Weighted covariance matrix for a single neighborhood, or a dictionary
-        mapping focal names to weighted covariance matrices.
-    """
-    if isinstance(adjacency, pd.Series) and isinstance(adjacency.index, pd.MultiIndex):
-        # Multi-focal case: return dict of cov matrices
-        covs = {}
-        X_df = pd.DataFrame(X) if not isinstance(X, pd.DataFrame) else X
-        for focal, group in adjacency.groupby(level=0, sort=False):
-            nbrs = group.index.get_level_values(1)
-            wt = group.values
-            X_nbr = X_df.loc[nbrs].values
-            covs[focal] = weighted_covariance(X_nbr, wt)
-        return covs
-
-    # Single-focal/local case
-    X_val = X.values if hasattr(X, "values") else np.asarray(X)
-    wt_val = adjacency.values if hasattr(adjacency, "values") else np.asarray(adjacency)
-
-    wt_sum = wt_val.sum()
-    if wt_sum == 0 or len(wt_val) < 2:
-        p = X_val.shape[1]
-        return np.full((p, p), np.nan)
-
-    mean = np.average(X_val, axis=0, weights=wt_val)
-    X_centered = X_val - mean
-    X_scaled = X_centered * np.sqrt(wt_val[:, np.newaxis])
-    return (X_scaled.T @ X_scaled) / wt_sum
 
 
 def _triangular(distances: np.ndarray, bandwidth: np.ndarray | float) -> np.ndarray:

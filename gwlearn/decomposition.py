@@ -11,7 +11,7 @@ import pandas as pd
 from joblib import Parallel, delayed
 import libpysal.graph as graph
 
-from .base import BaseDecomposition, weighted_covariance
+from .base import BaseDecomposition
 
 __all__ = ["GWPCA"]
 
@@ -188,8 +188,8 @@ class GWPCA(BaseDecomposition):
             ]
 
         weighted_mean = np.average(X_local, axis=0, weights=wt)
-        # Use weighted_covariance (LIBPYSAL related, put in gwlearn for now)
-        cov = weighted_covariance(X_local, wt)
+        # Use numpy.cov
+        cov = np.cov(X_local.T, aweights=wt, ddof=0)
 
         eigenvalues, eigenvectors = np.linalg.eigh(cov)
         eigenvalues = np.clip(eigenvalues, 0, None)
@@ -255,8 +255,8 @@ class GWPCA(BaseDecomposition):
             X_nbr = X_vals[loc_positions]
 
             w_mean = np.average(X_nbr, axis=0, weights=wt)
-            # Use weighted_covariance (LIBPYSAL related, put in gwlearn for now)
-            cov = weighted_covariance(X_nbr, wt)
+            # Use numpy.cov
+            cov = np.cov(X_nbr.T, aweights=wt, ddof=0)
 
             eigvals, eigvecs = np.linalg.eigh(cov)
             eigvals = np.clip(eigvals, 0, None)
