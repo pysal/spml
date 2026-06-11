@@ -1,0 +1,27 @@
+﻿spatialml.base.BaseRegressor
+============================
+
+.. currentmodule:: spatialml.base
+
+.. autoclass:: BaseRegressor
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BaseRegressor.__init__
+      ~BaseRegressor.fit
+      ~BaseRegressor.get_metadata_routing
+      ~BaseRegressor.get_params
+      ~BaseRegressor.local_metric
+      ~BaseRegressor.predict
+      ~BaseRegressor.score
+      ~BaseRegressor.set_fit_request
+      ~BaseRegressor.set_params
+      ~BaseRegressor.set_predict_request
+      ~BaseRegressor.set_score_request
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
