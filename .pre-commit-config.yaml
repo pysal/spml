@@ -4,9 +4,9 @@ repos:
     rev: "v0.15.9"
     hooks:
       - id: ruff-check
-        files: "gwlearn\/|docs\/"
+        files: "spatialml\/|docs\/"
       - id: ruff-format
-        files: "gwlearn\/|docs\/"
+        files: "spatialml\/|docs\/"
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: "v6.0.0"
     hooks:

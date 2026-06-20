@@ -1,6 +1,6 @@
 import pandas as pd
 
-from gwlearn.ensemble import (
+from spatialml.ensemble import (
     GWGradientBoostingClassifier,
     GWGradientBoostingRegressor,
     GWRandomForestClassifier,

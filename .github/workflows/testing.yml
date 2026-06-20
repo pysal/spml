@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: checkout repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0 # Fetch all history for all branches and tags.
 
@@ -75,12 +75,12 @@ jobs:
       - name: run tests
         run: |
           pytest \
-          gwlearn/ \
+          spatialml/ \
           --verbose \
           -r a \
           --numprocesses logical \
           --color yes \
-          --cov gwlearn \
+          --cov spatialml \
           --cov-append \
           --cov-report term-missing \
           --cov-report xml . \
@@ -88,9 +88,9 @@ jobs:
       - name: doctest
         if: contains(matrix.environment-file, 'latest') && contains(matrix.os, 'ubuntu')
         run: |
-          pytest -v --color=yes --doctest-only gwlearn
+          pytest -v --color=yes --doctest-only spatialml
 
       - name: codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

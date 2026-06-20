@@ -645,7 +645,7 @@ class _BaseModel(BaseEstimator):
         """Marker for unsupervised decomposition estimators.
 
         Overridden to ``True`` by :class:`BaseDecomposition` so that callers
-        (notably :class:`gwlearn.search.BandwidthSearch`) can dispatch the
+        (notably :class:`spatialml.search.BandwidthSearch`) can dispatch the
         ``y=None`` path and pick decomposition-appropriate defaults.
         """
         return False
@@ -851,7 +851,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
     >>> from sklearn.linear_model import LogisticRegression
-    >>> from gwlearn.base import BaseClassifier
+    >>> from spatialml.base import BaseClassifier
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]
@@ -1594,7 +1594,7 @@ class BaseRegressor(_BaseModel, RegressorMixin):
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
     >>> from sklearn.linear_model import LinearRegression
-    >>> from gwlearn.base import BaseRegressor
+    >>> from spatialml.base import BaseRegressor
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]

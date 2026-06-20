@@ -23,7 +23,7 @@ class BinaryRandomUnderSampler:
     --------
     >>> import numpy as np
     >>> import pandas as pd
-    >>> from gwlearn.undersample import BinaryRandomUnderSampler
+    >>> from spatialml.undersample import BinaryRandomUnderSampler
     >>> X = pd.DataFrame({"x": [0, 1, 2, 3, 4, 5]})
     >>> y = pd.Series([0, 0, 0, 0, 1, 1])
     >>> rus = BinaryRandomUnderSampler(random_state=0)

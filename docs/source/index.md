@@ -32,8 +32,8 @@ api
 :hidden:
 :caption: For contributors
 contributing
-GitHub <https://github.com/uscuni/gwlearn>
-Changelog <https://github.com/uscuni/gwlearn/releases>
+GitHub <https://github.com/pysal/spatialml>
+Changelog <https://github.com/pysal/spatialml/releases>
 
 ```
 

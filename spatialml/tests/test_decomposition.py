@@ -1,5 +1,5 @@
 """
-Tests for gwlearn.decomposition: GWPCA.
+Tests for spatialml.decomposition: GWPCA.
 
 Validates:
 - Output shapes and dtypes
@@ -20,8 +20,8 @@ from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from gwlearn.decomposition import GWPCA
-from gwlearn.search import BandwidthSearch
+from spatialml.decomposition import GWPCA
+from spatialml.search import BandwidthSearch
 
 
 SMALL_BW = 30  # adaptive k for Guerry (85 observations)

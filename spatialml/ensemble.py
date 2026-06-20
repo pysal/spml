@@ -147,7 +147,7 @@ class GWRandomForestClassifier(BaseClassifier):
     --------
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
-    >>> from gwlearn.ensemble import GWRandomForestClassifier
+    >>> from spatialml.ensemble import GWRandomForestClassifier
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]
@@ -159,7 +159,7 @@ class GWRandomForestClassifier(BaseClassifier):
     ...     random_state=0,
     ... ).fit(X, y, geometry=gdf.representative_point())
     >>> gw.pred_.head()
-    0    False
+    0     True
     1    False
     2    False
     3     True
@@ -411,7 +411,7 @@ class GWGradientBoostingClassifier(BaseClassifier):
     --------
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
-    >>> from gwlearn.ensemble import GWGradientBoostingClassifier
+    >>> from spatialml.ensemble import GWGradientBoostingClassifier
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]
@@ -632,7 +632,7 @@ class GWRandomForestRegressor(BaseRegressor):
     --------
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
-    >>> from gwlearn.ensemble import GWRandomForestRegressor
+    >>> from spatialml.ensemble import GWRandomForestRegressor
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]
@@ -644,11 +644,11 @@ class GWRandomForestRegressor(BaseRegressor):
     ...     random_state=0,
     ... ).fit(X, y, geometry=gdf.representative_point())
     >>> gw.pred_.head()
-    0    85064.34
-    1    19490.90
-    2    29501.62
-    3    33270.86
-    4    54608.57
+    0    104647.21
+    1     18963.73
+    2     28642.92
+    3     23943.21
+    4     57140.26
     dtype: float64
     """
 
@@ -881,7 +881,7 @@ class GWGradientBoostingRegressor(BaseRegressor):
     --------
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
-    >>> from gwlearn.ensemble import GWGradientBoostingRegressor
+    >>> from spatialml.ensemble import GWGradientBoostingRegressor
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]
@@ -893,7 +893,7 @@ class GWGradientBoostingRegressor(BaseRegressor):
     ...     random_state=0,
     ... ).fit(X, y, geometry=gdf.representative_point())
     >>> gw.pred_.head()
-    0    73092.061693
+    0    74314.578640
     1    14362.093351
     2    24158.876462
     3    21085.659844

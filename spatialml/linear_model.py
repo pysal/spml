@@ -150,7 +150,7 @@ class GWLogisticRegression(BaseClassifier):
     --------
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
-    >>> from gwlearn.linear_model import GWLogisticRegression
+    >>> from spatialml.linear_model import GWLogisticRegression
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]
@@ -401,7 +401,7 @@ class GWLinearRegression(BaseRegressor):
     --------
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
-    >>> from gwlearn.linear_model import GWLinearRegression
+    >>> from spatialml.linear_model import GWLinearRegression
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]

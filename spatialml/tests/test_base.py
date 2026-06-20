@@ -17,7 +17,7 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.metrics import accuracy_score, mean_absolute_error
 from sklearn.model_selection import GridSearchCV
 
-from gwlearn.base import BaseClassifier, BaseRegressor, _kernel_functions
+from spatialml.base import BaseClassifier, BaseRegressor, _kernel_functions
 
 
 def test_init_default_parameters():

@@ -17,8 +17,8 @@ class BandwidthSearch:
 
     The search supports two broad families of models:
 
-    * **Linear / logistic models** (:class:`~gwlearn.linear_model.GWLinearRegression`,
-      :class:`~gwlearn.linear_model.GWLogisticRegression`): information criteria
+    * **Linear / logistic models** (:class:`~spatialml.linear_model.GWLinearRegression`,
+      :class:`~spatialml.linear_model.GWLogisticRegression`): information criteria
       ``"aicc"``, ``"aic"``, ``"bic"`` are valid and recommended.  They are included
       in ``metrics_`` automatically.
     * **Non-linear models** (random forest, gradient boosting, …): information
@@ -35,7 +35,7 @@ class BandwidthSearch:
     ----------
     model : type
         A geographically weighted estimator class (e.g.
-        :class:`gwlearn.linear_model.GWLogisticRegression`) that can be
+        :class:`spatialml.linear_model.GWLogisticRegression`) that can be
         instantiated as
         ``model(bandwidth=..., fixed=..., kernel=..., n_jobs=..., ...)``.
     fixed : bool, optional
@@ -117,8 +117,8 @@ class BandwidthSearch:
 
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
-    >>> from gwlearn.linear_model import GWLogisticRegression
-    >>> from gwlearn.search import BandwidthSearch
+    >>> from spatialml.linear_model import GWLogisticRegression
+    >>> from spatialml.search import BandwidthSearch
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]
