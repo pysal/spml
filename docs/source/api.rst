@@ -58,3 +58,15 @@ Tooling to determine the optimal bandwidths of geographically weighted models.
    :toctree: generated/
 
    BandwidthSearch
+
+Decomposition
+-------------
+
+Geographically weighted decomposition models.
+
+.. currentmodule:: gwlearn.decomposition
+.. autosummary::
+   :toctree: generated/
+
+   BaseDecomposition
+   GWPCA

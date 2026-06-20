@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
-from time import time
 from typing import Literal
 
 import geopandas as gpd
@@ -11,7 +10,7 @@ import pandas as pd
 from joblib import Parallel, delayed
 import libpysal.graph as graph
 
-from .base import BaseDecomposition
+from ._base import BaseDecomposition
 
 __all__ = ["GWPCA"]
 

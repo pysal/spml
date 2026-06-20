@@ -258,7 +258,13 @@ class BandwidthSearch:
 
     @property
     def _reported_metrics(self) -> list[str]:
-        """All metrics evaluated during the search, including defaults, custom, and cv_score."""
+        """All metric names collected at each bandwidth during the search.
+
+        Always starts with IC metrics (if supported), then any user-specified
+        ``metrics``.  When the search criterion is ``"cv_score"``, that name
+        is appended so the LOO reconstruction error is captured in
+        :attr:`metrics_` alongside the other columns.
+        """
         met = self._ic_metrics.copy()
         if self.metrics is not None:
             met.extend(self.metrics)
@@ -292,7 +298,9 @@ class BandwidthSearch:
             X=X,
             y=y,
             geometry=self.geometry,
-            # Request local CV reconstruction score calculation only if requested as a metric
+            # GWPCA.fit() computes the LOO CV reconstruction score only on
+            # demand (it is expensive).  Pass cv=True only when cv_score is
+            # actually needed as a search criterion or reported metric.
             **({"cv": True} if "cv_score" in met else {}),
         )
 
