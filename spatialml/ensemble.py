@@ -231,7 +231,10 @@ class GWRandomForestClassifier(BaseClassifier):
         return true, pred
 
     def fit(
-        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,
+        geometry: gpd.GeoSeries | None = None,
     ) -> "GWRandomForestClassifier":
         """Fit geographically weighted random forests.
 
@@ -486,7 +489,10 @@ class GWGradientBoostingClassifier(BaseClassifier):
         self._model_type = "gradient_boosting"
 
     def fit(
-        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,
+        geometry: gpd.GeoSeries | None = None,
     ) -> "GWGradientBoostingClassifier":
         """Fit geographically weighted gradient boosting classifiers.
 
@@ -710,7 +716,10 @@ class GWRandomForestRegressor(BaseRegressor):
         return true, pred
 
     def fit(
-        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,
+        geometry: gpd.GeoSeries | None = None,
     ) -> "GWRandomForestRegressor":
         """Fit geographically weighted random forests.
 
@@ -953,7 +962,10 @@ class GWGradientBoostingRegressor(BaseRegressor):
         self._empty_score_data = np.nan
 
     def fit(
-        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,
+        geometry: gpd.GeoSeries | None = None,
     ) -> "GWGradientBoostingRegressor":
         """Fit geographically weighted gradient boosting regressors.
 

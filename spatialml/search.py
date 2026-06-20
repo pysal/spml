@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Literal
+from typing import Literal, cast
 
 import geopandas as gpd
 import numpy as np
@@ -245,8 +245,9 @@ class BandwidthSearch:
         elif self.search_method == "golden_section":
             self._golden_section(X=X, y=y, tolerance=self.tolerance)
 
-        self.optimal_bandwidth_ = (
-            self.scores_.idxmin() if self.minimize else self.scores_.idxmax()
+        self.optimal_bandwidth_: int | float = cast(
+            int | float,
+            self.scores_.idxmin() if self.minimize else self.scores_.idxmax(),
         )
 
         return self

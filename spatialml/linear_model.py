@@ -227,7 +227,12 @@ class GWLogisticRegression(BaseClassifier):
 
         self._model_type = "logistic"
 
-    def fit(self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None):
+    def fit(
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,
+        geometry: gpd.GeoSeries | None = None,
+    ):
         if isinstance(X, pd.DataFrame):
             self.feature_names_in_ = X.columns.to_numpy()
         else:
@@ -481,7 +486,12 @@ class GWLinearRegression(BaseRegressor):
             local_model.intercept_,  # intercept
         )
 
-    def fit(self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None):
+    def fit(
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,
+        geometry: gpd.GeoSeries | None = None,
+    ):
         if isinstance(X, pd.DataFrame):
             self.feature_names_in_ = X.columns.to_numpy()
         else:

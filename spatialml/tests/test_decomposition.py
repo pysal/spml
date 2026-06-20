@@ -303,7 +303,7 @@ class TestBandwidthSearchUnsupervised:
         ).fit(X, y=None, geometry=geometry)
 
         assert hasattr(search, "optimal_bandwidth_")
-        assert 10 <= float(search.optimal_bandwidth_) <= 50
+        assert 10 <= search.optimal_bandwidth_ <= 50
 
     def test_scores_series_indexed_by_bandwidth(self, sample_decomposition_data):
         X, geometry = sample_decomposition_data

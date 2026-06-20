@@ -977,6 +977,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
             # Check for 0, 1 encoding
             return bool(unique_values.issubset({0, 1}))
 
+        assert y is not None
         if not _is_binary(y):
             raise ValueError("Only binary dependent variable is supported.")
         self._validate_fit_inputs(X, y, geometry)
