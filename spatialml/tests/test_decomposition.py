@@ -17,12 +17,9 @@ import pandas as pd
 import pytest
 from sklearn import clone
 from sklearn.decomposition import PCA
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
 
 from spatialml.decomposition import GWPCA
 from spatialml.search import BandwidthSearch
-
 
 SMALL_BW = 30  # adaptive k for Guerry (85 observations)
 N_COMP = 3
@@ -189,7 +186,7 @@ class TestGWPCATransform:
     def test_transform_requires_geometry(self, sample_decomposition_data):
         X, geometry = sample_decomposition_data
         model = GWPCA(n_components=N_COMP, bandwidth=SMALL_BW).fit(X, geometry=geometry)
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             model.transform(X, geometry=None)
 
 
@@ -306,7 +303,7 @@ class TestBandwidthSearchUnsupervised:
         ).fit(X, y=None, geometry=geometry)
 
         assert hasattr(search, "optimal_bandwidth_")
-        assert 10 <= search.optimal_bandwidth_ <= 50
+        assert 10 <= float(search.optimal_bandwidth_) <= 50
 
     def test_scores_series_indexed_by_bandwidth(self, sample_decomposition_data):
         X, geometry = sample_decomposition_data

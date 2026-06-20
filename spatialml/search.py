@@ -331,6 +331,7 @@ class BandwidthSearch:
                         f"but '{type(gwm).__name__}' is a regressor."
                     )
                 mask = gwm.proba_.isna().any(axis=1)
+                assert y is not None
                 y_masked = y[~mask]
                 if len(np.unique(y_masked)) < 2:
                     all_metrics.append(np.inf)
@@ -409,6 +410,7 @@ class BandwidthSearch:
             c = max_dist * 2.0
         else:
             a = 40 + 2 * X.shape[1]
+            assert self.geometry is not None
             c = len(self.geometry)
 
         if self.min_bandwidth:

@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 from libpysal import graph
 from sklearn.base import TransformerMixin
-from sklearn.utils.parallel import Parallel, delayed
 
 from ..base import _BaseModel
 
@@ -141,7 +140,7 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         X: pd.DataFrame,
         y: pd.Series | None = None,  # noqa: ARG002 — sklearn API compatibility
         geometry: gpd.GeoSeries | None = None,
-    ) -> "BaseDecomposition":
+    ) -> BaseDecomposition:
         """Fit local decompositions, one per focal location.
 
         Parameters

@@ -16,7 +16,6 @@ from sklearn.base import (
     BaseEstimator,
     ClassifierMixin,
     RegressorMixin,
-    TransformerMixin,
 )
 from sklearn.model_selection import train_test_split
 from sklearn.utils.parallel import Parallel, delayed
@@ -25,7 +24,6 @@ __all__ = [
     "BaseClassifier",
     "BaseRegressor",
 ]
-
 
 
 def _triangular(distances: np.ndarray, bandwidth: np.ndarray | float) -> np.ndarray:
@@ -701,7 +699,6 @@ class _BaseModel(BaseEstimator):
         return np.array(results)
 
 
-
 class BaseClassifier(ClassifierMixin, _BaseModel):
     """Generic geographically weighted classification meta-estimator.
 
@@ -932,7 +929,10 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         self._empty_feature_imp = None
 
     def fit(
-        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,
+        geometry: gpd.GeoSeries | None = None,
     ) -> "BaseClassifier":
         """Fit geographically weighted local classification models.
 
@@ -1666,7 +1666,10 @@ class BaseRegressor(_BaseModel, RegressorMixin):
         self._empty_score_data = (np.array([]), np.array([]))
 
     def fit(
-        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,
+        geometry: gpd.GeoSeries | None = None,
     ) -> "BaseRegressor":
         """Fit geographically weighted local regression models.
 

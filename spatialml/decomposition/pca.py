@@ -5,10 +5,10 @@ from pathlib import Path
 from typing import Literal
 
 import geopandas as gpd
+import libpysal.graph as graph
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
-import libpysal.graph as graph
 
 from ._base import BaseDecomposition
 
@@ -114,10 +114,10 @@ class GWPCA(BaseDecomposition):
     def fit(
         self,
         X: pd.DataFrame,
-        y: None = None,
+        y: pd.Series | None = None,  # noqa: ARG002
         geometry: gpd.GeoSeries | None = None,
         cv: bool = False,
-    ) -> "GWPCA":
+    ) -> GWPCA:
         """Fit GWPCA at every spatial location.
 
         Parameters
@@ -151,7 +151,7 @@ class GWPCA(BaseDecomposition):
 
         return self
 
-    def _fit_global_model(self, X: pd.DataFrame):
+    def _fit_global_model(self, X: pd.DataFrame, y: pd.Series | None = None):  # noqa: ARG002
         from sklearn.decomposition import PCA
 
         self.global_model = PCA(n_components=self.n_components)
@@ -164,11 +164,11 @@ class GWPCA(BaseDecomposition):
 
     def _fit_local(
         self,
-        model,
+        model,  # noqa: ARG002
         data: pd.DataFrame,
         name,
         focal_x: np.ndarray,
-        model_kwargs: dict,
+        model_kwargs: dict,  # noqa: ARG002
     ) -> list:
         """Fit one local PCA at focal point ``name``."""
         X_local = data.drop(columns=["_weight"]).values.astype(float)
@@ -229,10 +229,7 @@ class GWPCA(BaseDecomposition):
 
     def _compute_cv_score(self, X: pd.DataFrame) -> float:
         """LOO cross-validation reconstruction error (Harris et al. 2011, §4.1)."""
-        if self.graph is not None:
-            weights = self.graph
-        else:
-            weights = self._build_weights()
+        weights = self.graph if self.graph is not None else self._build_weights()
 
         adjacency = weights._adjacency
         X_vals = X.values.astype(float)
@@ -285,7 +282,8 @@ class GWPCA(BaseDecomposition):
         n_permutations: int = 99,
         random_state: int | None = None,
     ) -> dict:
-        """Monte Carlo permutation test for eigenvalue nonstationarity (Harris 2011, §4.2).
+        """Monte Carlo permutation test for eigenvalue nonstationarity
+        (Harris 2011, §4.2).
 
         Returns dict with keys ``"true_sd"``, ``"permuted_sds"``, ``"p_value"``.
         """
@@ -324,7 +322,8 @@ class GWPCA(BaseDecomposition):
     ) -> pd.DataFrame:
         """Flag locations with condition number above ``threshold`` (Harris 2011, §4.5).
 
-        Returns DataFrame with columns: condition_number, pc1_evr, last_pc_evr, is_collinear.
+        Returns DataFrame with columns: condition_number, pc1_evr,
+        last_pc_evr, is_collinear.
         """
         if not hasattr(self, "_eigenvalues"):
             raise ValueError("Call fit() before identify_collinear_locations().")
