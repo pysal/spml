@@ -8,7 +8,6 @@ from typing import Literal
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-# pyrefly: ignore [missing-import]
 from libpysal import graph
 from sklearn.base import TransformerMixin
 from sklearn.utils.parallel import Parallel, delayed
