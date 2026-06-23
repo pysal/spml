@@ -89,4 +89,5 @@ filterwarnings = [
     "ignore:This process \\(pid=\\d+\\) is multi-threaded*:DeprecationWarning",
     "ignore:divide by zero encountered in power:RuntimeWarning",
     "ignore:Some inputs do not have OOB scores.",
+    "ignore:Setting the shape on a NumPy array"
 ]
