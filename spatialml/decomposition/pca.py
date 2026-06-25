@@ -146,9 +146,6 @@ class GWPCA(BaseDecomposition):
         if cv:
             self.cv_score_ = self._compute_cv_score(X)
 
-        if self.fit_global_model:
-            self._fit_global_model(X)
-
         return self
 
     def _fit_global_model(self, X: pd.DataFrame, y: pd.Series | None = None):  # noqa: ARG002

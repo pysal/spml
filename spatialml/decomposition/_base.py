@@ -29,9 +29,9 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
 
     Notes
     -----
-    No supervised baseline is fitted: ``fit_global_model`` is forced to
-    ``False`` and any ``y`` passed to :meth:`fit` is ignored (the argument
-    exists for scikit-learn pipeline / ``check_estimator`` compatibility).
+    A global unsupervised baseline (e.g. standard PCA) is fitted by default.
+    Any ``y`` passed to :meth:`fit` is ignored (the argument exists for
+    scikit-learn pipeline / ``check_estimator`` compatibility).
 
     Parameters
     ----------
@@ -104,7 +104,7 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         include_focal: bool = False,
         graph: graph.Graph | None = None,
         n_jobs: int = -1,
-        fit_global_model: bool = False,
+        fit_global_model: bool = True,
         keep_models: bool | str | Path = False,
         temp_folder: str | None = None,
         batch_size: int | None = None,
@@ -206,6 +206,9 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         self._scores = np.stack(scores)
         self._local_means = np.stack(local_means)
         self._names = np.asarray(self._names)
+
+        if self.fit_global_model:
+            self._fit_global_model(X)
 
         return self
 
