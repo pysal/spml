@@ -585,9 +585,8 @@ class _BaseModel(BaseEstimator):
             If any of the validation conditions fail.
         """
         # For supervised estimators y is mandatory — raise if the caller forgot it.
-        # For decomposition estimators (e.g. GWPCA) y is always ignored, so we
-        # check based on what the *estimator* needs rather than what value was passed.
-        if not self._is_decomposition:
+        # Decomposition estimators do not use y; _requires_y reflects this.
+        if self._requires_y:
             if y is None:
                 raise ValueError(
                     "y must be provided for supervised estimators "
@@ -639,14 +638,16 @@ class _BaseModel(BaseEstimator):
             )
 
     @property
-    def _is_decomposition(self) -> bool:
-        """Marker for unsupervised decomposition estimators.
+    def _requires_y(self) -> bool:
+        """Whether this estimator requires and uses ``y``.
 
-        Overridden to ``True`` by :class:`BaseDecomposition` so that callers
-        (notably :class:`spatialml.search.BandwidthSearch`) can dispatch the
-        ``y=None`` path and pick decomposition-appropriate defaults.
+        Returns ``True`` for all supervised estimators (classifiers,
+        regressors) and ``False`` for unsupervised decompositions such as
+        :class:`BaseDecomposition`.  Callers (e.g.
+        :class:`spatialml.search.BandwidthSearch`) use this flag to
+        decide whether to pass ``strict`` and other supervised-only kwargs.
         """
-        return False
+        return True
 
     # Abstract methods that subclasses must implement
     def _fit_local(
@@ -662,7 +663,7 @@ class _BaseModel(BaseEstimator):
     def fit(
         self,
         X: pd.DataFrame,
-        y: pd.Series | None = None,
+        y: pd.Series,
         geometry: gpd.GeoSeries | None = None,
     ):
         raise NotImplementedError("Subclasses must implement fit")

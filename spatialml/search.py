@@ -184,8 +184,11 @@ class BandwidthSearch:
         self.tolerance = tolerance
         self.metrics = metrics
         self.verbose = verbose
-        # Probe model type once at construction to know whether IC is valid.
-        self._supports_ic = model()._supports_ic
+        # Probe model type once at construction to know whether IC is valid
+        # and whether strict is a meaningful parameter (not for decompositions).
+        _probe = model()
+        self._supports_ic = _probe._supports_ic
+        self._model_requires_y = _probe._requires_y
 
     def fit(
         self,
@@ -292,7 +295,7 @@ class BandwidthSearch:
             coplanar=self.coplanar,
             n_jobs=self.n_jobs,
             fit_global_model=False,
-            strict=False,
+            **({}  if not self._model_requires_y else {"strict": False}),
             verbose=self.verbose == 2,
             **self._model_kwargs,
         ).fit(
@@ -332,7 +335,10 @@ class BandwidthSearch:
                         f"but '{type(gwm).__name__}' is a regressor."
                     )
                 mask = gwm.proba_.isna().any(axis=1)
-                assert y is not None
+                if y is None:
+                    raise ValueError(
+                        "criterion='log_loss' requires y but y is None."
+                    )
                 y_masked = y[~mask]
                 if len(np.unique(y_masked)) < 2:
                     all_metrics.append(np.inf)

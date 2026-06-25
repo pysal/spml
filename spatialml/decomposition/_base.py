@@ -74,9 +74,13 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
     components_ : numpy.ndarray
         Local loadings, shape ``(n_locations, n_features, n_components)``.
     scores_ : numpy.ndarray
-        Focal-point projections, shape ``(n_locations, n_components)``.
+        Transformed values (focal-point projections onto local components),
+        shape ``(n_locations, n_components)``.
     local_means_ : numpy.ndarray
-        Weighted local means, shape ``(n_locations, n_features)``.
+        Weighted local mean of ``X`` per focal location,
+        shape ``(n_locations, n_features)``.  Stored so that
+        :meth:`transform` can centre new observations against the same
+        local mean before projecting onto the local components.
     winning_variable_ : numpy.ndarray
         Index of the maximum-absolute-loading variable per component,
         shape ``(n_locations, n_components)``.
@@ -106,10 +110,6 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         batch_size: int | None = None,
         coplanar: Literal["raise", "jitter", "clique"] = "raise",
         verbose: bool = False,
-        # ``strict`` is accepted so that BandwidthSearch (which passes it to
-        # every model it creates) does not raise a TypeError.  Decompositions
-        # have no notion of invariant y, so the value is always ignored.
-        strict: bool | None = False,  # noqa: ARG002
         **kwargs,
     ):
         super().__init__(
@@ -121,7 +121,6 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
             graph=graph,
             n_jobs=n_jobs,
             fit_global_model=fit_global_model,
-            strict=False,
             keep_models=keep_models,
             temp_folder=temp_folder,
             batch_size=batch_size,
@@ -132,8 +131,8 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         self.n_components = n_components
 
     @property
-    def _is_decomposition(self) -> bool:
-        return True
+    def _requires_y(self) -> bool:
+        return False
 
     def fit(
         self,
@@ -228,12 +227,17 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
 
     @property
     def scores_(self) -> np.ndarray:
-        """Focal-point projections onto the local components."""
+        """Transformed values: focal-point projections onto the local components."""
         return self._scores
 
     @property
     def local_means_(self) -> np.ndarray:
-        """Weighted local mean per location, shape ``(n_locations, n_features)``."""
+        """Weighted local mean of ``X`` per focal location.
+
+        Shape ``(n_locations, n_features)``.  Stored so that
+        :meth:`transform` can centre new observations against the
+        same local mean before projecting onto the local components.
+        """
         return self._local_means
 
     @property
@@ -247,19 +251,21 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         X: pd.DataFrame,
         geometry: gpd.GeoSeries | None = None,
     ) -> np.ndarray:
-        """Project ``X`` onto local components via nearest-neighbour lookup.
+        """Project ``X`` onto local components.
 
-        Each row of ``X`` is mapped to the closest training geometry; the
-        corresponding local mean is subtracted and the result is projected
-        onto that location's components.
+        .. note::
+            Currently uses a nearest-neighbour lookup to assign each new
+            observation to the closest training location.  In future this
+            will follow the same out-of-sample logic as :meth:`predict` in
+            the supervised estimators (kernel-weighted interpolation of local
+            components rather than a hard nearest-neighbour assignment).
 
         Parameters
         ----------
         X : pandas.DataFrame
             Feature matrix for new observations.
         geometry : geopandas.GeoSeries | None
-            Geometries for ``X``.  When ``None``, the stored in-sample
-            :attr:`scores_` is returned (in-sample transform).
+            Geometries for ``X``.  Required for out-of-sample transforms.
 
         Returns
         -------

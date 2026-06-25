@@ -187,7 +187,6 @@ class GWPCA(BaseDecomposition):
             ]
 
         weighted_mean = np.average(X_local, axis=0, weights=wt)
-        # Use numpy.cov
         cov = np.cov(X_local.T, aweights=wt, ddof=0)
 
         eigenvalues, eigenvectors = np.linalg.eigh(cov)
@@ -251,7 +250,6 @@ class GWPCA(BaseDecomposition):
             X_nbr = X_vals[loc_positions]
 
             w_mean = np.average(X_nbr, axis=0, weights=wt)
-            # Use numpy.cov
             cov = np.cov(X_nbr.T, aweights=wt, ddof=0)
 
             eigvals, eigvecs = np.linalg.eigh(cov)
