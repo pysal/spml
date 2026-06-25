@@ -230,7 +230,7 @@ class GWLogisticRegression(BaseClassifier):
     def fit(
         self,
         X: pd.DataFrame,
-        y: pd.Series | None = None,
+        y: pd.Series,
         geometry: gpd.GeoSeries | None = None,
     ):
         if isinstance(X, pd.DataFrame):
@@ -489,7 +489,7 @@ class GWLinearRegression(BaseRegressor):
     def fit(
         self,
         X: pd.DataFrame,
-        y: pd.Series | None = None,
+        y: pd.Series,
         geometry: gpd.GeoSeries | None = None,
     ):
         if isinstance(X, pd.DataFrame):

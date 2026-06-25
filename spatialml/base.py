@@ -931,7 +931,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
     def fit(
         self,
         X: pd.DataFrame,
-        y: pd.Series | None = None,
+        y: pd.Series,
         geometry: gpd.GeoSeries | None = None,
     ) -> "BaseClassifier":
         """Fit geographically weighted local classification models.
@@ -977,7 +977,6 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
             # Check for 0, 1 encoding
             return bool(unique_values.issubset({0, 1}))
 
-        assert y is not None
         if not _is_binary(y):
             raise ValueError("Only binary dependent variable is supported.")
         self._validate_fit_inputs(X, y, geometry)
@@ -1669,7 +1668,7 @@ class BaseRegressor(_BaseModel, RegressorMixin):
     def fit(
         self,
         X: pd.DataFrame,
-        y: pd.Series | None = None,
+        y: pd.Series,
         geometry: gpd.GeoSeries | None = None,
     ) -> "BaseRegressor":
         """Fit geographically weighted local regression models.
