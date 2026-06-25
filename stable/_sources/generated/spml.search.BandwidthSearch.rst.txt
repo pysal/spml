@@ -1,0 +1,18 @@
+﻿spml.search.BandwidthSearch
+===========================
+
+.. currentmodule:: spml.search
+
+.. autoclass:: BandwidthSearch
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BandwidthSearch.__init__
+      ~BandwidthSearch.fit
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

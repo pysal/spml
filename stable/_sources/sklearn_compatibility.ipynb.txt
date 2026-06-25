@@ -7,7 +7,7 @@
             "source": [
                 "# Scikit-learn compatibility\n",
                 "\n",
-                "All estimators implemented in `spatialml` are designed to provide scikit-learn compatible API. However, that is occasionally tricky due to the need of geometry as an additional argument in `fit`, `predict` or `score`. Luckily, there is a way thanks to scikit-learn's (experimental) support of [metadata routing](https://scikit-learn.org/stable/metadata_routing.html)."
+                "All estimators implemented in SpML are designed to provide scikit-learn compatible API. However, that is occasionally tricky due to the need of geometry as an additional argument in `fit`, `predict` or `score`. Luckily, there is a way thanks to scikit-learn's (experimental) support of [metadata routing](https://scikit-learn.org/stable/metadata_routing.html)."
             ]
         },
         {
@@ -22,7 +22,7 @@
                 "from sklearn import set_config\n",
                 "from sklearn.model_selection import GridSearchCV\n",
                 "\n",
-                "from spatialml.linear_model import GWLinearRegression"
+                "from spml.linear_model import GWLinearRegression"
             ]
         },
         {
@@ -1913,7 +1913,7 @@
             "id": "e3d5dcc4",
             "metadata": {},
             "source": [
-                "This way, `spatialml` estimators can be included in your workflows with ease.\n",
+                "This way, SpML estimators can be included in your workflows with ease.\n",
                 "\n",
                 "It is recommended to disable metadata routing once you're done."
             ]
