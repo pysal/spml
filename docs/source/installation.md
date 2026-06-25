@@ -3,13 +3,13 @@
 You can install spatial ML from PyPI or from conda-forge using the tool of your choice:
 
 ```sh
-pip install spatialml
+pip install spml
 ```
 
 Or from conda-forge:
 
 ```sh
-conda install spatialml -c conda-forge
+conda install spml -c conda-forge
 ```
 
 ## Installing development version
@@ -17,15 +17,15 @@ conda install spatialml -c conda-forge
 You can either clone the repository:
 
 ```sh
-git clone https://github.com/pysal/spatialml.git
-cd spatialml
+git clone https://github.com/pysal/spml.git
+cd spml
 pip install .
 ```
 
 Or install directly from Github:
 
 ```sh
-pip install git+https://github.com/pysal/spatialml.git
+pip install git+https://github.com/pysal/spml.git
 ```
 
 The package depends on:

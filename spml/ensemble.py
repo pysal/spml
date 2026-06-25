@@ -147,7 +147,7 @@ class GWRandomForestClassifier(BaseClassifier):
     --------
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
-    >>> from spatialml.ensemble import GWRandomForestClassifier
+    >>> from spml.ensemble import GWRandomForestClassifier
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]
@@ -411,7 +411,7 @@ class GWGradientBoostingClassifier(BaseClassifier):
     --------
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
-    >>> from spatialml.ensemble import GWGradientBoostingClassifier
+    >>> from spml.ensemble import GWGradientBoostingClassifier
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]
@@ -632,7 +632,7 @@ class GWRandomForestRegressor(BaseRegressor):
     --------
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
-    >>> from spatialml.ensemble import GWRandomForestRegressor
+    >>> from spml.ensemble import GWRandomForestRegressor
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]
@@ -881,7 +881,7 @@ class GWGradientBoostingRegressor(BaseRegressor):
     --------
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
-    >>> from spatialml.ensemble import GWGradientBoostingRegressor
+    >>> from spml.ensemble import GWGradientBoostingRegressor
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]

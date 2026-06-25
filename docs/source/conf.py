@@ -10,15 +10,15 @@ import sys
 
 from packaging.version import Version
 
-sys.path.insert(0, os.path.abspath("../spatialml/"))
+sys.path.insert(0, os.path.abspath("../spml/"))
 
-import spatialml
+import spml
 
-project = "spatialml"
+project = "spml"
 copyright = "2025-, Martin Fleischmann & PySAL Developers"
 author = "Martin Fleischmann"
 
-version = Version(spatialml.__version__).public  # remove commit hash
+version = Version(spml.__version__).public  # remove commit hash
 release = version
 
 language = "en"
@@ -85,10 +85,10 @@ html_theme_options = {
         "repo": "fontawesome/brands/github",
         "edit": "material/file-code",
     },
-    "site_url": "https://pysal.org/spatialml",
-    "repo_url": "https://github.com/pysal/spatialml/",
+    "site_url": "https://pysal.org/spml",
+    "repo_url": "https://github.com/pysal/spml/",
     "edit_uri": "blob/main/docs/source",
-    "repo_name": "pysal/spatialml",
+    "repo_name": "pysal/spml",
     "features": [
         # "navigation.expand",
         # "navigation.tabs",
@@ -142,7 +142,7 @@ html_theme_options = {
         },
     ],
     "version_dropdown": True,
-    "version_json": "https://pysal.org/spatialml/versions.json",
+    "version_json": "https://pysal.org/spml/versions.json",
 }
 nb_execution_mode = "cache"
 nb_execution_timeout = -1
@@ -163,15 +163,15 @@ def linkcode_resolve(domain, info):
         import os
 
         fn = inspect.getsourcefile(obj)
-        fn = os.path.relpath(fn, start=os.path.dirname(spatialml.__file__))
+        fn = os.path.relpath(fn, start=os.path.dirname(spml.__file__))
         source, lineno = inspect.getsourcelines(obj)
         return fn, lineno, lineno + len(source) - 1
 
     if domain != "py" or not info["module"]:
         return None
     try:
-        filename = "spatialml/%s#L%d-L%d" % find_source()  # noqa: UP031
+        filename = "spml/%s#L%d-L%d" % find_source()  # noqa: UP031
     except Exception:
         filename = info["module"].replace(".", "/") + ".py"
     tag = "main" if "dev" in release else ("v" + release)
-    return f"https://github.com/pysal/spatialml/blob/{tag}/{filename}"
+    return f"https://github.com/pysal/spml/blob/{tag}/{filename}"

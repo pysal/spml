@@ -3,7 +3,7 @@
 API reference
 =============
 
-The API reference provides an overview of all public functions in ``spatialml``.
+The API reference provides an overview of all public functions in ``spml``.
 
 Base classes
 ------------
@@ -11,7 +11,7 @@ Base classes
 Base classes allow creation of geographically weighted versions of scikit-learn
 estimators.
 
-.. currentmodule:: spatialml.base
+.. currentmodule:: spml.base
 .. autosummary::
    :toctree: generated/
 
@@ -24,7 +24,7 @@ Linear models
 Implementation of linear models with access to relevant attributes (e.g. local
 coefficients).
 
-.. currentmodule:: spatialml.linear_model
+.. currentmodule:: spml.linear_model
 .. autosummary::
    :toctree: generated/
 
@@ -38,7 +38,7 @@ Implementation of linear models with access to relevant attributes (e.g. local
 feature importance).
 
 
-.. currentmodule:: spatialml.ensemble
+.. currentmodule:: spml.ensemble
 .. autosummary::
    :toctree: generated/
 
@@ -53,7 +53,7 @@ Bandwidth search
 
 Tooling to determine the optimal bandwidths of geographically weighted models.
 
-.. currentmodule:: spatialml.search
+.. currentmodule:: spml.search
 .. autosummary::
    :toctree: generated/
 
