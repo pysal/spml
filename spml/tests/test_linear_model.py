@@ -7,7 +7,7 @@ from numpy.testing import assert_almost_equal, assert_array_almost_equal
 from pandas.testing import assert_series_equal
 from sklearn.linear_model import LinearRegression, LogisticRegression
 
-from spatialml.linear_model import GWLinearRegression, GWLogisticRegression
+from spml.linear_model import GWLinearRegression, GWLogisticRegression
 
 try:
     from mgwr.gwr import GWR

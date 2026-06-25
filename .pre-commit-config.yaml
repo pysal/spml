@@ -4,9 +4,9 @@ repos:
     rev: "v0.15.9"
     hooks:
       - id: ruff-check
-        files: "spatialml\/|docs\/"
+        files: "spml\/|docs\/"
       - id: ruff-format
-        files: "spatialml\/|docs\/"
+        files: "spml\/|docs\/"
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: "v6.0.0"
     hooks:

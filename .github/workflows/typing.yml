@@ -27,11 +27,11 @@ jobs:
             - name: Install uv
               uses: astral-sh/setup-uv@v7
 
-            - name: Install spatialml
+            - name: Install spml
               run: |
                   uv venv
                   uv pip install ty
                   uv pip install .
 
             - name: Run checks
-              run: uv run ty check spatialml
+              run: uv run ty check spml
