@@ -158,9 +158,10 @@ class GWPCA(BaseDecomposition):
         self.global_model.fit(X)
 
     @property
-    def explained_variance_ratio_(self) -> np.ndarray:
+    def explained_variance_ratio_(self) -> pd.DataFrame:
         totals = self._all_eigenvalues.sum(axis=1, keepdims=True)
-        return np.where(totals > 0, self._eigenvalues / totals, 0.0)
+        evr = np.where(totals > 0, self._eigenvalues / totals, 0.0)
+        return pd.DataFrame(evr, index=self._names)
 
     def _fit_local(
         self,

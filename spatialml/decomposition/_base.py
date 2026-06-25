@@ -215,9 +215,9 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         return self._components
 
     @property
-    def explained_variance_(self) -> np.ndarray:
+    def explained_variance_(self) -> pd.DataFrame:
         """Local eigenvalues. Shape ``(n, q)``."""
-        return self._eigenvalues
+        return pd.DataFrame(self._eigenvalues, index=self._names)
 
     @property
     def condition_number_(self) -> pd.Series:
@@ -226,19 +226,21 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         return pd.Series(cond, index=self._names)
 
     @property
-    def scores_(self) -> np.ndarray:
+    def scores_(self) -> pd.DataFrame:
         """Transformed values: focal-point projections onto the local components."""
-        return self._scores
+        return pd.DataFrame(self._scores, index=self._names)
 
     @property
-    def local_means_(self) -> np.ndarray:
+    def local_means_(self) -> pd.DataFrame:
         """Weighted local mean of ``X`` per focal location.
 
         Shape ``(n_locations, n_features)``.  Stored so that
         :meth:`transform` can centre new observations against the
         same local mean before projecting onto the local components.
         """
-        return self._local_means
+        return pd.DataFrame(
+            self._local_means, index=self._names, columns=self.feature_names_in_
+        )
 
     @property
     def winning_variable_(self) -> pd.Series:
