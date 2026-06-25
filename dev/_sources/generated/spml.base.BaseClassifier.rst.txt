@@ -1,7 +1,7 @@
-﻿spatialml.base.BaseClassifier
-=============================
+﻿spml.base.BaseClassifier
+========================
 
-.. currentmodule:: spatialml.base
+.. currentmodule:: spml.base
 
 .. autoclass:: BaseClassifier
 

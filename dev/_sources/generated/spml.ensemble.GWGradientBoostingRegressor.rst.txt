@@ -1,7 +1,7 @@
-﻿spatialml.ensemble.GWGradientBoostingRegressor
-==============================================
+﻿spml.ensemble.GWGradientBoostingRegressor
+=========================================
 
-.. currentmodule:: spatialml.ensemble
+.. currentmodule:: spml.ensemble
 
 .. autoclass:: GWGradientBoostingRegressor
 

@@ -1,7 +1,7 @@
-﻿spatialml.ensemble.GWGradientBoostingClassifier
-===============================================
+﻿spml.ensemble.GWGradientBoostingClassifier
+==========================================
 
-.. currentmodule:: spatialml.ensemble
+.. currentmodule:: spml.ensemble
 
 .. autoclass:: GWGradientBoostingClassifier
 

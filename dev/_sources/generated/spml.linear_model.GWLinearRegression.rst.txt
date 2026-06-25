@@ -1,7 +1,7 @@
-﻿spatialml.linear\_model.GWLinearRegression
-==========================================
+﻿spml.linear\_model.GWLinearRegression
+=====================================
 
-.. currentmodule:: spatialml.linear_model
+.. currentmodule:: spml.linear_model
 
 .. autoclass:: GWLinearRegression
 

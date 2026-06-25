@@ -1,7 +1,7 @@
-﻿spatialml.linear\_model.GWLogisticRegression
-============================================
+﻿spml.linear\_model.GWLogisticRegression
+=======================================
 
-.. currentmodule:: spatialml.linear_model
+.. currentmodule:: spml.linear_model
 
 .. autoclass:: GWLogisticRegression
 

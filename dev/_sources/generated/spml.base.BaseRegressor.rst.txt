@@ -1,7 +1,7 @@
-﻿spatialml.base.BaseRegressor
-============================
+﻿spml.base.BaseRegressor
+=======================
 
-.. currentmodule:: spatialml.base
+.. currentmodule:: spml.base
 
 .. autoclass:: BaseRegressor
 

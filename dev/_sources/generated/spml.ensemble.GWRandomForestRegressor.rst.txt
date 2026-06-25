@@ -1,7 +1,7 @@
-﻿spatialml.ensemble.GWRandomForestRegressor
-==========================================
+﻿spml.ensemble.GWRandomForestRegressor
+=====================================
 
-.. currentmodule:: spatialml.ensemble
+.. currentmodule:: spml.ensemble
 
 .. autoclass:: GWRandomForestRegressor
 
