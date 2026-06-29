@@ -5,8 +5,8 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 
 [project]
-name = "spatialml"
-description = "Spatial modeling based on scikit-learn."
+name = "spml"
+description = "Spatial machine learning."
 dynamic = ["version"]
 authors = [
    { name = "Martin Fleischmann", email = "martin@martinfleischmann.net" },
@@ -31,14 +31,14 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://pysal.org/spatialml/"
-Documentation = "https://pysal.org/spatialml/"
-Repository = "https://github.com/pysal/spatialml.git"
-Issues = "https://github.com/pysal/spatialml/issues"
-Changelog = "https://github.com/pysal/spatialml/releases"
+Homepage = "https://pysal.org/spml/"
+Documentation = "https://pysal.org/spml/"
+Repository = "https://github.com/pysal/spml.git"
+Issues = "https://github.com/pysal/spml/issues"
+Changelog = "https://github.com/pysal/spml/releases"
 
 [tool.setuptools.packages.find]
-include = ["spatialml", "spatialml.*"]
+include = ["spml", "spml.*"]
 
 [tool.ruff]
 line-length = 88
@@ -68,7 +68,7 @@ no-matching-overload = "ignore"
 unresolved-import = "ignore"
 
 [tool.coverage.run]
-source = ["./spatialml"]
+source = ["./spml"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -79,7 +79,7 @@ exclude_lines = [
     "except ImportError",
 ]
 ignore_errors = true
-omit = ["spatialml/tests/*"]
+omit = ["spml/tests/*"]
 
 
 [tool.pytest.ini_options]
@@ -89,4 +89,5 @@ filterwarnings = [
     "ignore:This process \\(pid=\\d+\\) is multi-threaded*:DeprecationWarning",
     "ignore:divide by zero encountered in power:RuntimeWarning",
     "ignore:Some inputs do not have OOB scores.",
+    "ignore:Setting the shape on a NumPy array"
 ]

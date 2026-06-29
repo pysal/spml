@@ -32,8 +32,8 @@ api
 :hidden:
 :caption: For contributors
 contributing
-GitHub <https://github.com/pysal/spatialml>
-Changelog <https://github.com/pysal/spatialml/releases>
+GitHub <https://github.com/pysal/spml>
+Changelog <https://github.com/pysal/spml/releases>
 
 ```
 

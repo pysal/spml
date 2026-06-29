@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from spatialml.decomposition import GWPCA
-from spatialml.search import BandwidthSearch
+from spml.decomposition import GWPCA
+from spml.search import BandwidthSearch
 
 _MIN_BW_GRID = 8
 _N_COMP_GRID = 2

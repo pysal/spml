@@ -1,5 +1,5 @@
 """
-Tests for spatialml.decomposition: GWPCA.
+Tests for spml.decomposition: GWPCA.
 
 Validates:
 - Output shapes and dtypes
@@ -18,8 +18,8 @@ import pytest
 from sklearn import clone
 from sklearn.decomposition import PCA
 
-from spatialml.decomposition import GWPCA
-from spatialml.search import BandwidthSearch
+from spml.decomposition import GWPCA
+from spml.search import BandwidthSearch
 
 SMALL_BW = 30  # adaptive k for Guerry (85 observations)
 N_COMP = 3

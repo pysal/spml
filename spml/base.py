@@ -849,7 +849,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
     >>> from sklearn.linear_model import LogisticRegression
-    >>> from spatialml.base import BaseClassifier
+    >>> from spml.base import BaseClassifier
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]
@@ -1597,7 +1597,7 @@ class BaseRegressor(_BaseModel, RegressorMixin):
     >>> import geopandas as gpd
     >>> from geodatasets import get_path
     >>> from sklearn.linear_model import LinearRegression
-    >>> from spatialml.base import BaseRegressor
+    >>> from spml.base import BaseRegressor
 
     >>> gdf = gpd.read_file(get_path('geoda.guerry'))
     >>> X = gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']]
