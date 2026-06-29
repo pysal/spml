@@ -288,7 +288,7 @@ class GWRandomForestClassifier(BaseClassifier):
 
         # feature importances
         self.feature_importances_ = pd.DataFrame(
-            self._feature_importances, index=self._names, columns=X.columns
+            self._feature_importances, index=pd.Index(self._names), columns=X.columns
         )
 
         if self.verbose:
@@ -525,7 +525,7 @@ class GWGradientBoostingClassifier(BaseClassifier):
 
         # feature importances
         self.feature_importances_ = pd.DataFrame(
-            self._feature_importances, index=self._names, columns=X.columns
+            self._feature_importances, index=pd.Index(self._names), columns=X.columns
         )
 
         if self.verbose:
@@ -773,7 +773,7 @@ class GWRandomForestRegressor(BaseRegressor):
 
         # feature importances
         self.feature_importances_ = pd.DataFrame(
-            self._feature_importances, index=self._names, columns=X.columns
+            self._feature_importances, index=pd.Index(self._names), columns=X.columns
         )
 
         if self.verbose:
@@ -997,7 +997,7 @@ class GWGradientBoostingRegressor(BaseRegressor):
 
         # feature importances
         self.feature_importances_ = pd.DataFrame(
-            self._feature_importances, index=self._names, columns=X.columns
+            self._feature_importances, index=pd.Index(self._names), columns=X.columns
         )
 
         if self.verbose:

@@ -1017,6 +1017,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
                 left_out_proba,
                 models,
             ) = zip(*training_output, strict=False)
+            self._names = pd.Index(self._names)
             self._local_models = pd.Series(models, index=self._names)
         else:
             (
@@ -1028,6 +1029,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
                 hat_values,
                 left_out_proba,
             ) = zip(*training_output, strict=False)
+            self._names = pd.Index(self._names)
 
         self._n_labels = pd.Series(self._n_labels, index=self._names)
         self.local_class_support_ = self._n_labels.copy()
@@ -1725,6 +1727,7 @@ class BaseRegressor(_BaseModel, RegressorMixin):
                 self._feature_importances,
                 models,
             ) = zip(*training_output, strict=False)
+            self._names = pd.Index(self._names)
             self._local_models = pd.Series(models, index=self._names)
         else:
             (
@@ -1736,6 +1739,7 @@ class BaseRegressor(_BaseModel, RegressorMixin):
                 self._score_data,
                 self._feature_importances,
             ) = zip(*training_output, strict=False)
+            self._names = pd.Index(self._names)
 
         self.pred_ = pd.Series(np.nan, index=y.index)
         self.pred_.loc[np.array(self._names)] = focal_pred
