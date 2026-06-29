@@ -37,7 +37,7 @@ class TestGWPCAFit:
         X, geometry = sample_decomposition_data
         n_features = X.shape[1]
         model = GWPCA(n_components=N_COMP, bandwidth=SMALL_BW).fit(X, geometry=geometry)
-        assert model.components_.shape == (N_OBS, n_features, N_COMP)
+        assert model.components_.shape == (N_OBS, n_features * N_COMP)
         assert model.explained_variance_.shape == (N_OBS, N_COMP)
         assert model.explained_variance_ratio_.shape == (N_OBS, N_COMP)
         assert model.scores_.shape == (N_OBS, N_COMP)
@@ -62,7 +62,7 @@ class TestGWPCAFit:
         X, geometry = sample_decomposition_data
         n_features = X.shape[1]
         model = GWPCA(n_components=None, bandwidth=SMALL_BW).fit(X, geometry=geometry)
-        assert model.components_.shape == (N_OBS, n_features, n_features)
+        assert model.components_.shape == (N_OBS, n_features * n_features)
         assert model.explained_variance_.shape == (N_OBS, n_features)
 
     def test_names_match_index(self, sample_decomposition_data):
@@ -108,7 +108,7 @@ class TestGWPCAInvariants:
         X, geometry = sample_decomposition_data
         model = GWPCA(n_components=None, bandwidth=SMALL_BW).fit(X, geometry=geometry)
         for i in range(len(model._names)):
-            eigs = model.explained_variance_[i]
+            eigs = model.explained_variance_.iloc[i].values
             assert np.all(np.diff(eigs) <= 1e-10), (
                 f"Eigenvalues not descending at loc {i}"
             )
@@ -349,13 +349,13 @@ class TestGWPCAEdgeCases:
         model = GWPCA(n_components=2, graph=g)
         model.fit(X, geometry=geometry)
 
-        assert np.isnan(model.components_).all()
-        assert np.isnan(model.scores_).all()
+        assert model.components_.isna().all().all()
+        assert model.scores_.isna().all().all()
 
     def test_single_observation_in_neighbourhood(self, sample_decomposition_data):
         X, geometry = sample_decomposition_data
         model = GWPCA(n_components=2, bandwidth=1, include_focal=False)
         model.fit(X, geometry=geometry)
 
-        assert np.isnan(model.components_).all()
-        assert np.isnan(model.scores_).all()
+        assert model.components_.isna().all().all()
+        assert model.scores_.isna().all().all()

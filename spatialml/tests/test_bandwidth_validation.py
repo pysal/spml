@@ -29,7 +29,7 @@ def nonstationary_grid_data():
         else:
             X[i] = rng.normal([0.0, 3.0, 0.0, 0.0], [0.3, 2.0, 0.3, 0.3])
 
-    X_df = pd.DataFrame(X, columns=["f0", "f1", "f2", "f3"])
+    X_df = pd.DataFrame(X, columns=pd.Index(["f0", "f1", "f2", "f3"]))
     X_std = (X_df - X_df.mean()) / X_df.std()
     geometry = gpd.GeoSeries.from_xy(coords[:, 0], coords[:, 1])
     return X_std, geometry
@@ -189,7 +189,7 @@ class TestBandwidthSearchSyntheticGrid:
             n_jobs=1,
         ).fit(X, geometry=geometry)
 
-        assert model.components_.shape == (len(X), X.shape[1], _N_COMP_GRID)
+        assert model.components_.shape == (len(X), X.shape[1] * _N_COMP_GRID)
         assert model.explained_variance_ratio_.shape == (len(X), _N_COMP_GRID)
 
 
@@ -299,7 +299,7 @@ class TestBandwidthSearchCaliforniaHousing:
         ).fit(X, geometry=geometry)
 
         n, p = len(X), X.shape[1]
-        assert model.components_.shape == (n, p, 3)
+        assert model.components_.shape == (n, p * 3)
         assert model.explained_variance_ratio_.shape == (n, 3)
 
         row_sums = model.explained_variance_ratio_.sum(axis=1)

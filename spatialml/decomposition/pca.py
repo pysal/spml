@@ -158,7 +158,8 @@ class GWPCA(BaseDecomposition):
     def explained_variance_ratio_(self) -> pd.DataFrame:
         totals = self._all_eigenvalues.sum(axis=1, keepdims=True)
         evr = np.where(totals > 0, self._eigenvalues / totals, 0.0)
-        return pd.DataFrame(evr, index=self._names)
+        cols = [f"PC{i}" for i in range(evr.shape[1])]
+        return pd.DataFrame(evr, index=self._names, columns=cols)
 
     def _fit_local(
         self,

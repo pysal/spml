@@ -213,14 +213,25 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         return self
 
     @property
-    def components_(self) -> np.ndarray:
-        """Local loadings, shape ``(n_locations, n_features, n_components)``."""
-        return self._components
+    def components_(self) -> pd.DataFrame:
+        """Local loadings DataFrame with MultiIndex columns (Component, Feature)."""
+        n, p, q = self._components.shape
+
+        reshaped = np.transpose(self._components, (0, 2, 1)).reshape(n, q * p)
+        
+        comp_labels = [f"PC{i}" for i in range(q)]
+        columns = pd.MultiIndex.from_product(
+            [comp_labels, self.feature_names_in_], 
+            names=["Component", "Feature"]
+        )
+        
+        return pd.DataFrame(reshaped, index=self._names, columns=columns)
 
     @property
     def explained_variance_(self) -> pd.DataFrame:
         """Local eigenvalues. Shape ``(n, q)``."""
-        return pd.DataFrame(self._eigenvalues, index=self._names)
+        cols = [f"PC{i}" for i in range(self._eigenvalues.shape[1])]
+        return pd.DataFrame(self._eigenvalues, index=self._names, columns=cols)
 
     @property
     def condition_number_(self) -> pd.Series:
@@ -231,7 +242,8 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
     @property
     def scores_(self) -> pd.DataFrame:
         """Transformed values: focal-point projections onto the local components."""
-        return pd.DataFrame(self._scores, index=self._names)
+        cols = [f"PC{i}" for i in range(self._scores.shape[1])]
+        return pd.DataFrame(self._scores, index=self._names, columns=cols)
 
     @property
     def local_means_(self) -> pd.DataFrame:
