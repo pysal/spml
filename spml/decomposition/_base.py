@@ -17,73 +17,82 @@ __all__ = ["BaseDecomposition"]
 
 
 class BaseDecomposition(TransformerMixin, _BaseModel):
-    """Geographically weighted decomposition meta-estimator (scaffold).
+    """Generic geographically weighted decomposition meta-estimator.
 
-    Base class for unsupervised geographically weighted decompositions
-    (e.g. ``GWPCA``, ``RobustGWPCA``, ``GWFA``).  Subclasses implement
-    :meth:`_fit_local`, returning, for each focal location, the local
-    components, scores, mean and winning-variable vector.  The shared
-    spatial-weighting machinery, batch dispatch and output unpacking are
-    inherited from :class:`_BaseModel` (with the ``y=None`` path enabled
-    in :meth:`_batch_fit`).
+    This class provides the shared machinery for decomposition estimators that
+    fit one local model per focal observation using spatially varying sample
+    weights. Subclasses provide the local decomposition routine; the base class
+    handles spatial weights, batching, and result assembly.
 
     Notes
     -----
-    A global unsupervised baseline (e.g. standard PCA) is fitted by default.
-    Any ``y`` passed to :meth:`fit` is ignored (the argument exists for
-    scikit-learn pipeline / ``check_estimator`` compatibility).
+    - Decomposition estimators fit from ``X`` and spatial weights; ``y`` is
+      not used.
+    - Only point geometries are supported.
 
     Parameters
     ----------
     n_components : int | None, optional
-        Number of components retained per local fit.  ``None`` defers the
-        decision to the subclass.  By default ``None``.
+        Number of components retained in each local fit. If ``None``, the
+        subclass decides how many components to keep. By default ``None``.
     bandwidth : float | int | None, optional
-        Bandwidth for defining neighbourhoods.  See :class:`BaseClassifier`
-        for the full semantics of ``fixed`` / ``kernel`` / ``include_focal``.
+        Bandwidth used to define local neighborhoods.
+
+        - If ``fixed=True``, this is a distance threshold.
+        - If ``fixed=False``, this is the number of nearest neighbors used
+          for each local fit.
+
+        If ``graph`` is provided, ``bandwidth`` is ignored.
     fixed : bool, optional
-        Distance-based (``True``) versus adaptive KNN (``False``)
-        bandwidth, by default ``False``.
+        True for distance based bandwidth and False for adaptive (nearest
+        neighbor) bandwidth, by default ``False``.
     kernel : str | Callable, optional
-        Weighting kernel, by default ``"bisquare"``.
+        Type of kernel function used to weight observations, by default
+        ``"bisquare"``.
     include_focal : bool, optional
-        Include the focal observation in its own local fit, by default
-        ``False``.
+        Whether to include the focal observation in its own local fit, by
+        default ``False``.
     graph : libpysal.graph.Graph | None, optional
-        Pre-computed spatial graph (overrides ``bandwidth`` / ``kernel``).
+        Precomputed spatial graph. If provided, it is used directly and
+        ``bandwidth``, ``fixed``, ``kernel``, and ``include_focal`` are
+        ignored.
     n_jobs : int, optional
-        Parallelism for the per-location fits, by default ``-1``.
+        Number of jobs to run in parallel. ``-1`` uses all processors.
+    fit_global_model : bool, optional
+        Determines if the global baseline decomposition shall be fitted
+        alongside the geographically weighted decomposition, by default
+        ``True``.
     keep_models : bool | str | Path, optional
-        Whether to retain local fitted objects (kept here for API symmetry
-        with the supervised bases; subclasses may ignore).  By default
-        ``False``.
+        Whether to retain local fitted objects, by default ``False``.
+        Subclasses may ignore this parameter.
     temp_folder : str | None, optional
-        Joblib temp folder for memmapping, by default ``None``.
+        Folder to be used by the pool for memmapping large arrays for sharing
+        memory with worker processes. Passed to ``joblib.Parallel``, by
+        default ``None``.
     batch_size : int | None, optional
-        Batched dispatch size, by default ``None``.
+        Number of models to process in each batch, by default ``None``.
     coplanar : {"raise", "jitter", "clique"}, optional
-        Coplanar-point handling for adaptive kernels, by default ``"raise"``.
+        Method for handling coplanar points in adaptive kernels.
     verbose : bool, optional
-        Progress logging, by default ``False``.
+        Whether to print progress information, by default ``False``.
     **kwargs
-        Additional keyword arguments forwarded to the per-local estimator
-        instantiation (subclass-dependent).
+        Additional keyword arguments passed to subclass-specific local fitting.
 
     Attributes
     ----------
-    components_ : numpy.ndarray
-        Local loadings, shape ``(n_locations, n_features, n_components)``.
-    scores_ : numpy.ndarray
-        Transformed values (focal-point projections onto local components),
-        shape ``(n_locations, n_components)``.
-    local_means_ : numpy.ndarray
-        Weighted local mean of ``X`` per focal location,
-        shape ``(n_locations, n_features)``.  Stored so that
-        :meth:`transform` can centre new observations against the same
-        local mean before projecting onto the local components.
-    winning_variable_ : numpy.ndarray
-        Index of the maximum-absolute-loading variable per component,
-        shape ``(n_locations, n_components)``.
+    components_ : pandas.DataFrame
+        Local component loadings indexed by focal location, with MultiIndex
+        columns ``(Component, Feature)``.
+    explained_variance_ : pandas.DataFrame
+        Local eigenvalues for retained components.
+    scores_ : pandas.DataFrame
+        Focal observations projected onto local components.
+    local_means_ : pandas.DataFrame
+        Weighted local means of ``X`` at each focal location.
+    condition_number_ : pandas.Series
+        Ratio of largest to smallest retained eigenvalue per location.
+    winning_variable_ : pandas.Series
+        Feature with the largest absolute loading on the first component.
     """
 
     def __init__(
@@ -132,25 +141,26 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
 
     @property
     def _requires_y(self) -> bool:
+        """Whether the estimator requires a target vector during fitting."""
         return False
 
     def fit(
         self,
         X: pd.DataFrame,
-        y: pd.Series | None = None,  # noqa: ARG002 — sklearn API compatibility
+        y: pd.Series | None = None,  # noqa: ARG002
         geometry: gpd.GeoSeries | None = None,
     ) -> BaseDecomposition:
-        """Fit local decompositions, one per focal location.
+        """Fit one local decomposition model per focal location.
 
         Parameters
         ----------
         X : pandas.DataFrame
             Feature matrix.
-        y : None
-            Ignored.  Present only so the estimator slots into scikit-learn
-            pipelines and ``check_estimator``.
+        y : pandas.Series | None
+            Not used by decomposition estimators.
         geometry : geopandas.GeoSeries | None
-            Point geometries.  Required unless ``self.graph`` was provided.
+            Point geometries aligned to ``X``. Required unless ``self.graph``
+            was provided.
 
         Returns
         -------
@@ -161,7 +171,7 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         -----
         Subclasses must implement :meth:`_fit_local` and return, for each
         focal location, a tuple of the form
-        ``(name, components, scores, local_mean, winning_variable)``.
+        ``(name, components, eigenvalues, scores, local_mean)``.
         """
         self._start = time()
         self._validate_fit_inputs(X, None, geometry)
@@ -214,52 +224,47 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
 
     @property
     def components_(self) -> pd.DataFrame:
-        """Local loadings DataFrame with MultiIndex columns (Component, Feature)."""
+        """Local component loadings with MultiIndex columns."""
         n, p, q = self._components.shape
 
         reshaped = np.transpose(self._components, (0, 2, 1)).reshape(n, q * p)
-        
+
         comp_labels = [f"PC{i}" for i in range(q)]
         columns = pd.MultiIndex.from_product(
-            [comp_labels, self.feature_names_in_], 
-            names=["Component", "Feature"]
+            [comp_labels, self.feature_names_in_],
+            names=["Component", "Feature"],
         )
-        
+
         return pd.DataFrame(reshaped, index=self._names, columns=columns)
 
     @property
     def explained_variance_(self) -> pd.DataFrame:
-        """Local eigenvalues. Shape ``(n, q)``."""
+        """Local eigenvalues for retained components."""
         cols = [f"PC{i}" for i in range(self._eigenvalues.shape[1])]
         return pd.DataFrame(self._eigenvalues, index=self._names, columns=cols)
 
     @property
     def condition_number_(self) -> pd.Series:
-        """Condition number (max/min eigenvalue) per location."""
+        """Local condition number as largest/smallest eigenvalue."""
         cond = self._eigenvalues[:, 0] / (self._eigenvalues[:, -1] + 1e-10)
         return pd.Series(cond, index=self._names)
 
     @property
     def scores_(self) -> pd.DataFrame:
-        """Transformed values: focal-point projections onto the local components."""
+        """Focal observations projected onto local components."""
         cols = [f"PC{i}" for i in range(self._scores.shape[1])]
         return pd.DataFrame(self._scores, index=self._names, columns=cols)
 
     @property
     def local_means_(self) -> pd.DataFrame:
-        """Weighted local mean of ``X`` per focal location.
-
-        Shape ``(n_locations, n_features)``.  Stored so that
-        :meth:`transform` can centre new observations against the
-        same local mean before projecting onto the local components.
-        """
+        """Weighted local mean of ``X`` at each focal location."""
         return pd.DataFrame(
             self._local_means, index=self._names, columns=self.feature_names_in_
         )
 
     @property
     def winning_variable_(self) -> pd.Series:
-        """Index of the maximum-absolute-loading variable per component."""
+        """Feature with largest absolute loading on the first component."""
         idx = np.argmax(np.abs(self._components[:, :, 0]), axis=1)
         return pd.Series(self.feature_names_in_[idx], index=self._names)
 
@@ -268,26 +273,23 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         X: pd.DataFrame,
         geometry: gpd.GeoSeries | None = None,
     ) -> np.ndarray:
-        """Project ``X`` onto local components.
+        """Project observations onto fitted local components.
 
-        .. note::
-            Currently uses a nearest-neighbour lookup to assign each new
-            observation to the closest training location.  In future this
-            will follow the same out-of-sample logic as :meth:`predict` in
-            the supervised estimators (kernel-weighted interpolation of local
-            components rather than a hard nearest-neighbour assignment).
+        New observations are matched to the nearest fitted location before
+        projection. This is a nearest-neighbor assignment, not a weighted
+        interpolation across multiple local models.
 
         Parameters
         ----------
         X : pandas.DataFrame
-            Feature matrix for new observations.
+            Feature matrix to transform.
         geometry : geopandas.GeoSeries | None
-            Geometries for ``X``.  Required for out-of-sample transforms.
+            Point geometries aligned to ``X``. Required for transformation.
 
         Returns
         -------
         numpy.ndarray
-            Shape ``(len(X), n_components)``.
+            Array of shape ``(n_samples, n_components)``.
         """
         if geometry is None:
             raise ValueError("geometry is required to transform data.")
@@ -309,9 +311,9 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
     def fit_transform(
         self,
         X: pd.DataFrame,
-        y: pd.Series | None = None,  # noqa: ARG002 — sklearn API compatibility
+        y: pd.Series | None = None,  # noqa: ARG002
         geometry: gpd.GeoSeries | None = None,
         **fit_params,  # noqa: ARG002
     ) -> np.ndarray:
-        """Fit the model and return the in-sample focal-point scores."""
+        """Fit the model and return in-sample local component scores."""
         return self.fit(X, geometry=geometry).scores_

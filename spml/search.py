@@ -9,27 +9,25 @@ from sklearn import metrics
 
 
 class BandwidthSearch:
-    """Optimal bandwidth search for geographically weighted estimators.
+    """Bandwidth search for geographically weighted estimators.
 
-    Reports scores from multiple models with varying bandwidth and identifies
-    the optimal one.  When using golden section search, it minimizes (or
-    maximizes) the chosen ``criterion``.
+    ``BandwidthSearch`` evaluates a model over candidate bandwidth values,
+    stores the resulting scores, and selects the bandwidth that optimizes a
+    chosen ``criterion``.
 
-    The search supports two broad families of models:
+    Supported model families:
 
-    * **Linear / logistic models** (:class:`~spml.linear_model.GWLinearRegression`,
-      :class:`~spml.linear_model.GWLogisticRegression`): information criteria
-      ``"aicc"``, ``"aic"``, ``"bic"`` are valid and recommended.  They are included
-      in ``metrics_`` automatically.
-    * **Non-linear models** (random forest, gradient boosting, …): information
-      criteria are *not* valid (no closed-form log-likelihood or hat matrix).
-      Use ``"rmse"`` / ``"mae"`` for regression or ``"log_loss"`` combined with
-      ``"prediction_rate"`` for classification instead.
+    - Linear and logistic models: information criteria (``"aicc"``,
+      ``"aic"``, ``"bic"``) are valid and included in ``metrics_``
+      automatically.
+    - Tree-based models: information criteria are not valid; use
+      ``"rmse"``, ``"mae"``, ``"log_loss"``, and/or ``"prediction_rate"``.
+    - Decomposition models: use ``"cv_score"`` or another exposed fitted
+      attribute (``<name>_``).
 
-    When using classification models with a defined ``min_proportion``, keep in
-    mind that some locations may be excluded from the final model.  In such a
-    case, even the valid information criteria are not comparable across
-    bandwidths and ``"log_loss"`` should be preferred.
+    For classifiers where neighborhoods may be skipped due to
+    ``min_proportion``, prefer ``"log_loss"`` or ``"prediction_rate"`` over
+    information criteria.
 
     Parameters
     ----------
@@ -65,12 +63,12 @@ class BandwidthSearch:
 
         Built-in special values:
 
-        * ``"aicc"``, ``"aic"``, ``"bic"`` — information criteria;
+        * ``"aicc"``, ``"aic"``, ``"bic"`` - information criteria;
           **only valid for linear / logistic models**.
-        * ``"log_loss"`` — cross-entropy loss; for classifiers only.
-        * ``"prediction_rate"`` — proportion of fitted locations; classifiers.
-        * ``"rmse"`` — root mean squared error of focal residuals; regressors.
-        * ``"mae"`` — mean absolute error of focal residuals; regressors.
+        * ``"log_loss"`` - cross-entropy loss; for classifiers only.
+        * ``"prediction_rate"`` - proportion of fitted locations; classifiers.
+        * ``"rmse"`` - root mean squared error of focal residuals; regressors.
+        * ``"mae"`` - mean absolute error of focal residuals; regressors.
 
         Any other string ``m`` is interpreted as an attribute name and
         retrieved from the fitted model as ``getattr(model, m + "_")``.
@@ -196,24 +194,23 @@ class BandwidthSearch:
         y: pd.Series | None = None,
         geometry: gpd.GeoSeries | None = None,
     ) -> "BandwidthSearch":
-        """
-        Fit the searcher by evaluating candidate bandwidths on the provided data.
+        """Evaluate candidate bandwidths on the provided data.
 
         Parameters
         ----------
         X : pd.DataFrame
-            Feature matrix used to evaluate candidate bandwidths (rows are samples).
-        y : pd.Series
-            Target values corresponding to X.
-        geometry : gpd.GeoSeries
-            Geographic location of the observations in the sample. Used to determine the
-            spatial interaction weight based on specification by ``bandwidth``,
-            ``fixed``, ``kernel``, and ``include_focal`` keywords.
+            Feature matrix used to evaluate candidate bandwidths.
+        y : pd.Series | None
+            Target values aligned to ``X`` for supervised estimators.
+            Not used for decomposition estimators.
+        geometry : gpd.GeoSeries | None
+            Point geometries aligned to ``X``. Required unless a precomputed
+            graph is supplied through model kwargs.
 
         Returns
         -------
-        self
-            The fitted instance.
+        BandwidthSearch
+            Fitted search object.
 
         Notes
         -----
@@ -262,12 +259,11 @@ class BandwidthSearch:
 
     @property
     def _reported_metrics(self) -> list[str]:
-        """All metric names collected at each bandwidth during the search.
+        """All metric names recorded for each candidate bandwidth.
 
-        Always starts with IC metrics (if supported), then any user-specified
-        ``metrics``.  When the search criterion is ``"cv_score"``, that name
-        is appended so the LOO reconstruction error is captured in
-        :attr:`metrics_` alongside the other columns.
+        The sequence starts with information criteria when supported, then any
+        user-provided metrics. If ``criterion == "cv_score"``, that metric is
+        always included so it is available in ``metrics_``.
         """
         met = self._ic_metrics.copy()
         if self.metrics is not None:
@@ -279,9 +275,10 @@ class BandwidthSearch:
     def _score(
         self, X: pd.DataFrame, y: pd.Series | None, bw: int | float
     ) -> tuple[float, list[float]]:
-        """Fit the model and report criterion score.
+        """Fit one candidate bandwidth and return criterion and metrics.
 
-        In case of invariant y in a local model, returns np.inf
+        For supervised estimators with an invariant target vector, the
+        candidate is treated as invalid and returns ``np.inf``.
         """
         met = self._reported_metrics
 
@@ -369,14 +366,15 @@ class BandwidthSearch:
         return all_metrics[met.index(self.criterion)], all_metrics
 
     def _interval(self, X: pd.DataFrame, y: pd.Series | None) -> None:
-        """Fit models using the equal interval search.
+        """Evaluate candidates on an equal-interval bandwidth grid.
 
         Parameters
         ----------
         X : pd.DataFrame
-            Independent variables
-        y : pd.Series
-            Dependent variable
+            Feature matrix.
+        y : pd.Series | None
+            Target values for supervised estimators. Not used for
+            decomposition estimators.
         """
         if not (
             isinstance(self.min_bandwidth, float | int)
@@ -407,6 +405,18 @@ class BandwidthSearch:
     def _golden_section(
         self, X: pd.DataFrame, y: pd.Series | None, tolerance: float
     ) -> None:
+        """Evaluate candidates using golden-section search.
+
+        Parameters
+        ----------
+        X : pd.DataFrame
+            Feature matrix.
+        y : pd.Series | None
+            Target values for supervised estimators. Not used for
+            decomposition estimators.
+        tolerance : float
+            Stopping tolerance for the search.
+        """
         delta = 0.38197
         if self.fixed:
             pairwise_distance = pdist(self.geometry.get_coordinates())

@@ -16,52 +16,82 @@ __all__ = ["GWPCA"]
 
 
 class GWPCA(BaseDecomposition):
-    """Geographically Weighted Principal Components Analysis.
+    """Geographically weighted principal components analysis.
 
-    Fits a local PCA at each spatial location via a kernel-weighted covariance
-    matrix. Produces a surface of local eigenvectors, eigenvalues, and scores.
-    Follows Harris, Brunsdon & Charlton (2011).
+    Fits a local PCA at each spatial location using a kernel-weighted
+    covariance matrix. Produces local components, eigenvalues, scores, and
+    diagnostics. Follows Harris, Brunsdon & Charlton (2011).
 
     Parameters
     ----------
-    n_components : int | None
-        Components to retain per location. None keeps all.
-    bandwidth : float | int | None
-        KNN count (fixed=False) or distance threshold (fixed=True).
-    fixed : bool
-        Adaptive KNN (False) or fixed distance (True). Default False.
-    kernel : str | Callable
-        Weight function. Default ``"bisquare"``.
-    include_focal : bool
-        Include the focal point in its own neighbourhood. Default True.
-    graph : libpysal.graph.Graph | None
-        Pre-built spatial weights. Overrides bandwidth/kernel if given.
-    n_jobs : int
-        Joblib parallelism. -1 uses all CPUs.
-    fit_global_model : bool
-        Also fit a global sklearn PCA as a baseline.
-    sign_convention : {"first_positive", "max_abs", "none"}
-        Eigenvector sign rule. ``"first_positive"`` matches GWmodel.
+    n_components : int | None, optional
+        Number of components to retain per location. If ``None``, all
+        components are retained. By default ``None``.
+    bandwidth : float | int | None, optional
+        Bandwidth used to define local neighborhoods.
+
+        - If ``fixed=True``, this is a distance threshold.
+        - If ``fixed=False``, this is the number of nearest neighbors used
+          for each local fit.
+
+        If ``graph`` is provided, ``bandwidth`` is ignored.
+    fixed : bool, optional
+        True for distance based bandwidth and False for adaptive (nearest
+        neighbor) bandwidth, by default ``False``.
+    kernel : str | Callable, optional
+        Type of kernel function used to weight observations, by default
+        ``"bisquare"``.
+    include_focal : bool, optional
+        Whether to include the focal observation in its own neighborhood,
+        by default ``True``.
+    graph : libpysal.graph.Graph | None, optional
+        Precomputed spatial graph. If provided, it is used directly and
+        ``bandwidth``, ``fixed``, ``kernel``, and ``include_focal`` are
+        ignored.
+    n_jobs : int, optional
+        The number of jobs to run in parallel. ``-1`` means using all
+        processors, by default ``-1``.
+    fit_global_model : bool, optional
+        Determines if the global PCA baseline shall be fitted alongside the
+        geographically weighted PCA, by default ``True``.
+    keep_models : bool | str | Path, optional
+        Whether to retain local fitted objects, by default ``False``.
+    temp_folder : str | None, optional
+        Folder to be used by the pool for memmapping large arrays for sharing
+        memory with worker processes. Passed to ``joblib.Parallel``, by
+        default ``None``.
+    batch_size : int | None, optional
+        Number of models to process in each batch, by default ``None``.
+    verbose : bool, optional
+        Whether to print progress information, by default ``False``.
+    sign_convention : {"first_positive", "max_abs", "none"}, optional
+        Rule used to orient eigenvector signs consistently across locations.
 
     Attributes
     ----------
-    components_ : ndarray (n, p, q)
-        Local eigenvectors.
-    explained_variance_ratio_ : ndarray (n, q)
-        Local fraction of variance per component.
-    scores_ : ndarray (n, q)
-        Local PC scores for each focal observation.
-    local_means_ : ndarray (n, p)
-        Geographically weighted mean at each location.
-    winning_variable_ : pd.Series
-        Variable with the highest PC1 loading at each location.
-    condition_number_ : pd.Series
-        Local covariance condition number (collinearity diagnostic).
+    components_ : pandas.DataFrame
+        Local component loadings indexed by focal location.
+    explained_variance_ : pandas.DataFrame
+        Local eigenvalues for retained components.
+    explained_variance_ratio_ : pandas.DataFrame
+        Share of local variance explained by each retained component.
+    scores_ : pandas.DataFrame
+        Local component scores for each focal observation.
+    local_means_ : pandas.DataFrame
+        Weighted local means of ``X`` per focal location.
+    winning_variable_ : pandas.Series
+        Feature with largest absolute loading on the first component.
+    condition_number_ : pandas.Series
+        Local covariance condition number.
     cv_score_ : float | None
-        LOO reconstruction error. Set when ``cv=True`` is passed to ``fit``.
+        Leave-one-out reconstruction error when ``cv=True`` in :meth:`fit`.
 
     Examples
     --------
+    >>> import geopandas as gpd
+    >>> from geodatasets import get_path
+    >>> from spml.decomposition import GWPCA
+
     >>> gdf = gpd.read_file(get_path("geoda.guerry")).set_geometry(lambda g: g.centroid)
     >>> X = gdf[["Crm_prs", "Litercy", "Wealth", "Donatns", "Infants"]]
     >>> X = (X - X.mean()) / X.std()
@@ -118,22 +148,24 @@ class GWPCA(BaseDecomposition):
         geometry: gpd.GeoSeries | None = None,
         cv: bool = False,
     ) -> GWPCA:
-        """Fit GWPCA at every spatial location.
+        """Fit a local PCA model at each spatial location.
 
         Parameters
         ----------
         X : pd.DataFrame
-            Feature matrix. Standardise before calling.
-        y : None
-            Ignored. Present for sklearn Pipeline compatibility.
+            Feature matrix. Standardize before calling.
+        y : pd.Series | None
+            Not used by GWPCA.
         geometry : gpd.GeoSeries | None
-            Point geometry. Required unless ``graph`` was supplied at init.
+            Point geometries aligned to ``X``. Required unless ``graph``
+            was supplied during initialization.
         cv : bool
-            Compute LOO CV reconstruction error (Harris et al. 2011, §4.1).
+            Compute leave-one-out reconstruction error.
 
         Returns
         -------
         self
+            Fitted estimator.
         """
         super().fit(X, y=None, geometry=geometry)
 
@@ -149,6 +181,7 @@ class GWPCA(BaseDecomposition):
         return self
 
     def _fit_global_model(self, X: pd.DataFrame, y: pd.Series | None = None):  # noqa: ARG002
+        """Fit a global PCA baseline model."""
         from sklearn.decomposition import PCA
 
         self.global_model = PCA(n_components=self.n_components)
@@ -156,6 +189,7 @@ class GWPCA(BaseDecomposition):
 
     @property
     def explained_variance_ratio_(self) -> pd.DataFrame:
+        """Share of total local variance explained by each component."""
         totals = self._all_eigenvalues.sum(axis=1, keepdims=True)
         evr = np.where(totals > 0, self._eigenvalues / totals, 0.0)
         cols = [f"PC{i}" for i in range(evr.shape[1])]
@@ -169,7 +203,7 @@ class GWPCA(BaseDecomposition):
         focal_x: np.ndarray,
         model_kwargs: dict,  # noqa: ARG002
     ) -> list:
-        """Fit one local PCA at focal point ``name``."""
+        """Fit the local PCA for a single focal location."""
         X_local = data.drop(columns=["_weight"]).values.astype(float)
         wt = data["_weight"].values.astype(float)
 
@@ -226,7 +260,7 @@ class GWPCA(BaseDecomposition):
         return [name, eigenvectors, eigenvalues, focal_score, weighted_mean]
 
     def _compute_cv_score(self, X: pd.DataFrame) -> float:
-        """LOO cross-validation reconstruction error (Harris et al. 2011, §4.1)."""
+        """Compute leave-one-out reconstruction error (Harris et al. 2011, Sec. 4.1)."""
         weights = self.graph if self.graph is not None else self._build_weights()
 
         adjacency = weights._adjacency
@@ -279,10 +313,28 @@ class GWPCA(BaseDecomposition):
         n_permutations: int = 99,
         random_state: int | None = None,
     ) -> dict:
-        """Monte Carlo permutation test for eigenvalue nonstationarity
-        (Harris 2011, §4.2).
+        """Monte Carlo permutation test for eigenvalue nonstationarity.
 
-        Returns dict with keys ``"true_sd"``, ``"permuted_sds"``, ``"p_value"``.
+        Follows Harris, Brunsdon & Charlton (2011, Sec. 4.2).
+
+        Parameters
+        ----------
+        X : pd.DataFrame
+            Feature matrix used for each permutation refit.
+        geometry : gpd.GeoSeries
+            Point geometries aligned to ``X``.
+        component : int
+            Zero-based component index to test.
+        n_permutations : int
+            Number of random geometry permutations.
+        random_state : int | None
+            Random seed used for permutation sampling.
+
+        Returns
+        -------
+        dict
+            Dictionary with keys ``"true_sd"``, ``"permuted_sds"``, and
+            ``"p_value"``.
         """
         rng = np.random.default_rng(random_state)
 
@@ -317,10 +369,18 @@ class GWPCA(BaseDecomposition):
         self,
         threshold: float = 30.0,
     ) -> pd.DataFrame:
-        """Flag locations with condition number above ``threshold`` (Harris 2011, §4.5).
+        """Flag locations with high local collinearity.
 
-        Returns DataFrame with columns: condition_number, pc1_evr,
-        last_pc_evr, is_collinear.
+        Parameters
+        ----------
+        threshold : float
+            Condition-number threshold used to flag collinear locations.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with columns ``condition_number``, ``pc1_evr``,
+            ``last_pc_evr``, and ``is_collinear``.
         """
         if not hasattr(self, "_eigenvalues"):
             raise ValueError("Call fit() before identify_collinear_locations().")

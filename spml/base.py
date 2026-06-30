@@ -191,11 +191,12 @@ class _BaseModel(BaseEstimator):
         y: pd.Series | None,
         weights: graph.Graph,
     ) -> list:
-        """Fit models in batches or all at once.
+        """Fit local models, optionally in batches.
 
-        When ``y is None`` (unsupervised path, e.g. :class:`BaseDecomposition`),
-        no target is injected into the per-neighbourhood frames and no
-        invariance check is performed.
+        Supervised estimators pass ``y`` through to :meth:`_batch_fit` so each
+        neighborhood can attach the target and check for local invariance.
+        Decomposition estimators pass ``y=None`` and fit from ``X`` plus
+        spatial weights only.
         """
         if self.batch_size:
             training_output = []
@@ -234,13 +235,12 @@ class _BaseModel(BaseEstimator):
         _weight: np.ndarray,
         X_focals: np.ndarray,
     ) -> list:
-        """Fit a batch of local models.
+        """Fit one batch of local models.
 
-        When ``y`` is provided (supervised path), the per-neighbourhood frame
-        carries a ``_y`` column and an invariance check is run.  When ``y is
-        None`` (unsupervised path used by :class:`BaseDecomposition`), neither
-        the ``_y`` injection nor the invariance check is applied — local fits
-        only need ``X`` and ``_weight``.
+        When ``y`` is provided, each neighborhood frame includes a ``_y``
+        column and local invariance is checked before fitting. When ``y`` is
+        ``None``, the batch is treated as unsupervised and only ``X`` with
+        ``_weight`` is passed to :meth:`_fit_local`.
         """
         data = X.copy()
         if y is not None:
@@ -274,15 +274,12 @@ class _BaseModel(BaseEstimator):
         )
 
     def _fit_global_model(self, X: pd.DataFrame, y: pd.Series | None):
-        """Fit global baseline model for supervised estimators.
+        """Fit the global baseline model for supervised estimators.
 
-        This base-class implementation handles supervised models (classifiers /
-        regressors) that require both ``X`` and ``y``.  The early return when
-        ``y is None`` is intentional: unsupervised subclasses (e.g. ``GWPCA``)
-        override this method entirely — ``GWPCA._fit_global_model`` fits a
-        global :class:`sklearn.decomposition.PCA` using only ``X``, and is
-        called directly from :meth:`GWPCA.fit` so this base-class path is
-        never reached for decompositions.
+        The base implementation expects both ``X`` and ``y``. Unsupervised
+        decomposition subclasses override this method with an ``X``-only
+        implementation; returning early when ``y`` is ``None`` keeps that
+        shared contract safe.
         """
         if y is None:
             return
@@ -565,26 +562,20 @@ class _BaseModel(BaseEstimator):
         y: pd.Series | None,
         geometry: gpd.GeoSeries | None,
     ) -> None:
-        """
-        Validate input data and configuration parameters before model fitting.
+        """Validate core inputs before fitting.
 
-        This method performs structural and spatial consistency checks to ensure that:
-        - For supervised estimators (classifiers / regressors): ``y`` is not ``None``
-          and has the same length as ``X``.  A ``ValueError`` is raised even if the
-          user accidentally passes ``y=None`` to a supervised model.
-        - For unsupervised decomposition estimators (e.g. ``GWPCA``): ``y`` is
-          unconditionally ignored — the check is skipped entirely.
-        - At least one spatial structure (``geometry`` or ``graph``) is provided.
-        - The provided geometry, if any, matches the number of observations in ``X``.
-        - Bandwidth is positive when specified.
-        - Adaptive bandwidth (``fixed=False``) is an integer.
+        This checks that supervised estimators receive a target vector aligned
+        to ``X``, that either ``geometry`` or ``graph`` is available, that any
+        provided geometry matches the number of observations, and that the
+        bandwidth and kernel settings are valid. Unsupervised decomposition
+        estimators skip target validation through :attr:`_requires_y`.
 
         Raises
         ------
         ValueError
-            If any of the validation conditions fail.
+            If any validation check fails.
         """
-        # For supervised estimators y is mandatory — raise if the caller forgot it.
+        # For supervised estimators y is mandatory - raise if the caller forgot it.
         # Decomposition estimators do not use y; _requires_y reflects this.
         if self._requires_y:
             if y is None:
@@ -639,13 +630,12 @@ class _BaseModel(BaseEstimator):
 
     @property
     def _requires_y(self) -> bool:
-        """Whether this estimator requires and uses ``y``.
+        """Whether the estimator requires a target vector during fitting.
 
-        Returns ``True`` for all supervised estimators (classifiers,
-        regressors) and ``False`` for unsupervised decompositions such as
-        :class:`BaseDecomposition`.  Callers (e.g.
-        :class:`spatialml.search.BandwidthSearch`) use this flag to
-        decide whether to pass ``strict`` and other supervised-only kwargs.
+        Supervised estimators return ``True``. Unsupervised decompositions
+        return ``False`` so shared utilities such as
+        :class:`spml.search.BandwidthSearch` can omit supervised-only
+        arguments and allow ``y=None``.
         """
         return True
 
