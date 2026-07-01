@@ -64,7 +64,7 @@ Decomposition
 
 Geographically weighted decomposition models.
 
-.. currentmodule:: spatialml.decomposition
+.. currentmodule:: spml.decomposition
 .. autosummary::
    :toctree: generated/
 
