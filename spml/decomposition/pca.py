@@ -15,12 +15,17 @@ from ._base import BaseDecomposition
 __all__ = ["GWPCA"]
 
 
+def _weighted_covariance(X: np.ndarray, weights: np.ndarray) -> np.ndarray:
+    """Return the weighted covariance of the local neighborhood."""
+    return np.cov(X.T, aweights=weights, ddof=0)
+
+
 class GWPCA(BaseDecomposition):
     """Geographically weighted principal components analysis.
 
     Fits a local PCA at each spatial location using a kernel-weighted
     covariance matrix. Produces local components, eigenvalues, scores, and
-    diagnostics. Follows Harris, Brunsdon & Charlton (2011).
+    diagnostics for spatially varying feature structure.
 
     Parameters
     ----------
@@ -49,11 +54,11 @@ class GWPCA(BaseDecomposition):
         ``bandwidth``, ``fixed``, ``kernel``, and ``include_focal`` are
         ignored.
     n_jobs : int, optional
-        The number of jobs to run in parallel. ``-1`` means using all
-        processors, by default ``-1``.
+        Number of jobs to run in parallel. ``-1`` uses all processors, by
+        default ``-1``.
     fit_global_model : bool, optional
-        Determines if the global PCA baseline shall be fitted alongside the
-        geographically weighted PCA, by default ``True``.
+        Whether to fit a global PCA baseline alongside the geographically
+        weighted PCA, by default ``True``.
     keep_models : bool | str | Path, optional
         Whether to retain local fitted objects, by default ``False``.
     temp_folder : str | None, optional
@@ -180,7 +185,9 @@ class GWPCA(BaseDecomposition):
 
         return self
 
-    def _fit_global_model(self, X: pd.DataFrame, y: pd.Series | None = None):  # noqa: ARG002
+    def _fit_global_model(
+        self, X: pd.DataFrame, y: pd.Series | None = None,  # noqa: ARG002
+    ):
         """Fit a global PCA baseline model."""
         from sklearn.decomposition import PCA
 
@@ -220,7 +227,7 @@ class GWPCA(BaseDecomposition):
             ]
 
         weighted_mean = np.average(X_local, axis=0, weights=wt)
-        cov = np.cov(X_local.T, aweights=wt, ddof=0)
+        cov = _weighted_covariance(X_local, wt)
 
         eigenvalues, eigenvectors = np.linalg.eigh(cov)
         eigenvalues = np.clip(eigenvalues, 0, None)
@@ -260,7 +267,7 @@ class GWPCA(BaseDecomposition):
         return [name, eigenvectors, eigenvalues, focal_score, weighted_mean]
 
     def _compute_cv_score(self, X: pd.DataFrame) -> float:
-        """Compute leave-one-out reconstruction error (Harris et al. 2011, Sec. 4.1)."""
+        """Compute leave-one-out reconstruction error."""
         weights = self.graph if self.graph is not None else self._build_weights()
 
         adjacency = weights._adjacency
@@ -283,7 +290,7 @@ class GWPCA(BaseDecomposition):
             X_nbr = X_vals[loc_positions]
 
             w_mean = np.average(X_nbr, axis=0, weights=wt)
-            cov = np.cov(X_nbr.T, aweights=wt, ddof=0)
+            cov = _weighted_covariance(X_nbr, wt)
 
             eigvals, eigvecs = np.linalg.eigh(cov)
             eigvals = np.clip(eigvals, 0, None)
@@ -314,8 +321,6 @@ class GWPCA(BaseDecomposition):
         random_state: int | None = None,
     ) -> dict:
         """Monte Carlo permutation test for eigenvalue nonstationarity.
-
-        Follows Harris, Brunsdon & Charlton (2011, Sec. 4.2).
 
         Parameters
         ----------

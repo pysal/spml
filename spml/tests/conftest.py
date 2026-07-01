@@ -5,12 +5,12 @@ from geodatasets import get_path
 
 @pytest.fixture(scope="session")
 def sample_decomposition_data():
-    """Return standardised multivariate data for unsupervised decomposition tests."""
+    """Return standardized multivariate data for decomposition tests."""
     gdf = gpd.read_file(get_path("geoda.guerry"))
     gdf = gdf.set_geometry(gdf.centroid)
     cols = ["Crm_prs", "Litercy", "Wealth", "Donatns", "Infants"]
     X = gdf[cols].astype(float)
-    X = (X - X.mean()) / X.std()  # standardise as per Harris et al. (2011)
+    X = (X - X.mean()) / X.std()
     geometry = gdf.geometry
     return X, geometry
 
