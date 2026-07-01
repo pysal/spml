@@ -213,7 +213,7 @@ class TestGWPCANumericalCorrectness:
         )
 
         np.testing.assert_allclose(
-            model.local_means_.to_numpy(),
+            model._local_means,
             np.tile([1.0, 1.0 / 3.0], (len(X), 1)),
         )
         np.testing.assert_allclose(
@@ -321,7 +321,7 @@ class TestGWPCAFit:
         assert model.explained_variance_.shape == (N_OBS, N_COMP)
         assert model.explained_variance_ratio_.shape == (N_OBS, N_COMP)
         assert model.scores_.shape == (N_OBS, N_COMP)
-        assert model.local_means_.shape == (N_OBS, n_features)
+        assert model._local_means.shape == (N_OBS, n_features)
 
     def test_fit_adaptive_bandwidth(self, sample_decomposition_data):
         X, geometry = sample_decomposition_data
@@ -454,6 +454,7 @@ class TestGWPCATransform:
         X, geometry = sample_decomposition_data
         model = GWPCA(n_components=N_COMP, bandwidth=SMALL_BW).fit(X, geometry=geometry)
         scores = model.transform(X, geometry=geometry)
+        assert isinstance(scores, pd.DataFrame)
         assert scores.shape == (N_OBS, N_COMP)
 
     def test_fit_transform_matches_scores(self, sample_decomposition_data):
@@ -461,7 +462,7 @@ class TestGWPCATransform:
         model = GWPCA(n_components=N_COMP, bandwidth=SMALL_BW).fit(X, geometry=geometry)
         # fit_transform returns the same in-sample scores exposed by scores_.
         ft = model.fit_transform(X, geometry=geometry)
-        np.testing.assert_array_equal(ft, model.scores_)
+        pd.testing.assert_frame_equal(ft, model.scores_)
 
     def test_transform_requires_geometry(self, sample_decomposition_data):
         X, geometry = sample_decomposition_data

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from numbers import Integral, Real
 from pathlib import Path
 from time import time
 from typing import Literal
@@ -9,9 +10,10 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from libpysal import graph
+from scipy.spatial import KDTree
 from sklearn.base import TransformerMixin
 
-from ..base import _BaseModel
+from ..base import _BaseModel, _kernel_functions
 
 __all__ = ["BaseDecomposition"]
 
@@ -87,8 +89,6 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         Local eigenvalues for retained components.
     scores_ : pandas.DataFrame
         Focal observations projected onto local components.
-    local_means_ : pandas.DataFrame
-        Weighted local means of ``X`` at each focal location.
     condition_number_ : pandas.Series
         Ratio of largest to smallest retained eigenvalue per location.
     winning_variable_ : pandas.Series
@@ -216,6 +216,9 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         self._scores = np.stack(scores)
         self._local_means = np.stack(local_means)
         self._names = np.asarray(self._names)
+        self._name_to_position = {
+            name: pos for pos, name in enumerate(self._names.tolist())
+        }
 
         if self.fit_global_model:
             self._fit_global_model(X)
@@ -256,28 +259,121 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         return pd.DataFrame(self._scores, index=self._names, columns=cols)
 
     @property
-    def local_means_(self) -> pd.DataFrame:
-        """Weighted local mean of ``X`` at each focal location."""
-        return pd.DataFrame(
-            self._local_means, index=self._names, columns=self.feature_names_in_
-        )
-
-    @property
     def winning_variable_(self) -> pd.Series:
         """Feature with largest absolute loading on the first component."""
         idx = np.argmax(np.abs(self._components[:, :, 0]), axis=1)
         return pd.Series(self.feature_names_in_[idx], index=self._names)
 
+    def _prepare_transform_nearest(self, geometry: gpd.GeoSeries) -> np.ndarray:
+        """Map target geometries to the nearest fitted decomposition."""
+        self._validate_geometry(geometry)
+
+        if not isinstance(self.geometry, gpd.GeoSeries):
+            raise ValueError("Geometry needs to be specified at fit time to transform.")
+
+        indices_array = self.geometry.sindex.nearest(geometry, return_all=False)[1]
+        return self._names[indices_array.flatten()]
+
+    def _prepare_transform_neighborhoods(
+        self, geometry: gpd.GeoSeries, bandwidth: float | int | None = None
+    ) -> tuple[list[np.ndarray], list[np.ndarray]]:
+        """Prepare local decomposition ids and weights for transformation."""
+        self._validate_geometry(geometry)
+
+        if not (
+            (isinstance(self.bandwidth, Real) or bandwidth)
+            and isinstance(self.geometry, gpd.GeoSeries)
+        ):
+            raise ValueError(
+                "Bandwidth and geometry need to be specified to enable transform."
+            )
+
+        bw = bandwidth if bandwidth is not None else self.bandwidth
+
+        if (bw is None or not isinstance(bw, Real)) or np.isnan(bw) or (bw <= 0):
+            raise ValueError(f"Bandwidth must be a positive scalar number. Got '{bw}'.")
+
+        if not self.fixed and not isinstance(bw, Integral):
+            raise ValueError("Adaptive bandwidth (fixed=False) must be an integer.")
+
+        kernel = (
+            _kernel_functions[self.kernel]
+            if isinstance(self.kernel, str)
+            else self.kernel
+        )
+
+        if self.fixed:
+            input_ids, indices_array = self.geometry.sindex.query(
+                geometry, predicate="dwithin", distance=bw
+            )
+            local_ids = self._names[indices_array.flatten()]
+            distance = kernel(
+                self.geometry.iloc[indices_array].distance(
+                    geometry.iloc[input_ids], align=False
+                ),
+                bw,
+            )
+        else:
+            training_coords = self.geometry.get_coordinates()
+            tree = KDTree(training_coords)
+            query_coords = geometry.get_coordinates()
+
+            distances, indices_array = tree.query(query_coords, k=bw)
+
+            input_ids = np.repeat(np.arange(len(geometry)), bw)
+            local_ids = self._names[indices_array.flatten()]
+            distances = distances.flatten()
+
+            kernel_bandwidth = (
+                pd.Series(distances).groupby(input_ids).transform("max") + 1e-6
+            )
+            distance = kernel(distances, kernel_bandwidth)
+
+        split_indices = np.where(np.diff(input_ids))[0] + 1
+        local_model_ids = np.split(np.asarray(local_ids), split_indices)
+        distances = np.split(np.asarray(distance), split_indices)
+
+        return local_model_ids, distances
+
+    def _transform_local_nearest(self, x_: np.ndarray, local_id) -> np.ndarray:
+        """Project a single observation using the nearest local decomposition."""
+        idx = self._name_to_position[local_id]
+        return (x_ - self._local_means[idx]) @ self._components[idx]
+
+    def _transform_local_ensemble(
+        self,
+        x_: np.ndarray,
+        local_ids: np.ndarray,
+        distances_: np.ndarray,
+    ) -> np.ndarray:
+        """Project a single observation using a weighted ensemble of local fits."""
+        projections = []
+        valid_weights = []
+
+        for local_id, weight in zip(local_ids, distances_, strict=True):
+            idx = self._name_to_position[local_id]
+            components = self._components[idx]
+            if np.isnan(components).any():
+                continue
+            projections.append((x_ - self._local_means[idx]) @ components)
+            valid_weights.append(weight)
+
+        if not projections:
+            return np.full(self._components.shape[2], np.nan)
+
+        return np.average(np.vstack(projections), axis=0, weights=valid_weights)
+
     def transform(
         self,
         X: pd.DataFrame,
         geometry: gpd.GeoSeries | None = None,
-    ) -> np.ndarray:
+        bandwidth: Literal["nearest"] | int | float | None = "nearest",
+    ) -> pd.DataFrame:
         """Project observations onto fitted local components.
 
-        New observations are matched to the nearest fitted location before
-        projection. This is a nearest-neighbor assignment, not a weighted
-        interpolation across multiple local models.
+        Transformation can use either the nearest fitted local decomposition or
+        a weighted combination of local decompositions within a bandwidth, in
+        the same spirit as estimator prediction.
 
         Parameters
         ----------
@@ -285,28 +381,35 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
             Feature matrix to transform.
         geometry : geopandas.GeoSeries | None
             Point geometries aligned to ``X``. Required for transformation.
+        bandwidth : {"nearest"} | int | float | None, optional
+            Transformation mode. ``"nearest"`` uses the nearest fitted local
+            decomposition. Numeric values use a weighted ensemble of local
+            decompositions within the supplied bandwidth. ``None`` reuses the
+            bandwidth from fit.
 
         Returns
         -------
-        numpy.ndarray
-            Array of shape ``(n_samples, n_components)``.
+        pandas.DataFrame
+            Transformed values with one column per retained component.
         """
         if geometry is None:
             raise ValueError("geometry is required to transform data.")
-
-        if not isinstance(self.geometry, gpd.GeoSeries):
-            raise ValueError("Geometry needs to be specified at fit time to transform.")
-        self._validate_geometry(geometry)
-
-        indices = self.geometry.sindex.nearest(geometry, return_all=False)[1]
         X_values = X.values if hasattr(X, "values") else np.asarray(X)
-        n_components = self._components.shape[2]
-        out = np.empty((len(X_values), n_components))
-        for i, idx in enumerate(indices):
-            loc_components = self._components[idx]
-            loc_mean = self._local_means[idx]
-            out[i] = (X_values[i] - loc_mean) @ loc_components
-        return out
+        columns = [f"PC{i}" for i in range(self._components.shape[2])]
+
+        transformed = []
+        if bandwidth == "nearest":
+            local_ids = self._prepare_transform_nearest(geometry)
+            for x_, local_id in zip(X_values, local_ids, strict=True):
+                transformed.append(self._transform_local_nearest(x_, local_id))
+        else:
+            local_ids, distances = self._prepare_transform_neighborhoods(
+                geometry, bandwidth=bandwidth
+            )
+            for x_, ids, dist in zip(X_values, local_ids, distances, strict=True):
+                transformed.append(self._transform_local_ensemble(x_, ids, dist))
+
+        return pd.DataFrame(transformed, index=X.index, columns=columns)
 
     def fit_transform(
         self,
@@ -314,6 +417,6 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         y: pd.Series | None = None,  # noqa: ARG002
         geometry: gpd.GeoSeries | None = None,
         **fit_params,  # noqa: ARG002
-    ) -> np.ndarray:
+    ) -> pd.DataFrame:
         """Fit the model and return in-sample local component scores."""
         return self.fit(X, geometry=geometry).scores_

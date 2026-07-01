@@ -15,11 +15,6 @@ from ._base import BaseDecomposition
 __all__ = ["GWPCA"]
 
 
-def _weighted_covariance(X: np.ndarray, weights: np.ndarray) -> np.ndarray:
-    """Return the weighted covariance of the local neighborhood."""
-    return np.cov(X.T, aweights=weights, ddof=0)
-
-
 class GWPCA(BaseDecomposition):
     """Geographically weighted principal components analysis.
 
@@ -82,8 +77,6 @@ class GWPCA(BaseDecomposition):
         Share of local variance explained by each retained component.
     scores_ : pandas.DataFrame
         Local component scores for each focal observation.
-    local_means_ : pandas.DataFrame
-        Weighted local means of ``X`` per focal location.
     winning_variable_ : pandas.Series
         Feature with largest absolute loading on the first component.
     condition_number_ : pandas.Series
@@ -227,7 +220,7 @@ class GWPCA(BaseDecomposition):
             ]
 
         weighted_mean = np.average(X_local, axis=0, weights=wt)
-        cov = _weighted_covariance(X_local, wt)
+        cov = np.cov(X_local.T, aweights=wt, ddof=0)
 
         eigenvalues, eigenvectors = np.linalg.eigh(cov)
         eigenvalues = np.clip(eigenvalues, 0, None)
@@ -290,7 +283,7 @@ class GWPCA(BaseDecomposition):
             X_nbr = X_vals[loc_positions]
 
             w_mean = np.average(X_nbr, axis=0, weights=wt)
-            cov = _weighted_covariance(X_nbr, wt)
+            cov = np.cov(X_nbr.T, aweights=wt, ddof=0)
 
             eigvals, eigvecs = np.linalg.eigh(cov)
             eigvals = np.clip(eigvals, 0, None)
