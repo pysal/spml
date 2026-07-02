@@ -486,6 +486,33 @@ class TestGWPCAFit:
         model = GWPCA(n_components=2, bandwidth=SMALL_BW).fit(X, geometry=geometry)
         assert model.n_features_in_ == X.shape[1]
 
+    def test_fit_geometry_index_mismatch_raises(self, sample_decomposition_data):
+        X, geometry = sample_decomposition_data
+        shuffled_geometry = geometry.sample(frac=1.0, random_state=0)
+
+        model = GWPCA(n_components=2, bandwidth=SMALL_BW)
+
+        with pytest.raises(ValueError, match="matching indexes"):
+            model.fit(X, geometry=shuffled_geometry)
+
+    def test_repeated_fit_resets_state(self, sample_decomposition_data):
+        X, geometry = sample_decomposition_data
+        model = GWPCA(n_components=3, bandwidth=SMALL_BW, fit_global_model=True).fit(
+            X, geometry=geometry, cv=True
+        )
+
+        assert model.cv_score_ is not None
+        assert hasattr(model, "global_model")
+
+        X_subset = X[["Crm_prs", "Litercy", "Wealth"]]
+        model.set_params(fit_global_model=False)
+        model.fit(X_subset, geometry=geometry, cv=False)
+
+        assert model.cv_score_ is None
+        assert not hasattr(model, "global_model")
+        assert model.n_features_in_ == X_subset.shape[1]
+        assert model.components_.shape == (len(X_subset), 9)
+
 
 class TestGWPCAInvariants:
     def test_explained_variance_ratio_sums_to_one(self, sample_decomposition_data):
@@ -647,6 +674,48 @@ class TestGWPCATransform:
         with pytest.raises(ValueError):
             model.transform(X, geometry=None)
 
+    def test_transform_reorders_columns_by_name(self, sample_decomposition_data):
+        X, geometry = sample_decomposition_data
+        model = GWPCA(n_components=N_COMP, bandwidth=SMALL_BW).fit(X, geometry=geometry)
+
+        expected = model.transform(X, geometry=geometry)
+        reordered = model.transform(X[X.columns[::-1]], geometry=geometry)
+
+        pd.testing.assert_frame_equal(reordered, expected)
+
+    @pytest.mark.parametrize(
+        ("transform_X", "message"),
+        [
+            (
+                lambda X: X.drop(columns=["Crm_prs"]),
+                "missing columns",
+            ),
+            (
+                lambda X: X.assign(extra=1.0),
+                "unexpected columns",
+            ),
+        ],
+    )
+    def test_transform_column_mismatch_raises(
+        self,
+        sample_decomposition_data,
+        transform_X,
+        message,
+    ):
+        X, geometry = sample_decomposition_data
+        model = GWPCA(n_components=N_COMP, bandwidth=SMALL_BW).fit(X, geometry=geometry)
+
+        with pytest.raises(ValueError, match=message):
+            model.transform(transform_X(X), geometry=geometry)
+
+    def test_transform_geometry_index_mismatch_raises(self, sample_decomposition_data):
+        X, geometry = sample_decomposition_data
+        model = GWPCA(n_components=N_COMP, bandwidth=SMALL_BW).fit(X, geometry=geometry)
+        shuffled_geometry = geometry.sample(frac=1.0, random_state=0)
+
+        with pytest.raises(ValueError, match="matching indexes"):
+            model.transform(X, geometry=shuffled_geometry)
+
 
 class TestGWPCACVScore:
     def test_cv_score_is_positive(self, sample_decomposition_data):
@@ -776,6 +845,96 @@ class TestBandwidthSearchUnsupervised:
 
         assert isinstance(search.scores_, pd.Series)
         assert len(search.scores_) >= 3
+
+
+class TestGWPCAStationarity:
+    def test_stationarity_test_requires_fit(self, sample_decomposition_data):
+        X, geometry = sample_decomposition_data
+        model = GWPCA(n_components=2, bandwidth=SMALL_BW)
+
+        with pytest.raises(ValueError, match="Call fit"):
+            model.stationarity_test(X, geometry=geometry, n_permutations=2)
+
+    def test_stationarity_test_is_reproducible(self, sample_decomposition_data):
+        X, geometry = sample_decomposition_data
+        model = GWPCA(n_components=2, bandwidth=SMALL_BW, n_jobs=1).fit(
+            X, geometry=geometry
+        )
+
+        first = model.stationarity_test(
+            X, geometry=geometry, n_permutations=4, random_state=0
+        )
+        second = model.stationarity_test(
+            X, geometry=geometry, n_permutations=4, random_state=0
+        )
+
+        assert first["true_sd"] == second["true_sd"]
+        np.testing.assert_allclose(first["permuted_sds"], second["permuted_sds"])
+        assert first["p_value"] == second["p_value"]
+
+    def test_stationarity_test_preserves_estimator_configuration(
+        self,
+        sample_decomposition_data,
+        monkeypatch,
+    ):
+        X, geometry = sample_decomposition_data
+        model = GWPCA(
+            n_components=2,
+            bandwidth=SMALL_BW,
+            n_jobs=1,
+            sign_convention="none",
+            batch_size=7,
+            temp_folder="temp-cache",
+            coplanar="jitter",
+        ).fit(X, geometry=geometry)
+
+        captured = []
+
+        def fake_fit(self, X, y=None, geometry=None, cv=False):  # noqa: ARG001
+            captured.append(
+                {
+                    "sign_convention": self.sign_convention,
+                    "batch_size": self.batch_size,
+                    "temp_folder": self.temp_folder,
+                    "coplanar": self.coplanar,
+                    "n_jobs": self.n_jobs,
+                    "kernel": self.kernel,
+                    "include_focal": self.include_focal,
+                    "fit_global_model": self.fit_global_model,
+                    "keep_models": self.keep_models,
+                }
+            )
+            self._eigenvalues = np.ones((len(X), 2))
+            return self
+
+        monkeypatch.setattr(GWPCA, "fit", fake_fit)
+
+        model.stationarity_test(X, geometry=geometry, n_permutations=2, random_state=0)
+
+        assert captured == [
+            {
+                "sign_convention": "none",
+                "batch_size": 7,
+                "temp_folder": "temp-cache",
+                "coplanar": "jitter",
+                "n_jobs": 1,
+                "kernel": "bisquare",
+                "include_focal": True,
+                "fit_global_model": False,
+                "keep_models": False,
+            },
+            {
+                "sign_convention": "none",
+                "batch_size": 7,
+                "temp_folder": "temp-cache",
+                "coplanar": "jitter",
+                "n_jobs": 1,
+                "kernel": "bisquare",
+                "include_focal": True,
+                "fit_global_model": False,
+                "keep_models": False,
+            },
+        ]
 
 
 class TestGWPCAEdgeCases:

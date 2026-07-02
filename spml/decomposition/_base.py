@@ -173,6 +173,8 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         focal location, a tuple of the form
         ``(name, components, eigenvalues, scores, local_mean)``.
         """
+        if geometry is not None:
+            self._validate_geometry_alignment(X, geometry)
         self._start = time()
         self._validate_fit_inputs(X, None, geometry)
         if self.n_components is not None and self.n_components > X.shape[1]:
@@ -222,6 +224,8 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
 
         if self.fit_global_model:
             self._fit_global_model(X, None)
+        elif hasattr(self, "global_model"):
+            delattr(self, "global_model")
 
         return self
 
@@ -368,6 +372,51 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
 
         return np.average(np.vstack(projections), axis=0, weights=valid_weights)
 
+    @staticmethod
+    def _validate_geometry_alignment(
+        X: pd.DataFrame,
+        geometry: gpd.GeoSeries,
+    ) -> None:
+        """Require geometry to align with the feature matrix by index and order."""
+        if hasattr(X, "index") and not X.index.equals(geometry.index):
+            raise ValueError(
+                "X and geometry must have matching indexes in the same order."
+            )
+
+    def _prepare_transform_data(
+        self,
+        X: pd.DataFrame,
+        geometry: gpd.GeoSeries,
+    ) -> np.ndarray:
+        """Validate transform inputs and align columns to the fitted feature order."""
+        self._validate_geometry_alignment(X, geometry)
+
+        if isinstance(X, pd.DataFrame):
+            expected = pd.Index(self.feature_names_in_)
+            missing = expected.difference(X.columns)
+            extra = X.columns.difference(expected)
+            if len(missing) or len(extra):
+                problems = []
+                if len(missing):
+                    problems.append(f"missing columns: {missing.tolist()}")
+                if len(extra):
+                    problems.append(f"unexpected columns: {extra.tolist()}")
+                detail = "; ".join(problems)
+                raise ValueError(
+                    "Transform input columns must match the fitted feature set; "
+                    f"{detail}."
+                )
+            return X.loc[:, expected].to_numpy()
+
+        X_values = np.asarray(X)
+        if X_values.shape[1] != len(self.feature_names_in_):
+            raise ValueError(
+                "Transform input must have the same number of features used "
+                f"during fit. Expected {len(self.feature_names_in_)}, got "
+                f"{X_values.shape[1]}."
+            )
+        return X_values
+
     def transform(
         self,
         X: pd.DataFrame,
@@ -399,7 +448,7 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         """
         if geometry is None:
             raise ValueError("geometry is required to transform data.")
-        X_values = X.values if hasattr(X, "values") else np.asarray(X)
+        X_values = self._prepare_transform_data(X, geometry)
         columns = [f"PC{i}" for i in range(self._components.shape[2])]
 
         transformed = []

@@ -9,6 +9,7 @@ import libpysal.graph as graph
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
+from sklearn import clone
 
 from ._base import BaseDecomposition
 
@@ -62,6 +63,8 @@ class GWPCA(BaseDecomposition):
         default ``None``.
     batch_size : int | None, optional
         Number of models to process in each batch, by default ``None``.
+    coplanar : {"raise", "jitter", "clique"}, optional
+        Method for handling coplanar points in adaptive kernels.
     verbose : bool, optional
         Whether to print progress information, by default ``False``.
     sign_convention : {"first_positive", "max_abs", "none"}, optional
@@ -115,6 +118,7 @@ class GWPCA(BaseDecomposition):
         keep_models: bool | str | Path = False,
         temp_folder: str | None = None,
         batch_size: int | None = None,
+        coplanar: Literal["raise", "jitter", "clique"] = "raise",
         verbose: bool = False,
         sign_convention: Literal[
             "first_positive", "max_abs", "none"
@@ -133,6 +137,7 @@ class GWPCA(BaseDecomposition):
             keep_models=keep_models,
             temp_folder=temp_folder,
             batch_size=batch_size,
+            coplanar=coplanar,
             verbose=verbose,
             **kwargs,
         )
@@ -336,6 +341,9 @@ class GWPCA(BaseDecomposition):
             Dictionary with keys ``"true_sd"``, ``"permuted_sds"``, and
             ``"p_value"``.
         """
+        if not hasattr(self, "_eigenvalues"):
+            raise ValueError("Call fit() before stationarity_test().")
+
         rng = np.random.default_rng(random_state)
 
         true_sd = float(np.nanstd(self._eigenvalues[:, component]))
@@ -345,15 +353,13 @@ class GWPCA(BaseDecomposition):
             perm_geom = geometry.iloc[rng.permutation(len(geometry))].set_axis(
                 geometry.index
             )
-            perm_model = GWPCA(
-                n_components=self.n_components,
-                bandwidth=self.bandwidth,
-                fixed=self.fixed,
-                kernel=self.kernel,
-                include_focal=self.include_focal,
-                n_jobs=self.n_jobs,
+            perm_model = clone(self)
+            perm_model.set_params(
                 fit_global_model=False,
-            ).fit(X, geometry=perm_geom)
+                keep_models=False,
+                verbose=False,
+            )
+            perm_model.fit(X, geometry=perm_geom)
             permuted_sds.append(float(np.nanstd(perm_model._eigenvalues[:, component])))
 
         permuted_sds = np.array(permuted_sds)
