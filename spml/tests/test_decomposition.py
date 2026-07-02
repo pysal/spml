@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -9,7 +11,6 @@ import pytest
 from libpysal.graph import Graph
 from sklearn import clone
 from sklearn.decomposition import PCA
-from typing import cast
 
 from spml.decomposition import GWPCA
 from spml.search import BandwidthSearch
