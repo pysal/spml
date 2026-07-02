@@ -181,13 +181,19 @@ class _BaseModel(BaseEstimator):
     def _fit_models_batch(
         self,
         X: pd.DataFrame,
-        y: pd.Series,
+        y: pd.Series | None,
         weights: graph.Graph,
     ) -> list:
-        """Fit models in batches or all at once"""
+        """Fit local models, optionally in batches.
+
+        Supervised estimators pass ``y`` through to :meth:`_batch_fit` so each
+        neighborhood can attach the target and check for local invariance.
+        Decomposition estimators pass ``y=None`` and fit from ``X`` plus
+        spatial weights only.
+        """
         if self.batch_size:
             training_output = []
-            num_groups = len(y)
+            num_groups = len(X)
             indices = X.index
             for i in range(0, num_groups, self.batch_size):
                 if self.verbose:
@@ -217,29 +223,37 @@ class _BaseModel(BaseEstimator):
     def _batch_fit(
         self,
         X: pd.DataFrame,
-        y: pd.Series,
+        y: pd.Series | None,
         index: pd.MultiIndex,
         _weight: np.ndarray,
         X_focals: np.ndarray,
     ) -> list:
-        """Fit a batch of local models"""
+        """Fit one batch of local models.
+
+        When ``y`` is provided, each neighborhood frame includes a ``_y``
+        column and local invariance is checked before fitting. When ``y`` is
+        ``None``, the batch is treated as unsupervised and only ``X`` with
+        ``_weight`` is passed to :meth:`_fit_local`.
+        """
         data = X.copy()
-        data["_y"] = y
+        if y is not None:
+            data["_y"] = y
         data = data.loc[index.get_level_values(1)]
         data["_weight"] = _weight
         grouper = data.groupby(index.get_level_values(0), sort=False)
 
-        invariant = grouper["_y"].nunique() == 1
-        if invariant.any():
-            if self.strict:
-                raise ValueError(
-                    f"y at locations {invariant.index[invariant]} is invariant."
-                )
-            elif self.strict is None:
-                warnings.warn(
-                    f"y at locations {invariant.index[invariant]} is invariant.",
-                    stacklevel=3,
-                )
+        if y is not None:
+            invariant = grouper["_y"].nunique() == 1
+            if invariant.any():
+                if self.strict:
+                    raise ValueError(
+                        f"y at locations {invariant.index[invariant]} is invariant."
+                    )
+                elif self.strict is None:
+                    warnings.warn(
+                        f"y at locations {invariant.index[invariant]} is invariant.",
+                        stacklevel=3,
+                    )
 
         return Parallel(n_jobs=self.n_jobs, temp_folder=self.temp_folder)(
             delayed(self._fit_local)(
@@ -252,8 +266,16 @@ class _BaseModel(BaseEstimator):
             for (name, group), focal_x in zip(grouper, X_focals, strict=False)
         )
 
-    def _fit_global_model(self, X: pd.DataFrame, y: pd.Series):
-        """Fit global baseline model"""
+    def _fit_global_model(self, X: pd.DataFrame, y: pd.Series | None):
+        """Fit the global baseline model for supervised estimators.
+
+        The base implementation expects both ``X`` and ``y``. Unsupervised
+        decomposition subclasses override this method with an ``X``-only
+        implementation; returning early when ``y`` is ``None`` keeps that
+        shared contract safe.
+        """
+        if y is None:
+            return
         if self._model_type == "random_forest":
             self._model_kwargs["oob_score"] = True
         # fit global model as a baseline
@@ -530,29 +552,34 @@ class _BaseModel(BaseEstimator):
     def _validate_fit_inputs(
         self,
         X: pd.DataFrame,
-        y: pd.Series,
+        y: pd.Series | None,
         geometry: gpd.GeoSeries | None,
     ) -> None:
-        """
-        Validate input data and configuration parameters before model fitting.
+        """Validate core inputs before fitting.
 
-        This method performs structural and spatial consistency checks to ensure that:
-        - Feature matrix `X` and target vector `y` have matching lengths.
-        - At least one spatial structure (`geometry` or `graph`) is provided.
-        - The provided geometry, if any, matches the number of observations in `X`.
-        - Bandwidth is positive when specified.
-        - Adaptive bandwidth (`fixed=False`) is an integer.
+        This checks that supervised estimators receive a target vector aligned
+        to ``X``, that either ``geometry`` or ``graph`` is available, that any
+        provided geometry matches the number of observations, and that the
+        bandwidth and kernel settings are valid. Unsupervised decomposition
+        estimators skip target validation through :attr:`_requires_y`.
 
         Raises
         ------
         ValueError
-            If any of the validation conditions fail.
+            If any validation check fails.
         """
-        # Length checks
-        if len(X) != len(y):
-            raise ValueError(
-                f"X and y must have the same length. Got {len(X)} and {len(y)}."
-            )
+        # For supervised estimators y is mandatory - raise if the caller forgot it.
+        # Decomposition estimators do not use y; _requires_y reflects this.
+        if self._requires_y:
+            if y is None:
+                raise ValueError(
+                    "y must be provided for supervised estimators "
+                    f"({type(self).__name__}). Got None."
+                )
+            if len(X) != len(y):
+                raise ValueError(
+                    f"X and y must have the same length. Got {len(X)} and {len(y)}."
+                )
 
         # Geometry presence
         if self.graph is None and geometry is None:
@@ -594,6 +621,17 @@ class _BaseModel(BaseEstimator):
                 "kernel must be either a valid string or a callable function."
             )
 
+    @property
+    def _requires_y(self) -> bool:
+        """Whether the estimator requires a target vector during fitting.
+
+        Supervised estimators return ``True``. Unsupervised decompositions
+        return ``False`` so shared utilities such as
+        :class:`spml.search.BandwidthSearch` can omit supervised-only
+        arguments and allow ``y=None``.
+        """
+        return True
+
     # Abstract methods that subclasses must implement
     def _fit_local(
         self,
@@ -605,7 +643,12 @@ class _BaseModel(BaseEstimator):
     ) -> list[Hashable]:
         raise NotImplementedError("Subclasses must implement _fit_local")
 
-    def fit(self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None):
+    def fit(
+        self,
+        X: pd.DataFrame,
+        y: pd.Series,
+        geometry: gpd.GeoSeries | None = None,
+    ):
         raise NotImplementedError("Subclasses must implement fit")
 
     def _get_score_data(
@@ -870,7 +913,10 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         self._empty_feature_imp = None
 
     def fit(
-        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
+        self,
+        X: pd.DataFrame,
+        y: pd.Series,
+        geometry: gpd.GeoSeries | None = None,
     ) -> "BaseClassifier":
         """Fit geographically weighted local classification models.
 
@@ -954,6 +1000,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
                 left_out_proba,
                 models,
             ) = zip(*training_output, strict=False)
+            self._names = pd.Index(self._names)
             self._local_models = pd.Series(models, index=self._names)
         else:
             (
@@ -965,6 +1012,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
                 hat_values,
                 left_out_proba,
             ) = zip(*training_output, strict=False)
+            self._names = pd.Index(self._names)
 
         self._n_labels = pd.Series(self._n_labels, index=self._names)
         self.local_class_support_ = self._n_labels.copy()
@@ -1604,7 +1652,10 @@ class BaseRegressor(_BaseModel, RegressorMixin):
         self._empty_score_data = (np.array([]), np.array([]))
 
     def fit(
-        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
+        self,
+        X: pd.DataFrame,
+        y: pd.Series,
+        geometry: gpd.GeoSeries | None = None,
     ) -> "BaseRegressor":
         """Fit geographically weighted local regression models.
 
@@ -1659,6 +1710,7 @@ class BaseRegressor(_BaseModel, RegressorMixin):
                 self._feature_importances,
                 models,
             ) = zip(*training_output, strict=False)
+            self._names = pd.Index(self._names)
             self._local_models = pd.Series(models, index=self._names)
         else:
             (
@@ -1670,6 +1722,7 @@ class BaseRegressor(_BaseModel, RegressorMixin):
                 self._score_data,
                 self._feature_importances,
             ) = zip(*training_output, strict=False)
+            self._names = pd.Index(self._names)
 
         self.pred_ = pd.Series(np.nan, index=y.index)
         self.pred_.loc[np.array(self._names)] = focal_pred

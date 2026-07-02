@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Literal
+from typing import Literal, cast
 
 import geopandas as gpd
 import numpy as np
@@ -21,7 +21,7 @@ class BandwidthSearch:
       :class:`~spml.linear_model.GWLogisticRegression`): information criteria
       ``"aicc"``, ``"aic"``, ``"bic"`` are valid and recommended.  They are included
       in ``metrics_`` automatically.
-    * **Non-linear models** (random forest, gradient boosting, …): information
+    * **Non-linear models** (random forest, gradient boosting, ...): information
       criteria are *not* valid (no closed-form log-likelihood or hat matrix).
       Use ``"rmse"`` / ``"mae"`` for regression or ``"log_loss"`` combined with
       ``"prediction_rate"`` for classification instead.
@@ -184,30 +184,35 @@ class BandwidthSearch:
         self.tolerance = tolerance
         self.metrics = metrics
         self.verbose = verbose
-        # Probe model type once at construction to know whether IC is valid.
-        self._supports_ic = model()._supports_ic
+        # Probe model type once at construction to know whether IC is valid
+        # and whether strict is a meaningful parameter (not for decompositions).
+        _probe = model()
+        self._supports_ic = _probe._supports_ic
+        self._model_requires_y = _probe._requires_y
 
     def fit(
-        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,
+        geometry: gpd.GeoSeries | None = None,
     ) -> "BandwidthSearch":
-        """
-        Fit the searcher by evaluating candidate bandwidths on the provided data.
+        """Evaluate candidate bandwidths on the provided data.
 
         Parameters
         ----------
         X : pd.DataFrame
-            Feature matrix used to evaluate candidate bandwidths (rows are samples).
-        y : pd.Series
-            Target values corresponding to X.
-        geometry : gpd.GeoSeries
-            Geographic location of the observations in the sample. Used to determine the
-            spatial interaction weight based on specification by ``bandwidth``,
-            ``fixed``, ``kernel``, and ``include_focal`` keywords.
+            Feature matrix used to evaluate candidate bandwidths.
+        y : pd.Series | None
+            Target values aligned to ``X`` for supervised estimators.
+            Not used for decomposition estimators.
+        geometry : gpd.GeoSeries | None
+            Point geometries aligned to ``X``. Required unless a precomputed
+            graph is supplied through model kwargs.
 
         Returns
         -------
-        self
-            The fitted instance.
+        BandwidthSearch
+            Fitted search object.
 
         Notes
         -----
@@ -242,8 +247,9 @@ class BandwidthSearch:
         elif self.search_method == "golden_section":
             self._golden_section(X=X, y=y, tolerance=self.tolerance)
 
-        self.optimal_bandwidth_ = (
-            self.scores_.idxmin() if self.minimize else self.scores_.idxmax()
+        self.optimal_bandwidth_: int | float = cast(
+            int | float,
+            self.scores_.idxmin() if self.minimize else self.scores_.idxmax(),
         )
 
         return self
@@ -253,18 +259,32 @@ class BandwidthSearch:
         """IC metric names included automatically when the model supports them."""
         return ["aicc", "aic", "bic"] if self._supports_ic else []
 
-    def _score(
-        self, X: pd.DataFrame, y: pd.Series, bw: int | float
-    ) -> tuple[float, list[float]]:
-        """Fit the model and report criterion score.
+    @property
+    def _reported_metrics(self) -> list[str]:
+        """All metric names recorded for each candidate bandwidth.
 
-        In case of invariant y in a local model, returns np.inf
+        The sequence starts with information criteria when supported, then any
+        user-provided metrics. If ``criterion == "cv_score"``, that metric is
+        always included so it is available in ``metrics_``.
         """
         met = self._ic_metrics.copy()
         if self.metrics is not None:
-            met += self.metrics
+            met.extend(self.metrics)
+        if self.criterion == "cv_score" and "cv_score" not in met:
+            met.append("cv_score")
+        return met
 
-        if len(np.unique(y)) == 1:
+    def _score(
+        self, X: pd.DataFrame, y: pd.Series | None, bw: int | float
+    ) -> tuple[float, list[float]]:
+        """Fit one candidate bandwidth and return criterion and metrics.
+
+        For supervised estimators with an invariant target vector, the
+        candidate is treated as invalid and returns ``np.inf``.
+        """
+        met = self._reported_metrics
+
+        if y is not None and len(np.unique(y)) == 1:
             return (np.inf, [np.nan] * len(met))
 
         gwm = self.model(
@@ -274,10 +294,18 @@ class BandwidthSearch:
             coplanar=self.coplanar,
             n_jobs=self.n_jobs,
             fit_global_model=False,
-            strict=False,
+            **({} if not self._model_requires_y else {"strict": False}),
             verbose=self.verbose == 2,
             **self._model_kwargs,
-        ).fit(X=X, y=y, geometry=self.geometry)
+        ).fit(
+            X=X,
+            y=y,
+            geometry=self.geometry,
+            # GWPCA.fit() computes the LOO CV reconstruction score only on
+            # demand (it is expensive).  Pass cv=True only when cv_score is
+            # actually needed as a search criterion or reported metric.
+            **({"cv": True} if "cv_score" in met else {}),
+        )
 
         if hasattr(gwm, "prediction_rate_") and gwm.prediction_rate_ == 0:
             # prediction rate should report 0, everything else is undefined
@@ -306,6 +334,8 @@ class BandwidthSearch:
                         f"but '{type(gwm).__name__}' is a regressor."
                     )
                 mask = gwm.proba_.isna().any(axis=1)
+                if y is None:
+                    raise ValueError("criterion='log_loss' requires y but y is None.")
                 y_masked = y[~mask]
                 if len(np.unique(y_masked)) < 2:
                     all_metrics.append(np.inf)
@@ -335,15 +365,16 @@ class BandwidthSearch:
         assert self.criterion is not None
         return all_metrics[met.index(self.criterion)], all_metrics
 
-    def _interval(self, X: pd.DataFrame, y: pd.Series) -> None:
-        """Fit models using the equal interval search.
+    def _interval(self, X: pd.DataFrame, y: pd.Series | None) -> None:
+        """Evaluate candidates on an equal-interval bandwidth grid.
 
         Parameters
         ----------
         X : pd.DataFrame
-            Independent variables
-        y : pd.Series
-            Dependent variable
+            Feature matrix.
+        y : pd.Series | None
+            Target values for supervised estimators. Not used for
+            decomposition estimators.
         """
         if not (
             isinstance(self.min_bandwidth, float | int)
@@ -368,12 +399,24 @@ class BandwidthSearch:
         self.scores_ = pd.Series(scores, name=self.criterion)
         self.metrics_ = pd.DataFrame(
             metrics,
-            index=pd.Index(
-                self._ic_metrics + self.metrics if self.metrics else self._ic_metrics
-            ),
+            index=pd.Index(self._reported_metrics),
         ).T
 
-    def _golden_section(self, X: pd.DataFrame, y: pd.Series, tolerance: float) -> None:
+    def _golden_section(
+        self, X: pd.DataFrame, y: pd.Series | None, tolerance: float
+    ) -> None:
+        """Evaluate candidates using golden-section search.
+
+        Parameters
+        ----------
+        X : pd.DataFrame
+            Feature matrix.
+        y : pd.Series | None
+            Target values for supervised estimators. Not used for
+            decomposition estimators.
+        tolerance : float
+            Stopping tolerance for the search.
+        """
         delta = 0.38197
         if self.fixed:
             pairwise_distance = pdist(self.geometry.get_coordinates())
@@ -384,6 +427,7 @@ class BandwidthSearch:
             c = max_dist * 2.0
         else:
             a = 40 + 2 * X.shape[1]
+            assert self.geometry is not None
             c = len(self.geometry)
 
         if self.min_bandwidth:
@@ -457,7 +501,5 @@ class BandwidthSearch:
         self.scores_ = pd.Series(scores)
         self.metrics_ = pd.DataFrame(
             metrics,
-            index=pd.Index(
-                self._ic_metrics + self.metrics if self.metrics else self._ic_metrics
-            ),
+            index=pd.Index(self._reported_metrics),
         ).T

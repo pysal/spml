@@ -231,7 +231,10 @@ class GWRandomForestClassifier(BaseClassifier):
         return true, pred
 
     def fit(
-        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
+        self,
+        X: pd.DataFrame,
+        y: pd.Series,
+        geometry: gpd.GeoSeries | None = None,
     ) -> "GWRandomForestClassifier":
         """Fit geographically weighted random forests.
 
@@ -285,7 +288,7 @@ class GWRandomForestClassifier(BaseClassifier):
 
         # feature importances
         self.feature_importances_ = pd.DataFrame(
-            self._feature_importances, index=self._names, columns=X.columns
+            self._feature_importances, index=pd.Index(self._names), columns=X.columns
         )
 
         if self.verbose:
@@ -486,7 +489,10 @@ class GWGradientBoostingClassifier(BaseClassifier):
         self._model_type = "gradient_boosting"
 
     def fit(
-        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
+        self,
+        X: pd.DataFrame,
+        y: pd.Series,
+        geometry: gpd.GeoSeries | None = None,
     ) -> "GWGradientBoostingClassifier":
         """Fit geographically weighted gradient boosting classifiers.
 
@@ -519,7 +525,7 @@ class GWGradientBoostingClassifier(BaseClassifier):
 
         # feature importances
         self.feature_importances_ = pd.DataFrame(
-            self._feature_importances, index=self._names, columns=X.columns
+            self._feature_importances, index=pd.Index(self._names), columns=X.columns
         )
 
         if self.verbose:
@@ -710,7 +716,10 @@ class GWRandomForestRegressor(BaseRegressor):
         return true, pred
 
     def fit(
-        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
+        self,
+        X: pd.DataFrame,
+        y: pd.Series,
+        geometry: gpd.GeoSeries | None = None,
     ) -> "GWRandomForestRegressor":
         """Fit geographically weighted random forests.
 
@@ -764,7 +773,7 @@ class GWRandomForestRegressor(BaseRegressor):
 
         # feature importances
         self.feature_importances_ = pd.DataFrame(
-            self._feature_importances, index=self._names, columns=X.columns
+            self._feature_importances, index=pd.Index(self._names), columns=X.columns
         )
 
         if self.verbose:
@@ -953,7 +962,10 @@ class GWGradientBoostingRegressor(BaseRegressor):
         self._empty_score_data = np.nan
 
     def fit(
-        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
+        self,
+        X: pd.DataFrame,
+        y: pd.Series,
+        geometry: gpd.GeoSeries | None = None,
     ) -> "GWGradientBoostingRegressor":
         """Fit geographically weighted gradient boosting regressors.
 
@@ -985,7 +997,7 @@ class GWGradientBoostingRegressor(BaseRegressor):
 
         # feature importances
         self.feature_importances_ = pd.DataFrame(
-            self._feature_importances, index=self._names, columns=X.columns
+            self._feature_importances, index=pd.Index(self._names), columns=X.columns
         )
 
         if self.verbose:
