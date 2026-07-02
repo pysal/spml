@@ -9,6 +9,7 @@ import pytest
 from libpysal.graph import Graph
 from sklearn import clone
 from sklearn.decomposition import PCA
+from typing import cast
 
 from spml.decomposition import GWPCA
 from spml.search import BandwidthSearch
@@ -195,6 +196,16 @@ ADAPTIVE_REFERENCE_FIXTURE = {
 }
 
 
+def _reference_local_pv_to_array(local_pv: list[list[str | float]]) -> np.ndarray:
+    """Convert fixture local variance proportions to a numeric array."""
+    return np.asarray(
+        [
+            [np.nan if value == "NaN" else float(value) for value in row]
+            for row in local_pv
+        ]
+    )
+
+
 def _complete_graph(index: pd.Index, weights: np.ndarray | None = None) -> Graph:
     """Build a complete precomputed graph for deterministic local PCA tests."""
     if weights is None:
@@ -248,11 +259,8 @@ class TestGWPCANumericalCorrectness:
         ).fit(X, geometry=geometry)
 
         expected_loadings = np.asarray(baseline["loadings"], dtype=float)
-        expected_pv = np.asarray(
-            [
-                [np.nan if value == "NaN" else float(value) for value in row]
-                for row in baseline["local_pv"]
-            ]
+        expected_pv = _reference_local_pv_to_array(
+            cast(list[list[str | float]], baseline["local_pv"])
         )
         valid = ~np.isnan(expected_pv).any(axis=1)
 
@@ -283,11 +291,8 @@ class TestGWPCANumericalCorrectness:
         ).fit(X, geometry=geometry)
 
         expected_loadings = np.asarray(baseline["loadings"], dtype=float)
-        expected_pv = np.asarray(
-            [
-                [np.nan if value == "NaN" else float(value) for value in row]
-                for row in baseline["local_pv"]
-            ]
+        expected_pv = _reference_local_pv_to_array(
+            cast(list[list[str | float]], baseline["local_pv"])
         )
         valid = ~np.isnan(expected_pv).any(axis=1)
 
