@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -19,7 +16,6 @@ from spml.search import BandwidthSearch
 SMALL_BW = 30  # adaptive k for Guerry (85 observations)
 N_COMP = 3
 N_OBS = 85  # geoda.guerry has 85 rows
-REFERENCE_FIXTURE = Path(__file__).parent / "data" / "gwpca_reference_fixture.json"
 
 REFERENCE_DATA_VALUES = np.array(
     [
@@ -55,6 +51,84 @@ REFERENCE_DATA_VALUES = np.array(
         0.046450412719997725,
     ]
 )
+
+REFERENCE_FIXTURE = {
+    "loadings": [
+        [[0, 0], [0, 0], [0, 0]],
+        [[0, 0], [0, 0], [0, 0]],
+        [[0.68895623, 0.08114459], [-0.70852055, -0.13404747], [-0.15276758, 0.98764712]],
+        [[0.79204176, 0.05003965], [-0.60487671, 0.19889535], [-0.08242585, -0.97874239]],
+        [[-0.88485219, -0.02065589], [0.45039504, -0.29329253], [0.11908364, 0.95579957]],
+        [[0.96219121, -0.10256587], [-0.210973, 0.30528858], [-0.17227437, -0.94672019]],
+        [[-0.93663008, 0.31174872], [-0.08511507, -0.64500411], [0.33982279, 0.69769795]],
+        [[-0.51692673, 0.83387714], [-0.62819202, -0.21598468], [0.58151659, 0.50793655]],
+        [[0, 0], [0, 0], [0, 0]],
+        [[0, 0], [0, 0], [0, 0]],
+    ],
+    "variance": [
+        [0, 0, 0],
+        [0, 0, 0],
+        [3.93812938, 1.66358022, 0.29374308],
+        [3.61922622, 1.78839909, 0.27889875],
+        [2.80221162, 1.51091937, 0.25117926],
+        [2.02398727, 1.05944893, 0.15627066],
+        [1.36991268, 0.76672912, 0.23347427],
+        [1.3623808, 0.46131166, 0.16313187],
+        [0, 0, 0],
+        [0, 0, 0],
+    ],
+    "local_pv": [
+        ["NaN", "NaN"],
+        ["NaN", "NaN"],
+        [66.79944007, 28.21802351],
+        [63.64566799, 31.44977619],
+        [61.39397786, 33.10290676],
+        [62.47439538, 32.7019998],
+        [57.7993921, 32.34985527],
+        [68.57077309, 23.21854269],
+        ["NaN", "NaN"],
+        ["NaN", "NaN"],
+    ],
+}
+
+ADAPTIVE_REFERENCE_FIXTURE = {
+    "loadings": [
+        [[0.60993314, 0.23654338], [-0.73441761, -0.1897877], [-0.29767825, 0.95290496]],
+        [[0.63714007, 0.19605999], [-0.72180837, -0.18734073], [-0.27026877, 0.96252996]],
+        [[0.68547324, 0.12418271], [-0.69371998, -0.18780701], [-0.22108602, 0.97432396]],
+        [[0.77973177, 0.00660859], [-0.61316622, 0.21036173], [-0.12667105, -0.97760128]],
+        [[-0.87782206, -0.02818008], [0.46863935, -0.25690546], [0.09902316, 0.9660256]],
+        [[0.94972115, 0.04094778], [-0.30463128, 0.34983336], [-0.07231543, -0.93591661]],
+        [[-0.92571501, 0.34419976], [-0.0930792, -0.60907915], [0.36658967, 0.71452719]],
+        [[-0.55308543, 0.82489682], [-0.5077167, -0.44488073], [0.66054542, 0.34874973]],
+        [[-0.50531974, 0.85710878], [-0.54828792, -0.40846176], [0.6663575, 0.31388457]],
+        [[-0.49689716, 0.8629973], [-0.55884158, -0.39866779], [0.66391965, 0.31032184]],
+    ],
+    "variance": [
+        [2.32375602, 0.84330013, 0.28520773],
+        [2.53970835, 0.96873157, 0.3180203],
+        [2.58949453, 1.07096243, 0.32362928],
+        [2.20311422, 1.05447282, 0.22325],
+        [1.77931687, 0.91648398, 0.17898809],
+        [1.32392673, 0.74526799, 0.17198495],
+        [0.91619687, 0.66019121, 0.15731149],
+        [1.0679142, 0.64289867, 0.173594],
+        [1.06254581, 0.52088275, 0.16317364],
+        [0.96938089, 0.42251793, 0.14595662],
+    ],
+    "local_pv": [
+        [67.31107772, 24.42745284],
+        [66.37226587, 25.31665071],
+        [64.99594573, 26.88100518],
+        [63.29265622, 30.29365663],
+        [61.89382622, 31.88004401],
+        [59.07276182, 33.25337976],
+        [52.84634564, 38.0799087],
+        [56.67110498, 34.1167656],
+        [60.83502095, 29.82263213],
+        [63.03459127, 27.47448915],
+    ],
+}
 
 
 def _complete_graph(index: pd.Index, weights: np.ndarray | None = None) -> Graph:
@@ -93,25 +167,11 @@ def _reference_fixture_data() -> tuple[pd.DataFrame, gpd.GeoSeries]:
     return X, geometry
 
 
-def _read_adaptive_reference_fixture() -> dict:
-    """Read the adaptive external reference fixture."""
-    with (
-        Path(__file__).parent / "data" / "gwpca_adaptive_reference_fixture.json"
-    ).open(encoding="utf-8") as file:
-        return json.load(file)
-
-
-def _read_reference_fixture() -> dict:
-    """Read the external reference output fixture."""
-    with REFERENCE_FIXTURE.open(encoding="utf-8") as file:
-        return json.load(file)
-
-
 class TestGWPCANumericalCorrectness:
     def test_matches_reference_loadings_and_variance_ratios(self):
         """Compare directly comparable outputs against the reference fixture."""
         X, geometry = _reference_fixture_data()
-        baseline = _read_reference_fixture()
+        baseline = REFERENCE_FIXTURE
 
         model = GWPCA(
             n_components=2,
@@ -146,7 +206,7 @@ class TestGWPCANumericalCorrectness:
     def test_matches_reference_loadings_and_variance_ratios_adaptive(self):
         """Compare adaptive-bandwidth outputs against the reference fixture."""
         X, geometry = _reference_fixture_data()
-        baseline = _read_adaptive_reference_fixture()
+        baseline = ADAPTIVE_REFERENCE_FIXTURE
 
         model = GWPCA(
             n_components=2,
