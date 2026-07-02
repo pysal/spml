@@ -12,6 +12,7 @@ installation
 :caption: User Guide
 introduction
 linear
+gwpca
 ensemble
 predict
 imbalance
