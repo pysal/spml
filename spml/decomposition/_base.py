@@ -221,7 +221,7 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         }
 
         if self.fit_global_model:
-            self._fit_global_model(X)
+            self._fit_global_model(X, None)
 
         return self
 
@@ -249,7 +249,8 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
     @property
     def condition_number_(self) -> pd.Series:
         """Local condition number as largest/smallest eigenvalue."""
-        cond = self._eigenvalues[:, 0] / (self._eigenvalues[:, -1] + 1e-10)
+        eigenvalues = getattr(self, "_all_eigenvalues", self._eigenvalues)
+        cond = eigenvalues[:, 0] / (eigenvalues[:, -1] + 1e-10)
         return pd.Series(cond, index=self._names)
 
     @property
@@ -261,8 +262,12 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
     @property
     def winning_variable_(self) -> pd.Series:
         """Feature with largest absolute loading on the first component."""
-        idx = np.argmax(np.abs(self._components[:, :, 0]), axis=1)
-        return pd.Series(self.feature_names_in_[idx], index=self._names)
+        loadings = np.abs(self._components[:, :, 0])
+        valid = ~np.isnan(loadings).all(axis=1)
+        idx = np.argmax(np.where(np.isnan(loadings), -np.inf, loadings), axis=1)
+        labels = self.feature_names_in_[idx].astype(object)
+        labels[~valid] = pd.NA
+        return pd.Series(labels, index=self._names)
 
     def _prepare_transform_nearest(self, geometry: gpd.GeoSeries) -> np.ndarray:
         """Map target geometries to the nearest fitted decomposition."""
@@ -416,7 +421,7 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
         X: pd.DataFrame,
         y: pd.Series | None = None,  # noqa: ARG002
         geometry: gpd.GeoSeries | None = None,
-        **fit_params,  # noqa: ARG002
+        **fit_params,
     ) -> pd.DataFrame:
         """Fit the model and return in-sample local component scores."""
-        return self.fit(X, geometry=geometry).scores_
+        return self.fit(X, y=y, geometry=geometry, **fit_params).scores_

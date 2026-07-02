@@ -179,7 +179,9 @@ class GWPCA(BaseDecomposition):
         return self
 
     def _fit_global_model(
-        self, X: pd.DataFrame, y: pd.Series | None = None,  # noqa: ARG002
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,  # noqa: ARG002
     ):
         """Fit a global PCA baseline model."""
         from sklearn.decomposition import PCA
@@ -214,7 +216,7 @@ class GWPCA(BaseDecomposition):
             return [
                 name,
                 np.full((p, q), np.nan),
-                np.full(q, np.nan),
+                np.full(p, np.nan),
                 np.full(q, np.nan),
                 nan_vec,
             ]
@@ -232,7 +234,7 @@ class GWPCA(BaseDecomposition):
             return [
                 name,
                 np.full((p, q), np.nan),
-                np.full(q, np.nan),
+                np.full(p, np.nan),
                 np.full(q, np.nan),
                 nan_vec,
             ]
@@ -383,7 +385,7 @@ class GWPCA(BaseDecomposition):
         if not hasattr(self, "_eigenvalues"):
             raise ValueError("Call fit() before identify_collinear_locations().")
 
-        ev = np.abs(self._eigenvalues)  # (n, q)
+        ev = np.abs(getattr(self, "_all_eigenvalues", self._eigenvalues))
         with np.errstate(divide="ignore", invalid="ignore"):
             cond = np.where(
                 ev[:, -1] > 0,

@@ -216,17 +216,13 @@ class TestGWPCANumericalCorrectness:
             model._local_means,
             np.tile([1.0, 1.0 / 3.0], (len(X), 1)),
         )
-        np.testing.assert_allclose(
-            model._components, expected_components, atol=1e-6
-        )
+        np.testing.assert_allclose(model._components, expected_components, atol=1e-6)
         np.testing.assert_allclose(
             model.explained_variance_.to_numpy(),
             expected_eigenvalues,
             atol=1e-5,
         )
-        np.testing.assert_allclose(
-            model.scores_.to_numpy(), expected_scores, atol=1e-6
-        )
+        np.testing.assert_allclose(model.scores_.to_numpy(), expected_scores, atol=1e-6)
         np.testing.assert_allclose(
             model.explained_variance_ratio_.to_numpy(),
             np.tile([0.91907020, 0.08092980], (len(X), 1)),
@@ -433,6 +429,25 @@ class TestGWPCADerivedAttributes:
         assert isinstance(cond, pd.Series)
         assert (cond > 0).all()
 
+    def test_condition_number_uses_full_spectrum_when_components_truncated(self):
+        X = pd.DataFrame(
+            {
+                "x": [-2.0, -1.0, 0.0, 1.0, 2.0],
+                "x_duplicate": [-4.0, -2.0, 0.0, 2.0, 4.0],
+                "noise": [1.0, 0.0, -1.0, 0.0, 1.0],
+            },
+            index=pd.Index(["a", "b", "c", "d", "e"], name="id"),
+        )
+        model = GWPCA(
+            n_components=1,
+            graph=_complete_graph(X.index),
+            fit_global_model=False,
+            n_jobs=1,
+        ).fit(X)
+
+        assert np.isfinite(model.explained_variance_.to_numpy()).all()
+        assert (model.condition_number_ > 1e8).all()
+
     def test_global_model_fitted(self, sample_decomposition_data):
         X, geometry = sample_decomposition_data
         model = GWPCA(
@@ -447,6 +462,29 @@ class TestGWPCADerivedAttributes:
             n_components=N_COMP, bandwidth=SMALL_BW, fit_global_model=False
         ).fit(X, geometry=geometry)
         assert not hasattr(model, "global_model")
+
+    def test_winning_variable_missing_for_failed_local_fit(self):
+        X = pd.DataFrame(
+            {"a": [0.0, 1.0], "b": [0.0, 1.0]},
+            index=pd.Index(["x", "y"], name="id"),
+        )
+        adjacency = pd.Series(
+            [0.0, 0.0],
+            index=pd.MultiIndex.from_tuples(
+                [("x", "x"), ("y", "y")],
+                names=["focal", "neighbor"],
+            ),
+            name="weight",
+        )
+        model = GWPCA(
+            n_components=1,
+            graph=Graph(adjacency, is_sorted=True),
+            fit_global_model=False,
+            n_jobs=1,
+        ).fit(X)
+
+        assert model.components_.isna().all().all()
+        assert model.winning_variable_.isna().all()
 
 
 class TestGWPCATransform:
@@ -463,6 +501,15 @@ class TestGWPCATransform:
         # fit_transform returns the same in-sample scores exposed by scores_.
         ft = model.fit_transform(X, geometry=geometry)
         pd.testing.assert_frame_equal(ft, model.scores_)
+
+    def test_fit_transform_forwards_fit_parameters(self):
+        X = pd.DataFrame({"x": [-1.0, 1.0, 0.0, 0.0], "y": [0.0, 0.0, -2.0, 2.0]})
+        geometry = gpd.GeoSeries.from_xy([0, 1, 2, 3], [0, 0, 0, 0])
+        model = GWPCA(n_components=1, bandwidth=3, n_jobs=1)
+
+        model.fit_transform(X, geometry=geometry, cv=True)
+
+        assert model.cv_score_ is not None
 
     def test_transform_requires_geometry(self, sample_decomposition_data):
         X, geometry = sample_decomposition_data
@@ -637,3 +684,35 @@ class TestGWPCAEdgeCases:
 
         assert model.components_.isna().all().all()
         assert model.scores_.isna().all().all()
+
+    def test_mixed_valid_and_invalid_neighborhoods_do_not_crash(self):
+        X = pd.DataFrame(
+            {"a": [0.0, 1.0, 2.0], "b": [0.0, 1.0, 2.0]},
+            index=pd.Index(["x", "y", "z"], name="id"),
+        )
+        adjacency = pd.Series(
+            [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+            index=pd.MultiIndex.from_tuples(
+                [
+                    ("x", "x"),
+                    ("x", "y"),
+                    ("y", "x"),
+                    ("y", "y"),
+                    ("y", "z"),
+                    ("z", "z"),
+                ],
+                names=["focal", "neighbor"],
+            ),
+            name="weight",
+        )
+
+        model = GWPCA(
+            n_components=1,
+            graph=Graph(adjacency, is_sorted=True),
+            fit_global_model=False,
+            n_jobs=1,
+        ).fit(X)
+
+        assert model.components_.shape == (3, 2)
+        assert model.explained_variance_.shape == (3, 1)
+        assert model.components_.loc["z"].isna().all()
