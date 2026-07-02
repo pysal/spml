@@ -466,7 +466,7 @@ def test_maximize_custom_metric(sample_data):
     search.fit(X, y, geometry)
 
     # Check that metrics were tracked correctly
-    assert search.optimal_bandwidth_ > 400000
+    assert search.optimal_bandwidth_ > 400000  # ty:ignore[unsupported-operator]
 
 
 def test_bandwidth_search_global_invariant_y():

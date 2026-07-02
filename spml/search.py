@@ -9,25 +9,27 @@ from sklearn import metrics
 
 
 class BandwidthSearch:
-    """Bandwidth search for geographically weighted estimators.
+    """Optimal bandwidth search for geographically weighted estimators.
 
-    ``BandwidthSearch`` evaluates a model over candidate bandwidth values,
-    stores the resulting scores, and selects the bandwidth that optimizes a
-    chosen ``criterion``.
+    Reports scores from multiple models with varying bandwidth and identifies
+    the optimal one.  When using golden section search, it minimizes (or
+    maximizes) the chosen ``criterion``.
 
-    Supported model families:
+    The search supports two broad families of models:
 
-    - Linear and logistic models: information criteria (``"aicc"``,
-      ``"aic"``, ``"bic"``) are valid and included in ``metrics_``
-      automatically.
-    - Tree-based models: information criteria are not valid; use
-      ``"rmse"``, ``"mae"``, ``"log_loss"``, and/or ``"prediction_rate"``.
-    - Decomposition models: use ``"cv_score"`` or another exposed fitted
-      attribute (``<name>_``).
+    * **Linear / logistic models** (:class:`~spml.linear_model.GWLinearRegression`,
+      :class:`~spml.linear_model.GWLogisticRegression`): information criteria
+      ``"aicc"``, ``"aic"``, ``"bic"`` are valid and recommended.  They are included
+      in ``metrics_`` automatically.
+    * **Non-linear models** (random forest, gradient boosting, ...): information
+      criteria are *not* valid (no closed-form log-likelihood or hat matrix).
+      Use ``"rmse"`` / ``"mae"`` for regression or ``"log_loss"`` combined with
+      ``"prediction_rate"`` for classification instead.
 
-    For classifiers where neighborhoods may be skipped due to
-    ``min_proportion``, prefer ``"log_loss"`` or ``"prediction_rate"`` over
-    information criteria.
+    When using classification models with a defined ``min_proportion``, keep in
+    mind that some locations may be excluded from the final model.  In such a
+    case, even the valid information criteria are not comparable across
+    bandwidths and ``"log_loss"`` should be preferred.
 
     Parameters
     ----------
@@ -63,12 +65,12 @@ class BandwidthSearch:
 
         Built-in special values:
 
-        * ``"aicc"``, ``"aic"``, ``"bic"`` - information criteria;
+        * ``"aicc"``, ``"aic"``, ``"bic"`` — information criteria;
           **only valid for linear / logistic models**.
-        * ``"log_loss"`` - cross-entropy loss; for classifiers only.
-        * ``"prediction_rate"`` - proportion of fitted locations; classifiers.
-        * ``"rmse"`` - root mean squared error of focal residuals; regressors.
-        * ``"mae"`` - mean absolute error of focal residuals; regressors.
+        * ``"log_loss"`` — cross-entropy loss; for classifiers only.
+        * ``"prediction_rate"`` — proportion of fitted locations; classifiers.
+        * ``"rmse"`` — root mean squared error of focal residuals; regressors.
+        * ``"mae"`` — mean absolute error of focal residuals; regressors.
 
         Any other string ``m`` is interpreted as an attribute name and
         retrieved from the fitted model as ``getattr(model, m + "_")``.

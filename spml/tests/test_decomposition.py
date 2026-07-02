@@ -19,6 +19,98 @@ SMALL_BW = 30  # adaptive k for Guerry (85 observations)
 N_COMP = 3
 N_OBS = 85  # geoda.guerry has 85 rows
 
+# R code used to generate the fixed reference fixture
+
+# library(GWmodel)
+# library(jsonlite)
+
+# X_data <- c(
+#   0.3745401188473625, 0.5986584841970366, 0.05808361216819946, 0.7080725777960455,
+#   0.8324426408004217, 0.18340450985343382, 0.43194501864211576, 0.13949386065204183,
+#   0.45606998421703593, 0.5142344384136116, 0.9507143064099162, 0.15601864044243652,
+#   0.8661761457749352, 0.020584494295802447, 0.21233911067827616, 0.3042422429595377,
+#   0.2912291401980419, 0.29214464853521815, 0.7851759613930136, 0.5924145688620425,
+#   0.7319939418114051, 0.15599452033620265, 0.6011150117432088, 0.9699098521619943,
+#   0.18182496720710062, 0.5247564316322378, 0.6118528947223795, 0.3663618432936917,
+#   0.19967378215835974, 0.046450412719997725
+# )
+# X <- matrix(X_data, nrow=10, ncol=3)
+# colnames(X) <- c("A", "B", "C")
+# X <- scale(X)
+
+# coords <- cbind(0:9, 0:9)
+# sdf <- SpatialPointsDataFrame(coords, as.data.frame(X))
+
+# model <- gwpca(
+#   sdf,
+#   vars = c("A", "B", "C"),
+#   bw = 5,
+#   k = 2,
+#   kernel = "bisquare",
+#   adaptive = FALSE,
+#   scaling = FALSE
+# )
+
+# loadings <- model$loadings
+# variance <- model$var
+# local_pv <- model$local.PV
+
+# output <- list(
+#   loadings = loadings,
+#   variance = variance,
+#   local_pv = local_pv
+# )
+
+# write_json(output, "gwpca_reference_fixture.json", digits = 8)
+# cat("Successfully generated gwpca_reference_fixture.json\n")
+
+
+# R code used to generate the adaptive reference fixture
+
+# library(GWmodel)
+# library(jsonlite)
+
+# X_data <- c(
+#   0.3745401188473625, 0.5986584841970366, 0.05808361216819946, 0.7080725777960455, 
+#   0.8324426408004217, 0.18340450985343382, 0.43194501864211576, 0.13949386065204183, 
+#   0.45606998421703593, 0.5142344384136116, 0.9507143064099162, 0.15601864044243652, 
+#   0.8661761457749352, 0.020584494295802447, 0.21233911067827616, 0.3042422429595377, 
+#   0.2912291401980419, 0.29214464853521815, 0.7851759613930136, 0.5924145688620425, 
+#   0.7319939418114051, 0.15599452033620265, 0.6011150117432088, 0.9699098521619943, 
+#   0.18182496720710062, 0.5247564316322378, 0.6118528947223795, 0.3663618432936917, 
+#   0.19967378215835974, 0.046450412719997725
+# )
+# X <- matrix(X_data, nrow=10, ncol=3)
+# colnames(X) <- c("A", "B", "C")
+# X <- scale(X)
+
+# coords <- cbind(0:9, 0:9)
+# sdf <- SpatialPointsDataFrame(coords, as.data.frame(X))
+
+# model <- gwpca(
+#   sdf,
+#   vars = c("A", "B", "C"),
+#   bw = 8,
+#   k = 2,
+#   kernel = "bisquare",
+#   adaptive = TRUE,
+#   scaling = FALSE
+# )
+
+# loadings <- model$loadings
+# variance <- model$var
+# local_pv <- model$local.PV
+
+# output <- list(
+#   loadings = loadings,
+#   variance = variance,
+#   local_pv = local_pv
+# )
+
+# write_json(output, "gwpca_adaptive_reference_fixture.json", digits = 8)
+# cat("Successfully generated gwpca_adaptive_reference_fixture.json\n")
+
+
 REFERENCE_DATA_VALUES = np.array(
     [
         0.3745401188473625,
@@ -195,6 +287,41 @@ ADAPTIVE_REFERENCE_FIXTURE = {
         [63.03459127, 27.47448915],
     ],
 }
+
+
+# R code used to generate the bsstop reference fixture
+
+# library(GWmodel)
+# library(jsonlite)
+
+# data(bsstop)
+
+# X <- scale(as.matrix(bsstop[, 5:14]))
+# colnames(X) <- colnames(bsstop)[5:14]
+# coords <- as.matrix(cbind(bsstop$XCOO, bsstop$YCOO))
+# sdf <- SpatialPointsDataFrame(coords, as.data.frame(X))
+
+# model <- gwpca(
+#   sdf,
+#   vars = colnames(sdf@data),
+#   bw = 1000000,
+#   k = 10,
+#   kernel = "bisquare",
+#   adaptive = FALSE,
+#   scaling = FALSE
+# )
+
+# output <- list(
+#   columns = colnames(sdf@data),
+#   coords = unname(coords),
+#   data = unname(as.matrix(sdf@data)),
+#   loadings = model$loadings,
+#   variance = model$var,
+#   local_pv = model$local.PV
+# )
+
+# write_json(output, "gwpca_bsstop_fixture.json", digits = 8)
+# cat("Successfully generated gwpca_bsstop_fixture.json\n")
 
 
 def _reference_local_pv_to_array(local_pv: list[list[str | float]]) -> np.ndarray:

@@ -2047,7 +2047,7 @@ def test_regressor_local_metric(sample_regression_data):
 
 
 def test_metadata_routing(sample_regression_data):
-    """Test metadata routing through a scikit-learn pipeline."""
+    """Test compatibility with sklearn pipes"""
     sklearn.set_config(enable_metadata_routing=True)
 
     X, y, geometry = sample_regression_data
