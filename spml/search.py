@@ -292,7 +292,7 @@ class BandwidthSearch:
             coplanar=self.coplanar,
             n_jobs=self.n_jobs,
             fit_global_model=False,
-            **({}  if not self._model_requires_y else {"strict": False}),
+            **({} if not self._model_requires_y else {"strict": False}),
             verbose=self.verbose == 2,
             **self._model_kwargs,
         ).fit(
@@ -333,9 +333,7 @@ class BandwidthSearch:
                     )
                 mask = gwm.proba_.isna().any(axis=1)
                 if y is None:
-                    raise ValueError(
-                        "criterion='log_loss' requires y but y is None."
-                    )
+                    raise ValueError("criterion='log_loss' requires y but y is None.")
                 y_masked = y[~mask]
                 if len(np.unique(y_masked)) < 2:
                     all_metrics.append(np.inf)
