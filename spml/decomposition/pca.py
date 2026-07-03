@@ -93,7 +93,8 @@ class GWPCA(BaseDecomposition):
     >>> from geodatasets import get_path
     >>> from spml.decomposition import GWPCA
 
-    >>> gdf = gpd.read_file(get_path("geoda.guerry")).set_geometry(lambda g: g.centroid)
+    >>> gdf = gpd.read_file(get_path("geoda.guerry"))
+    >>> gdf = gdf.set_geometry(gdf.centroid)
     >>> X = gdf[["Crm_prs", "Litercy", "Wealth", "Donatns", "Infants"]]
     >>> X = (X - X.mean()) / X.std()
     >>> model = GWPCA(n_components=3, bandwidth=50).fit(X, geometry=gdf.geometry)
