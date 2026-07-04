@@ -100,3 +100,15 @@ re-exported here.
 
    area_of_applicability
    gearygram
+
+Preprocessing
+-------------
+
+Spatial feature engineering transformers for scikit-learn pipelines.
+
+.. currentmodule:: spml.preprocessing
+.. autosummary::
+   :toctree: generated/
+
+   KNeighborsFeatures
+   RadiusNeighborsFeatures
