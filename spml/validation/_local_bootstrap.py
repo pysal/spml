@@ -199,7 +199,7 @@ class LocalBootstrap(BaseEstimator):
             When None (default), observations are drawn from ``X`` itself
             (standard bootstrap).
 
-            When provided, the weight matrix is (|X|, |donor|): row i weights
+            When provided, the weight matrix is ``(len(X), len(donor))``: row i weights
             every donor observation by its kernel distance from ``X[i]``, so each
             new location draws locally from the donor pool.
 

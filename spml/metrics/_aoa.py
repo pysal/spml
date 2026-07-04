@@ -90,13 +90,6 @@ def area_of_applicability(
     OR a Bunch with attributes ``applicable``, ``dissimilarity_index``,
     ``cutpoint``, ``feature_weights``, and ``lpd`` when
     ``return_diagnostics=True``.
-
-    References
-    ----------
-    .. [meyer2021] Meyer, H. & Pebesma, E. (2021). Predicting into unknown
-       space? Estimating the area of applicability of spatial prediction
-       models. *Methods in Ecology and Evolution*, 12(9), 1620-1633.
-       https://doi.org/10.1111/2041-210X.13650
     """
     X_test = check_array(X_test, ensure_all_finite=True)
     X_train = check_array(X_train, ensure_all_finite=True)
