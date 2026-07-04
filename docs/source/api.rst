@@ -58,3 +58,15 @@ Tooling to determine the optimal bandwidths of geographically weighted models.
    :toctree: generated/
 
    BandwidthSearch
+
+Preprocessing
+-------------
+
+Spatial feature engineering transformers for scikit-learn pipelines.
+
+.. currentmodule:: spml.preprocessing
+.. autosummary::
+   :toctree: generated/
+
+   KNeighborsFeatures
+   RadiusNeighborsFeatures
