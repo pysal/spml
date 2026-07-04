@@ -85,3 +85,18 @@ utilities for validating spatial models.
    StratifiedClassSampler
    MultinomialSampler
    PoissonSampler
+
+Metrics
+-------
+
+Metrics for evaluating spatial sampler and cross-validation outputs.
+Regionalization and autocorrelation metrics from ``esda`` (e.g.
+``completeness``, ``boundary_silhouette``, ``correlogram``) are also
+re-exported here.
+
+.. currentmodule:: spml.metrics
+.. autosummary::
+   :toctree: generated/
+
+   area_of_applicability
+   gearygram
