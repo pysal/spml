@@ -182,3 +182,8 @@ docs/source/generated
 *.DS_Store
 
 docs/source/cache/
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+pixi.lock
