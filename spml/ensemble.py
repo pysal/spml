@@ -19,7 +19,7 @@ from .base import BaseClassifier, BaseRegressor
 
 
 class GWRandomForestClassifier(BaseClassifier):
-    """Geographically weighted random forest classifier.
+    """Geographically weighted random forest classifiers.
 
     Fits one :class:`sklearn.ensemble.RandomForestClassifier` per focal observation
     using spatially varying sample weights.
