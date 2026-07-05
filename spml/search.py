@@ -21,7 +21,7 @@ class BandwidthSearch:
       :class:`~spml.linear_model.GWLogisticRegression`): information criteria
       ``"aicc"``, ``"aic"``, ``"bic"`` are valid and recommended.  They are included
       in ``metrics_`` automatically.
-    * **Non-linear models** (random forest, gradient boosting, ...): information
+    * **Non-linear models** (random forest, gradient boosting, …): information
       criteria are *not* valid (no closed-form log-likelihood or hat matrix).
       Use ``"rmse"`` / ``"mae"`` for regression or ``"log_loss"`` combined with
       ``"prediction_rate"`` for classification instead.

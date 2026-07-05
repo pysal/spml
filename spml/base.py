@@ -643,12 +643,7 @@ class _BaseModel(BaseEstimator):
     ) -> list[Hashable]:
         raise NotImplementedError("Subclasses must implement _fit_local")
 
-    def fit(
-        self,
-        X: pd.DataFrame,
-        y: pd.Series,
-        geometry: gpd.GeoSeries | None = None,
-    ):
+    def fit(self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None):
         raise NotImplementedError("Subclasses must implement fit")
 
     def _get_score_data(
@@ -913,10 +908,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         self._empty_feature_imp = None
 
     def fit(
-        self,
-        X: pd.DataFrame,
-        y: pd.Series,
-        geometry: gpd.GeoSeries | None = None,
+        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
     ) -> "BaseClassifier":
         """Fit geographically weighted local classification models.
 
@@ -1652,10 +1644,7 @@ class BaseRegressor(_BaseModel, RegressorMixin):
         self._empty_score_data = (np.array([]), np.array([]))
 
     def fit(
-        self,
-        X: pd.DataFrame,
-        y: pd.Series,
-        geometry: gpd.GeoSeries | None = None,
+        self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
     ) -> "BaseRegressor":
         """Fit geographically weighted local regression models.
 
