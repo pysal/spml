@@ -95,7 +95,7 @@ def test_init_kernel_assignment():
         clf = BaseClassifier(
             LogisticRegression,
             bandwidth=100,
-            kernel=kernel_name,  # ty:ignore[invalid-argument-type]
+            kernel=kernel_name,
         )
         assert clf.kernel == kernel_name
 
