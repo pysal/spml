@@ -499,25 +499,28 @@ class _BaseModel(BaseEstimator):
                 )
             self._validate_geometry(geometry)
 
-        # Bandwidth validation
-        bw = self.bandwidth
-        if bw is not None:
-            # must be scalar and not NaN
-            if (
-                not np.isscalar(bw)
-                or pd.isna(bw)
-                or not isinstance(bw, Real)
-                or bw <= 0
-            ):
-                raise ValueError("Bandwidth must be a positive scalar number.")
+        if self.graph is None:
+            # Bandwidth validation
+            bw = self.bandwidth
+            if bw is not None:
+                # must be scalar and not NaN
+                if (
+                    not np.isscalar(bw)
+                    or pd.isna(bw)
+                    or not isinstance(bw, Real)
+                    or bw <= 0
+                ):
+                    raise ValueError("Bandwidth must be a positive scalar number.")
 
-            if not self.fixed and not isinstance(bw, Integral):
-                raise ValueError("Adaptive bandwidth (fixed=False) must be an integer.")
+                if not self.fixed and not isinstance(bw, Integral):
+                    raise ValueError(
+                        "Adaptive bandwidth (fixed=False) must be an integer."
+                    )
 
-        elif not callable(self.kernel):
-            raise ValueError(
-                "kernel must be either a valid string or a callable function."
-            )
+            elif not callable(self.kernel):
+                raise ValueError(
+                    "kernel must be either a valid string or a callable function."
+                )
 
     # Abstract methods that subclasses must implement
     def _fit_local(
