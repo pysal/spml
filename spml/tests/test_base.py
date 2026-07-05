@@ -16,8 +16,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.metrics import accuracy_score, mean_absolute_error
 from sklearn.model_selection import GridSearchCV
-
-from gwlearn.base import BaseClassifier, BaseRegressor
+from smpl.base import BaseClassifier, BaseRegressor
 
 
 def test_init_default_parameters():

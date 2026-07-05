@@ -1,6 +1,6 @@
 import pandas as pd
 
-from gwlearn.ensemble import (
+from spml.ensemble import (
     GWGradientBoostingClassifier,
     GWGradientBoostingRegressor,
     GWRandomForestClassifier,

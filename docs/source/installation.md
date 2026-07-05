@@ -1,15 +1,15 @@
 # Installation
 
-You can install gwlearn from PyPI or from conda-forge using the tool of your choice:
+You can install spatial ML from PyPI or from conda-forge using the tool of your choice:
 
 ```sh
-pip install gwlearn
+pip install spml
 ```
 
 Or from conda-forge:
 
 ```sh
-conda install gwlearn -c conda-forge
+conda install spml -c conda-forge
 ```
 
 ## Installing development version
@@ -17,15 +17,15 @@ conda install gwlearn -c conda-forge
 You can either clone the repository:
 
 ```sh
-git clone https://github.com/pysal/gwlearn.git
-cd gwlearn
+git clone https://github.com/pysal/spml.git
+cd spml
 pip install .
 ```
 
 Or install directly from Github:
 
 ```sh
-pip install git+https://github.com/pysal/gwlearn.git
+pip install git+https://github.com/pysal/spml.git
 ```
 
 The package depends on:
