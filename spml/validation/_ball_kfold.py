@@ -77,6 +77,8 @@ class BallKFold(BaseEstimator):
         if self.radius is not None:
             r = float(self.radius)
         else:
+            if self.n_splits is None:
+                raise ValueError("Specify exactly one of 'radius' or 'n_splits'.")
             # r = minimum n_splits-th NN distance across all points.
             # Every point then has at most n_splits-1 neighbours within r,
             # so greedy colouring uses at most n_splits colours.
