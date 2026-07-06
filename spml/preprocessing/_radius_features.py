@@ -1,5 +1,7 @@
 """RadiusNeighborsFeatures transformer."""
 
+from typing import Callable
+
 import numpy
 import pandas
 from scipy.spatial import cKDTree
@@ -54,7 +56,7 @@ class RadiusNeighborsFeatures(TransformerMixin, BaseEstimator):
     def __init__(
         self,
         radii=(500, 1000, 5000),
-        func="mean",
+        func: str | Callable = "mean",
         exclusive=True,
         metric="euclidean",
     ):
@@ -147,7 +149,7 @@ class RadiusNeighborsFeatures(TransformerMixin, BaseEstimator):
             train_col = self._train_values[:, j]
             for band_nbrs, suffix in zip(bands, col_suffixes):
                 vals = numpy.array([
-                    agg(train_col[nbrs]) if nbrs else numpy.nan
+                    agg(train_col[nbrs]) if nbrs else numpy.nan  # ty:ignore[call-top-callable]
                     for nbrs in band_nbrs
                 ])
                 new_cols[f"{feat}_{suffix}"] = vals
