@@ -171,7 +171,8 @@ def knn_range(X, y, max_k: int = 30) -> int:
     _, all_idx = tree.query(coords, k=max_k + 1)
     all_idx = all_idx[:, 1:]  # drop self -> shape (n, max_k)
 
-    prev_r, prev_k = None, None
+    prev_r: float | None = None
+    prev_k: int = 0
 
     for k in range(1, max_k + 1):
         lag = y_z[all_idx[:, :k]].mean(axis=1)

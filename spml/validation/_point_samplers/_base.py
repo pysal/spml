@@ -13,12 +13,12 @@ class BasePointSampler(BaseEstimator):
     """
 
     @abstractmethod
-    def sample(self, source, **kwargs) -> geopandas.GeoDataFrame:
+    def sample(self, geometry, **kwargs) -> geopandas.GeoDataFrame:
         """Generate sampled point locations.
 
         Parameters
         ----------
-        source
+        geometry
             The spatial source to sample from.  Accepted types depend on the
             concrete sampler (Shapely geometry, GeoDataFrame, rasterio dataset,
             or a file path).

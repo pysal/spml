@@ -52,7 +52,7 @@ class StratifiedClassSampler(BasePointSampler):
         self.quasi_random = quasi_random
         self.random_state = random_state
 
-    def sample(self, geometry, labels=None, weights=None) -> geopandas.GeoDataFrame:
+    def sample(self, geometry, labels=None, weights=None) -> geopandas.GeoDataFrame:  # ty:ignore[invalid-method-override]
         """Generate proportionally allocated class samples.
 
         Parameters

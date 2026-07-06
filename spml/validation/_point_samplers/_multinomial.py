@@ -63,7 +63,7 @@ class MultinomialSampler(BasePointSampler):
         self.quasi_random = quasi_random
         self.random_state = random_state
 
-    def sample(self, geometry, labels=None, weights=None) -> geopandas.GeoDataFrame:
+    def sample(self, geometry, labels=None, weights=None) -> geopandas.GeoDataFrame:  # ty:ignore[invalid-method-override]
         """Generate multinomially allocated class samples.
 
         Parameters

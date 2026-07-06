@@ -90,7 +90,7 @@ class PoissonSampler(BasePointSampler):
 
     # -- public ----------------------------------------------------------------
 
-    def sample(self, geometry, intensity):
+    def sample(self, geometry, intensity):  # ty:ignore[invalid-method-override]
         """
         Generate an inhomogeneous Poisson point pattern inside *geometry*.
 
