@@ -9,11 +9,11 @@ from typing import Literal
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from libpysal import graph
+from libpysal import graph, kernels
 from scipy.spatial import KDTree
 from sklearn.base import TransformerMixin
 
-from ..base import _BaseModel, _kernel_functions
+from ..base import _BaseModel
 
 __all__ = ["BaseDecomposition"]
 
@@ -306,7 +306,7 @@ class BaseDecomposition(TransformerMixin, _BaseModel):
             raise ValueError("Adaptive bandwidth (fixed=False) must be an integer.")
 
         kernel = (
-            _kernel_functions[self.kernel]
+            kernels._kernel_functions[self.kernel]
             if isinstance(self.kernel, str)
             else self.kernel
         )
