@@ -665,13 +665,14 @@ class TestGWPCAFit:
 
     def test_fit_verbose_with_array(self, monkeypatch, capsys):
         """Fit accepts ndarray input and emits verbose progress logs."""
-        X = np.array(
+        X_array = np.array(
             [
                 [0.0, 1.0],
                 [1.0, 0.0],
                 [2.0, 1.0],
             ]
         )
+        X = cast(pd.DataFrame, X_array)
         graph = _complete_graph(pd.Index([0, 1, 2]))
         model = GWPCA(
             n_components=1,
