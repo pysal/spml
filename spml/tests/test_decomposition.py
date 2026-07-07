@@ -558,6 +558,29 @@ class TestGWPCANumericalCorrectness:
 
         np.testing.assert_allclose(model.cv_score_, 32.0 / 9.0, atol=1e-12)
 
+    def test_sign_convention_max_abs(self):
+        """max_abs sign convention orients dominant loadings as non-negative."""
+        X = pd.DataFrame(
+            {
+                "x": [0.0, 2.0, 0.0],
+                "y": [0.0, 0.0, 1.0],
+            },
+            index=pd.Index(["a", "b", "c"], name="id"),
+        )
+        model = GWPCA(
+            n_components=None,
+            graph=_complete_graph(X.index, weights=np.array([1.0, 3.0, 2.0])),
+            fit_global_model=False,
+            n_jobs=1,
+            sign_convention="max_abs",
+        ).fit(X)
+
+        components = model._components[0]
+        dominant_rows = np.argmax(np.abs(components), axis=0)
+        dominant_values = components[dominant_rows, np.arange(components.shape[1])]
+
+        assert (dominant_values >= 0).all()
+
 
 class TestGWPCAFit:
     def test_fit_returns_self(self, sample_decomposition_data):
@@ -639,6 +662,62 @@ class TestGWPCAFit:
         assert not hasattr(model, "global_model")
         assert model.n_features_in_ == X_subset.shape[1]
         assert model.components_.shape == (len(X_subset), 9)
+
+    def test_fit_verbose_with_array(self, monkeypatch, capsys):
+        """Fit accepts ndarray input and emits verbose progress logs."""
+        X = np.array(
+            [
+                [0.0, 1.0],
+                [1.0, 0.0],
+                [2.0, 1.0],
+            ]
+        )
+        graph = _complete_graph(pd.Index([0, 1, 2]))
+        model = GWPCA(
+            n_components=1,
+            graph=graph,
+            fit_global_model=False,
+            verbose=True,
+            n_jobs=1,
+        )
+
+        def fake_fit_models_batch(X_input, y_input, weights_input):  # noqa: ARG001
+            """Stub for _fit_models_batch that returns fixed outputs.
+            Keeps the same args so monkeypatching works."""
+            return [
+                (
+                    0,
+                    np.array([[1.0], [0.0]]),
+                    np.array([2.0]),
+                    np.array([0.0]),
+                    np.zeros(2),
+                ),
+                (
+                    1,
+                    np.array([[1.0], [0.0]]),
+                    np.array([2.0]),
+                    np.array([0.0]),
+                    np.zeros(2),
+                ),
+                (
+                    2,
+                    np.array([[1.0], [0.0]]),
+                    np.array([2.0]),
+                    np.array([0.0]),
+                    np.zeros(2),
+                ),
+            ]
+
+        monkeypatch.setattr(model, "_fit_models_batch", fake_fit_models_batch)
+
+        model.fit(X, geometry=None)
+        out = capsys.readouterr().out
+
+        np.testing.assert_array_equal(model.feature_names_in_, np.array([0, 1]))
+        assert "Building weights" in out
+        assert "Weights ready" in out
+        assert "Fitting local decompositions" in out
+        assert "Local fits complete" in out
 
 
 class TestGWPCAInvariants:
@@ -770,6 +849,35 @@ class TestGWPCADerivedAttributes:
         assert model.components_.isna().all().all()
         assert model.winning_variable_.isna().all()
 
+    def test_identify_collinear_requires_fit(self, sample_decomposition_data):
+        """Collinearity diagnostics require a fitted model."""
+        X, _ = sample_decomposition_data
+        model = GWPCA(n_components=2, bandwidth=SMALL_BW)
+
+        with pytest.raises(ValueError, match="Call fit"):
+            model.identify_collinear_locations()
+
+    def test_identify_collinear_output_columns(self, sample_decomposition_data):
+        """Collinearity diagnostics return expected columns and types."""
+        X, geometry = sample_decomposition_data
+        model = GWPCA(
+            n_components=2,
+            bandwidth=SMALL_BW,
+            fit_global_model=False,
+            n_jobs=1,
+        ).fit(X, geometry=geometry)
+
+        result = model.identify_collinear_locations(threshold=10.0)
+
+        assert list(result.columns) == [
+            "condition_number",
+            "pc1_evr",
+            "last_pc_evr",
+            "is_collinear",
+        ]
+        assert result.index.equals(model.scores_.index)
+        assert result["is_collinear"].dtype == bool
+
 
 class TestGWPCATransform:
     def test_transform_shape(self, sample_decomposition_data):
@@ -843,6 +951,235 @@ class TestGWPCATransform:
         with pytest.raises(ValueError, match="matching indexes"):
             model.transform(X, geometry=shuffled_geometry)
 
+    def test_nearest_transform_requires_fit_geometry(self):
+        """Nearest transform should fail if fit did not include geometry."""
+        X = pd.DataFrame(
+            {"x": [0.0, 1.0, 2.0], "y": [0.0, 1.0, 0.0]},
+            index=pd.Index(["a", "b", "c"], name="id"),
+        )
+        graph = _complete_graph(X.index)
+        query_geometry = gpd.GeoSeries.from_xy(
+            [0.0, 1.0, 2.0],
+            [0.0, 0.0, 0.0],
+            index=X.index,
+        )
+
+        model = GWPCA(
+            n_components=1,
+            graph=graph,
+            fit_global_model=False,
+            n_jobs=1,
+        ).fit(X)
+
+        with pytest.raises(ValueError, match="specified at fit time"):
+            model._prepare_transform_nearest(query_geometry)
+
+    def test_adaptive_neighborhoods_and_transform(self):
+        """Adaptive neighborhood prep and transform return expected shapes."""
+        X = pd.DataFrame(
+            {"x": [0.0, 1.0, 2.0, 3.0], "y": [0.0, 1.0, 0.0, 1.0]},
+            index=pd.Index(["a", "b", "c", "d"], name="id"),
+        )
+        geometry = gpd.GeoSeries.from_xy(
+            [0.0, 1.0, 2.0, 3.0],
+            [0.0, 0.0, 0.0, 0.0],
+            index=X.index,
+        )
+        model = GWPCA(
+            n_components=1,
+            bandwidth=2,
+            fixed=False,
+            fit_global_model=False,
+            n_jobs=1,
+        ).fit(X, geometry=geometry)
+
+        local_ids, distances = model._prepare_transform_neighborhoods(
+            geometry, bandwidth=2
+        )
+        transformed = model.transform(X, geometry=geometry, bandwidth=2)
+
+        assert len(local_ids) == len(X)
+        assert len(distances) == len(X)
+        assert all(len(ids) == 2 for ids in local_ids)
+        assert transformed.shape == (len(X), 1)
+
+    def test_fixed_neighborhoods(self):
+        """Fixed-distance neighborhoods are built for every observation."""
+        X = pd.DataFrame(
+            {"x": [0.0, 1.0, 2.0, 3.0], "y": [0.0, 1.0, 0.0, 1.0]},
+            index=pd.Index(["a", "b", "c", "d"], name="id"),
+        )
+        geometry = gpd.GeoSeries.from_xy(
+            [0.0, 1.0, 2.0, 3.0],
+            [0.0, 0.0, 0.0, 0.0],
+            index=X.index,
+        )
+        model = GWPCA(
+            n_components=1,
+            bandwidth=1.5,
+            fixed=True,
+            fit_global_model=False,
+            n_jobs=1,
+        ).fit(X, geometry=geometry)
+
+        local_ids, distances = model._prepare_transform_neighborhoods(
+            geometry, bandwidth=2.0
+        )
+
+        assert len(local_ids) == len(X)
+        assert len(distances) == len(X)
+        assert all(len(ids) >= 1 for ids in local_ids)
+
+    @pytest.mark.parametrize("bandwidth", [0, np.nan])
+    def test_neighborhoods_invalid_bandwidth(self, bandwidth):
+        """Neighborhood prep rejects negative or NaN bandwidth values."""
+        X = pd.DataFrame(
+            {"x": [0.0, 1.0, 2.0], "y": [0.0, 1.0, 0.0]},
+            index=pd.Index(["a", "b", "c"], name="id"),
+        )
+        geometry = gpd.GeoSeries.from_xy(
+            [0.0, 1.0, 2.0],
+            [0.0, 0.0, 0.0],
+            index=X.index,
+        )
+        model = GWPCA(
+            n_components=1,
+            bandwidth=2,
+            fixed=False,
+            fit_global_model=False,
+            n_jobs=1,
+        ).fit(X, geometry=geometry)
+
+        with pytest.raises(ValueError, match="positive scalar number"):
+            model._prepare_transform_neighborhoods(geometry, bandwidth=bandwidth)
+
+    def test_adaptive_neighborhoods_require_integer_bandwidth(self):
+        """Adaptive neighborhoods require an integer bandwidth."""
+        X = pd.DataFrame(
+            {"x": [0.0, 1.0, 2.0], "y": [0.0, 1.0, 0.0]},
+            index=pd.Index(["a", "b", "c"], name="id"),
+        )
+        geometry = gpd.GeoSeries.from_xy(
+            [0.0, 1.0, 2.0],
+            [0.0, 0.0, 0.0],
+            index=X.index,
+        )
+        model = GWPCA(
+            n_components=1,
+            bandwidth=2,
+            fixed=False,
+            fit_global_model=False,
+            n_jobs=1,
+        ).fit(X, geometry=geometry)
+
+        with pytest.raises(ValueError, match="must be an integer"):
+            model._prepare_transform_neighborhoods(geometry, bandwidth=2.5)
+
+    def test_neighborhoods_require_bandwidth_and_fit_geometry(self):
+        """Neighborhood prep requires both bandwidth and fit-time geometry."""
+        X = pd.DataFrame(
+            {"x": [0.0, 1.0, 2.0], "y": [0.0, 1.0, 0.0]},
+            index=pd.Index(["a", "b", "c"], name="id"),
+        )
+        geometry = gpd.GeoSeries.from_xy(
+            [0.0, 1.0, 2.0],
+            [0.0, 0.0, 0.0],
+            index=X.index,
+        )
+        model = GWPCA(
+            n_components=1,
+            graph=_complete_graph(X.index),
+            fit_global_model=False,
+            n_jobs=1,
+        ).fit(X)
+        model.bandwidth = None
+
+        with pytest.raises(
+            ValueError, match="Bandwidth and geometry need to be specified"
+        ):
+            model._prepare_transform_neighborhoods(geometry, bandwidth=None)
+
+    def test_ensemble_transform_all_invalid_returns_nan(self):
+        """Ensemble transform returns NaN when all local components are invalid."""
+        X = pd.DataFrame(
+            {"x": [0.0, 1.0, 2.0], "y": [0.0, 1.0, 0.0]},
+            index=pd.Index(["a", "b", "c"], name="id"),
+        )
+        geometry = gpd.GeoSeries.from_xy(
+            [0.0, 1.0, 2.0],
+            [0.0, 0.0, 0.0],
+            index=X.index,
+        )
+        model = GWPCA(
+            n_components=1,
+            bandwidth=2,
+            fixed=False,
+            fit_global_model=False,
+            n_jobs=1,
+        ).fit(X, geometry=geometry)
+        model._components[:] = np.nan
+
+        transformed = model.transform(X, geometry=geometry, bandwidth=2)
+
+        assert transformed.isna().all().all()
+
+    def test_ensemble_transform_weighted_average(self):
+        """Ensemble transform matches explicit weighted averaging."""
+        X = pd.DataFrame(
+            {"x": [0.0, 1.0, 2.0, 3.0, 4.0], "y": [0.0, 1.0, 0.0, 1.0, 0.0]},
+            index=pd.Index(["a", "b", "c", "d", "e"], name="id"),
+        )
+        geometry = gpd.GeoSeries.from_xy(
+            [0.0, 1.0, 2.0, 3.0, 4.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0],
+            index=X.index,
+        )
+        model = GWPCA(
+            n_components=1,
+            bandwidth=3,
+            fixed=False,
+            fit_global_model=False,
+            n_jobs=1,
+        ).fit(X, geometry=geometry)
+
+        valid = ~np.isnan(model._components).any(axis=(1, 2))
+        local_ids = np.asarray(model._names[valid][:2])
+        distances = np.array([0.25, 0.75])
+        x_ = X.iloc[2].to_numpy()
+
+        result = model._transform_local_ensemble(x_, local_ids, distances)
+
+        expected = np.average(
+            np.vstack(
+                [
+                    (x_ - model._local_means[model._name_to_position[local_id]])
+                    @ model._components[model._name_to_position[local_id]]
+                    for local_id in local_ids
+                ]
+            ),
+            axis=0,
+            weights=distances,
+        )
+        np.testing.assert_allclose(result, expected)
+
+    def test_prepare_transform_data_array_feature_count(
+        self, sample_decomposition_data
+    ):
+        """Array transform data keeps shape and validates feature count."""
+        X, geometry = sample_decomposition_data
+        model = GWPCA(
+            n_components=2,
+            bandwidth=SMALL_BW,
+            fit_global_model=False,
+            n_jobs=1,
+        ).fit(X, geometry=geometry)
+
+        aligned = model._prepare_transform_data(X.to_numpy(), geometry)
+        assert aligned.shape == X.shape
+
+        with pytest.raises(ValueError, match="same number of features"):
+            model._prepare_transform_data(X.iloc[:, :-1].to_numpy(), geometry)
+
 
 class TestGWPCACVScore:
     def test_cv_score_is_positive(self, sample_decomposition_data):
@@ -871,6 +1208,29 @@ class TestGWPCACVScore:
         )
         assert np.isfinite(model_small.cv_score_)
         assert np.isfinite(model_large.cv_score_)
+
+    def test_cv_score_infinite_without_valid_neighbors(self):
+        """CV score is infinite when no focal has enough non-self neighbors."""
+        X = pd.DataFrame(
+            {"x": [0.0, 1.0, 2.0], "y": [0.0, 1.0, 0.0]},
+            index=pd.Index(["a", "b", "c"], name="id"),
+        )
+        adjacency = pd.Series(
+            [1.0, 1.0, 1.0],
+            index=pd.MultiIndex.from_tuples(
+                [("a", "a"), ("b", "b"), ("c", "c")],
+                names=["focal", "neighbor"],
+            ),
+            name="weight",
+        )
+        model = GWPCA(
+            n_components=1,
+            graph=Graph(adjacency, is_sorted=True),
+            fit_global_model=False,
+            n_jobs=1,
+        ).fit(X, cv=True)
+
+        assert np.isinf(model.cv_score_)
 
 
 class TestGWPCAEstimatorInterface:
