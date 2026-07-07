@@ -1284,6 +1284,14 @@
   warn(
 /home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
   warn(
+/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
+  warn(
+/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
+  warn(
+/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
+  warn(
+/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
+  warn(
 </code></pre></div>
 </div>
 <div class="output text_html"><style>.sk-global {
@@ -2207,7 +2215,7 @@ a.param-doc-link::before {
        <tr class="default">
            <td class="param"><a class="param-doc-link" style="text-decoration:none;">oob_pred_pooled_</a></td>
            <td class="fitted-att-type">ndarray[int64](177150,)</td>
-           <td>[0,0,1,...,1,0,0]</td>
+           <td>[0,0,0,...,1,0,0]</td>
 
 
        </tr>
@@ -2442,7 +2450,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7620660457239627
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7637595258255715
 </code></pre></div>
 </div>
 </div>
@@ -2456,7 +2464,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7341179791137454
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.734055884843353
 </code></pre></div>
 </div>
 </div>
@@ -2471,8 +2479,8 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>array([0.63333333, 0.64      , 0.67333333, ..., 0.60666667, 0.7       ,
-       0.66      ], shape=(1412,))
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>array([0.64666667, 0.61333333, 0.67333333, ..., 0.61333333, 0.72      ,
+       0.64      ], shape=(1412,))
 </code></pre></div>
 </div>
 </div>
@@ -2486,7 +2494,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/d15ab2bb22c3a3a47cc3f61e603d74ea770c0f0236fe637e55851cb3098fc0a1.png" src="_images/d15ab2bb22c3a3a47cc3f61e603d74ea770c0f0236fe637e55851cb3098fc0a1.png" />
+<img alt="_images/d9954339d3fd5e9619064b3c56a86c79d36ad4ebf1319e93b6fb73cbc6ed405b.png" src="_images/d9954339d3fd5e9619064b3c56a86c79d36ad4ebf1319e93b6fb73cbc6ed405b.png" />
 </div>
 </div>
 <h3 id="feature-importance">Feature importance<a class="headerlink" href="#feature-importance" title="Link to this heading">¶</a></h3>
@@ -2527,48 +2535,48 @@ forceTheme('sk-container-id-1');</script></body></div></div>
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.161568</td>
-      <td>0.168264</td>
-      <td>0.199717</td>
-      <td>0.243373</td>
-      <td>0.117020</td>
-      <td>0.110058</td>
+      <td>0.155352</td>
+      <td>0.180128</td>
+      <td>0.178076</td>
+      <td>0.243861</td>
+      <td>0.111085</td>
+      <td>0.131497</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.162082</td>
-      <td>0.174895</td>
-      <td>0.200456</td>
-      <td>0.216655</td>
-      <td>0.125352</td>
-      <td>0.120560</td>
+      <td>0.154686</td>
+      <td>0.183251</td>
+      <td>0.210130</td>
+      <td>0.211907</td>
+      <td>0.119787</td>
+      <td>0.120238</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.195915</td>
-      <td>0.161914</td>
-      <td>0.184380</td>
-      <td>0.250190</td>
-      <td>0.101826</td>
-      <td>0.105776</td>
+      <td>0.191776</td>
+      <td>0.159276</td>
+      <td>0.202454</td>
+      <td>0.223245</td>
+      <td>0.118094</td>
+      <td>0.105156</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.176357</td>
-      <td>0.158382</td>
-      <td>0.196851</td>
-      <td>0.223628</td>
-      <td>0.136770</td>
-      <td>0.108013</td>
+      <td>0.184635</td>
+      <td>0.154408</td>
+      <td>0.190361</td>
+      <td>0.233828</td>
+      <td>0.115548</td>
+      <td>0.121221</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.135058</td>
-      <td>0.161737</td>
-      <td>0.209155</td>
-      <td>0.246919</td>
-      <td>0.110943</td>
-      <td>0.136189</td>
+      <td>0.119196</td>
+      <td>0.170422</td>
+      <td>0.232222</td>
+      <td>0.214439</td>
+      <td>0.122275</td>
+      <td>0.141446</td>
     </tr>
     <tr>
       <th>...</th>
@@ -2581,48 +2589,48 @@ forceTheme('sk-container-id-1');</script></body></div></div>
     </tr>
     <tr>
       <th>1407</th>
-      <td>0.126365</td>
-      <td>0.178442</td>
-      <td>0.256258</td>
-      <td>0.253408</td>
-      <td>0.094017</td>
-      <td>0.091511</td>
+      <td>0.135469</td>
+      <td>0.174122</td>
+      <td>0.279312</td>
+      <td>0.232672</td>
+      <td>0.088975</td>
+      <td>0.089451</td>
     </tr>
     <tr>
       <th>1408</th>
-      <td>0.178528</td>
-      <td>0.155428</td>
-      <td>0.210644</td>
-      <td>0.241220</td>
-      <td>0.118724</td>
-      <td>0.095455</td>
+      <td>0.183804</td>
+      <td>0.144952</td>
+      <td>0.210895</td>
+      <td>0.243036</td>
+      <td>0.110928</td>
+      <td>0.106385</td>
     </tr>
     <tr>
       <th>1409</th>
-      <td>0.163920</td>
-      <td>0.189630</td>
-      <td>0.201006</td>
-      <td>0.193290</td>
-      <td>0.149631</td>
-      <td>0.102522</td>
+      <td>0.154506</td>
+      <td>0.174667</td>
+      <td>0.209820</td>
+      <td>0.205319</td>
+      <td>0.155501</td>
+      <td>0.100187</td>
     </tr>
     <tr>
       <th>1410</th>
-      <td>0.145742</td>
-      <td>0.181108</td>
-      <td>0.221308</td>
-      <td>0.215632</td>
-      <td>0.102574</td>
-      <td>0.133635</td>
+      <td>0.139952</td>
+      <td>0.197281</td>
+      <td>0.231833</td>
+      <td>0.201115</td>
+      <td>0.088160</td>
+      <td>0.141658</td>
     </tr>
     <tr>
       <th>1411</th>
-      <td>0.152960</td>
-      <td>0.153610</td>
-      <td>0.234367</td>
-      <td>0.231115</td>
-      <td>0.104971</td>
-      <td>0.122978</td>
+      <td>0.152161</td>
+      <td>0.167052</td>
+      <td>0.215181</td>
+      <td>0.235707</td>
+      <td>0.122757</td>
+      <td>0.107142</td>
     </tr>
   </tbody>
 </table>
@@ -2638,7 +2646,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/c9331e5d575b3e65aaabc5238704b4742c379b8401da70fe8d96e27b878fc6c2.png" src="_images/c9331e5d575b3e65aaabc5238704b4742c379b8401da70fe8d96e27b878fc6c2.png" />
+<img alt="_images/ba64a9f25815734595b9529b49988577b5446023f7e56a10cadf312e0159f3a7.png" src="_images/ba64a9f25815734595b9529b49988577b5446023f7e56a10cadf312e0159f3a7.png" />
 </div>
 </div>
 <p>You can compare all of this to values extracted from a global model, fitted alongside.</p>
@@ -2649,8 +2657,8 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>array([0.15178517, 0.14675362, 0.223872  , 0.25144914, 0.10990222,
-       0.11623785])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>array([0.14347218, 0.15042225, 0.22071889, 0.26397127, 0.10176062,
+       0.11965479])
 </code></pre></div>
 </div>
 </div>
@@ -2662,12 +2670,12 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>HR60    0.153637
-HR70    0.159712
-HR80    0.202285
-HR90    0.222615
-HC60    0.140194
-HC70    0.121557
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>HR60    0.153386
+HR70    0.159622
+HR80    0.203071
+HR90    0.222445
+HC60    0.140487
+HC70    0.120989
 dtype: float64
 </code></pre></div>
 </div>
@@ -5231,7 +5239,7 @@ forceTheme('sk-container-id-3');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7519051651143099
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7527519051651143
 </code></pre></div>
 </div>
 </div>
@@ -5273,48 +5281,48 @@ forceTheme('sk-container-id-3');</script></body></div></div>
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.139017</td>
-      <td>0.261184</td>
-      <td>0.186367</td>
-      <td>0.221217</td>
-      <td>0.098859</td>
-      <td>0.093356</td>
+      <td>0.142790</td>
+      <td>0.261459</td>
+      <td>0.186708</td>
+      <td>0.217918</td>
+      <td>0.095108</td>
+      <td>0.096018</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.179367</td>
-      <td>0.181328</td>
-      <td>0.196284</td>
-      <td>0.232656</td>
-      <td>0.085719</td>
-      <td>0.124646</td>
+      <td>0.182213</td>
+      <td>0.170953</td>
+      <td>0.209358</td>
+      <td>0.237018</td>
+      <td>0.085021</td>
+      <td>0.115436</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.242642</td>
-      <td>0.126397</td>
-      <td>0.169213</td>
-      <td>0.289728</td>
-      <td>0.064964</td>
-      <td>0.107056</td>
+      <td>0.243163</td>
+      <td>0.134342</td>
+      <td>0.176249</td>
+      <td>0.287591</td>
+      <td>0.080215</td>
+      <td>0.078440</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.164935</td>
-      <td>0.192374</td>
-      <td>0.169748</td>
-      <td>0.261140</td>
-      <td>0.095956</td>
-      <td>0.115847</td>
+      <td>0.165871</td>
+      <td>0.201970</td>
+      <td>0.169621</td>
+      <td>0.261289</td>
+      <td>0.102146</td>
+      <td>0.099104</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.071271</td>
-      <td>0.182803</td>
-      <td>0.252724</td>
-      <td>0.244260</td>
-      <td>0.104336</td>
-      <td>0.144606</td>
+      <td>0.070087</td>
+      <td>0.179944</td>
+      <td>0.252527</td>
+      <td>0.241935</td>
+      <td>0.104159</td>
+      <td>0.151350</td>
     </tr>
     <tr>
       <th>...</th>
@@ -5327,48 +5335,48 @@ forceTheme('sk-container-id-3');</script></body></div></div>
     </tr>
     <tr>
       <th>1407</th>
-      <td>0.119087</td>
-      <td>0.172416</td>
-      <td>0.383351</td>
-      <td>0.252888</td>
-      <td>0.036159</td>
-      <td>0.036098</td>
+      <td>0.122609</td>
+      <td>0.173712</td>
+      <td>0.380486</td>
+      <td>0.254021</td>
+      <td>0.032471</td>
+      <td>0.036701</td>
     </tr>
     <tr>
       <th>1408</th>
-      <td>0.234915</td>
-      <td>0.148414</td>
-      <td>0.278695</td>
-      <td>0.206944</td>
-      <td>0.084771</td>
-      <td>0.046261</td>
+      <td>0.232432</td>
+      <td>0.148967</td>
+      <td>0.273505</td>
+      <td>0.208758</td>
+      <td>0.090002</td>
+      <td>0.046336</td>
     </tr>
     <tr>
       <th>1409</th>
-      <td>0.145567</td>
-      <td>0.295785</td>
-      <td>0.268802</td>
-      <td>0.158578</td>
-      <td>0.084318</td>
-      <td>0.046950</td>
+      <td>0.119467</td>
+      <td>0.303129</td>
+      <td>0.254880</td>
+      <td>0.185035</td>
+      <td>0.095037</td>
+      <td>0.042452</td>
     </tr>
     <tr>
       <th>1410</th>
-      <td>0.122022</td>
-      <td>0.231389</td>
-      <td>0.264640</td>
-      <td>0.228951</td>
-      <td>0.032141</td>
-      <td>0.120857</td>
+      <td>0.121653</td>
+      <td>0.227692</td>
+      <td>0.263505</td>
+      <td>0.230742</td>
+      <td>0.033037</td>
+      <td>0.123372</td>
     </tr>
     <tr>
       <th>1411</th>
-      <td>0.071362</td>
-      <td>0.182032</td>
-      <td>0.327638</td>
-      <td>0.244220</td>
-      <td>0.115174</td>
-      <td>0.059574</td>
+      <td>0.070674</td>
+      <td>0.185416</td>
+      <td>0.329956</td>
+      <td>0.243095</td>
+      <td>0.112130</td>
+      <td>0.058728</td>
     </tr>
   </tbody>
 </table>
@@ -6294,13 +6302,13 @@ a.param-doc-link::before {
        <tr class="default">
            <td class="param"><a class="param-doc-link" style="text-decoration:none;">left_out_proba_</a></td>
            <td class="fitted-att-type">ndarray[float64](35430, 2)</td>
-           <td>[[0.34,0.66],
- [0.69,0.31],
- [0.  ,1.  ],
+           <td>[[0.81,0.19],
+ [0.61,0.39],
+ [0.77,0.23],
  ...,
- [0.17,0.83],
- [0.75,0.25],
- [0.85,0.15]]</td>
+ [0.89,0.11],
+ [0.31,0.69],
+ [0.91,0.09]]</td>
 
 
        </tr>
@@ -6309,7 +6317,7 @@ a.param-doc-link::before {
        <tr class="default">
            <td class="param"><a class="param-doc-link" style="text-decoration:none;">left_out_w_</a></td>
            <td class="fitted-att-type">ndarray[float64](35430,)</td>
-           <td>[0.  ,0.47,0.31,...,0.63,0.47,0.82]</td>
+           <td>[0.01,0.13,0.31,...,0.72,0.9 ,0.01]</td>
 
 
        </tr>
@@ -6318,7 +6326,7 @@ a.param-doc-link::before {
        <tr class="default">
            <td class="param"><a class="param-doc-link" style="text-decoration:none;">left_out_y_</a></td>
            <td class="fitted-att-type">ndarray[bool](35430,)</td>
-           <td>[False,False, True,..., True, True,False]</td>
+           <td>[ True, True,False,...,False,False, True]</td>
 
 
        </tr>
@@ -6545,7 +6553,7 @@ forceTheme('sk-container-id-4');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7239345187694045
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7235393734123624
 </code></pre></div>
 </div>
 </div>
@@ -7802,8 +7810,8 @@ dtype: float64
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>array([0.0674059 , 0.10292956, 0.20558314, 0.45864959, 0.10555146,
-       0.05988036])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>array([0.0678455 , 0.10279318, 0.20453181, 0.45938483, 0.1060926 ,
+       0.05935208])
 </code></pre></div>
 </div>
 </div>
