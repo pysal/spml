@@ -8,7 +8,9 @@ References
    https://doi.org/10.1111/2041-210X.13650
 """
 
-import numpy
+import warnings
+
+import numpy as np
 from sklearn.inspection import permutation_importance
 from sklearn.metrics import pairwise_distances, pairwise_distances_argmin_min
 from sklearn.utils import Bunch, check_array
@@ -51,33 +53,33 @@ def area_of_applicability(
     cv : sklearn CV splitter, optional
         If provided, the training-DI distribution is computed by holding
         out each fold in turn -- the held-out points get their distance
-        to the in-fold training points.  If None, each training point's
+        to the in-fold training points.  If ``None``, each training point's
         DI is its distance to its nearest OTHER training point.
     feature_weights : {'permutation', 'uniform'} or (n_features,) array
         How to weight features when computing distances.
 
-        - 'permutation' : sklearn permutation importance, normalised to
+        - ``'permutation'`` : sklearn permutation importance, normalised to
           sum to 1.  Negative importances are clipped to zero.
-        - 'uniform' / False / None : all features weighted equally.
+        - ``'uniform'`` / ``False`` / ``None`` : all features weighted equally.
         - array : pre-computed non-negative weights; normalised to sum
           to 1 internally.
     metric : str, default 'euclidean'
-        Passed to ``sklearn.metrics.pairwise_distances``.
+        Passed to :func:`sklearn.metrics.pairwise_distances`.
     threshold : {'tukey', 'mad'} or float in (0, 1)
         Rule for converting the training-DI distribution into a single
         cut-off.
 
-        - 'tukey' : 75th percentile + 1.5 * IQR.
-        - 'mad'   : median + 3 * median absolute deviation.
-        - float p : the p-quantile of the training DIs.
+        - ``'tukey'`` : 75th percentile + 1.5 * IQR.
+        - ``'mad'``   : median + 3 * median absolute deviation.
+        - ``float`` p : the p-quantile of the training DIs.
     permutation_kwargs : dict, optional
         Extra arguments forwarded to
-        ``sklearn.inspection.permutation_importance``.  Defaults set
+        :func:`sklearn.inspection.permutation_importance`.  Defaults set
         ``n_repeats=10`` and ``n_jobs=-1`` if not overridden.
     return_diagnostics : bool, default False
-        If False, returns the boolean ``applicable`` mask (cheap path:
+        If ``False``, returns the boolean ``applicable`` mask (cheap path:
         only the nearest training point per test sample is computed).
-        If True, returns a ``sklearn.utils.Bunch`` with ``applicable``,
+        If ``True``, returns a :class:`sklearn.utils.Bunch` with ``applicable``,
         ``dissimilarity_index``, ``cutpoint``, ``feature_weights``, and
         ``lpd`` (Local Point Density).  The diagnostics path computes
         the full (n_test, n_train) distance matrix, so memory cost is
@@ -86,10 +88,12 @@ def area_of_applicability(
     Returns
     -------
     applicable : (n_test,) bool ndarray
-        True where the model is considered applicable.
-    OR a Bunch with attributes ``applicable``, ``dissimilarity_index``,
-    ``cutpoint``, ``feature_weights``, and ``lpd`` when
-    ``return_diagnostics=True``.
+        True where the model is considered applicable when
+        ``return_diagnostics=False``.
+    diagnostics : Bunch
+        Bunch with attributes ``applicable``, ``dissimilarity_index``,
+        ``cutpoint``, ``feature_weights``, and ``lpd`` when
+        ``return_diagnostics=True``.
     """
     X_test = check_array(X_test, ensure_all_finite=True)
     X_train = check_array(X_train, ensure_all_finite=True)
@@ -121,17 +125,17 @@ def area_of_applicability(
     if cv is None:
         # Each training point's DI = distance to its nearest OTHER training
         # point, normalised by the mean of all pairwise training distances.
-        numpy.fill_diagonal(train_dists, numpy.inf)
+        np.fill_diagonal(train_dists, np.inf)
         d_mins = train_dists.min(axis=1)
-        numpy.fill_diagonal(train_dists, 0.0)
+        np.fill_diagonal(train_dists, 0.0)
         # Upper triangle without diagonal for the mean (avoids the
         # double-count + zero-diagonal bias).
-        iu = numpy.triu_indices_from(train_dists, k=1)
+        iu = np.triu_indices_from(train_dists, k=1)
         d_mean = train_dists[iu].mean()
     else:
         # Held-out points get their distance to in-fold training points.
         # NOTE: sklearn yields (train_idx, test_idx) in that order.
-        d_mins = numpy.empty(n_train, dtype=float)
+        d_mins = np.empty(n_train, dtype=float)
         s = 0.0
         c = 0
         for train_idx, test_idx in cv.split(Xw_train):
@@ -183,9 +187,9 @@ def _resolve_weights(
 ):
     """Return non-negative (n_features,) weight vector summing to 1."""
     if feature_weights is None or feature_weights is False:
-        return numpy.full(n_features, 1.0 / n_features)
+        return np.full(n_features, 1.0 / n_features)
     if isinstance(feature_weights, str) and feature_weights == "uniform":
-        return numpy.full(n_features, 1.0 / n_features)
+        return np.full(n_features, 1.0 / n_features)
 
     if isinstance(feature_weights, str) and feature_weights == "permutation":
         if model is None or y_train is None:
@@ -195,13 +199,24 @@ def _resolve_weights(
         kwargs = dict(permutation_kwargs or {})
         kwargs.setdefault("n_jobs", -1)
         kwargs.setdefault("n_repeats", 10)
-        importances = permutation_importance(
-            model,
-            X_train,
-            y_train,
-            **kwargs,
-        ).importances_mean
-        importances = numpy.clip(importances, 0.0, None)
+
+        # catch warnings as we cast to arrays ourselves
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message=(
+                    "X does not have valid feature names, but .* was fitted "
+                    "with feature names"
+                ),
+                category=UserWarning,
+            )
+            importances = permutation_importance(
+                model,
+                X_train,
+                y_train,
+                **kwargs,
+            ).importances_mean
+        importances = np.clip(importances, 0.0, None)
         total = importances.sum()
         if total == 0:
             raise ValueError(
@@ -210,7 +225,7 @@ def _resolve_weights(
             )
         return importances / total
 
-    arr = numpy.asarray(feature_weights, dtype=float)
+    arr = np.asarray(feature_weights, dtype=float)
     if arr.shape != (n_features,):
         raise ValueError(
             f"feature_weights must have shape ({n_features},), got {arr.shape}."
@@ -228,15 +243,15 @@ def _compute_cutpoint(di_train, threshold):
     if threshold == "tukey":
         # FIXED relative to nanophyto/abil: percentile expects 0-100,
         # not 0-1.  Original passed (0.25, 0.75) -> always ~0.
-        lo, hi = numpy.percentile(di_train, [25, 75])
+        lo, hi = np.percentile(di_train, [25, 75])
         return float(hi + 1.5 * (hi - lo))
     if threshold == "mad":
-        med = numpy.median(di_train)
-        mad = numpy.median(numpy.abs(di_train - med))
+        med = np.median(di_train)
+        mad = np.median(np.abs(di_train - med))
         return float(med + 3.0 * mad)
     if isinstance(threshold, (int, float)) and 0.0 < threshold < 1.0:
-        # FIXED: scale 0-1 quantile to 0-100 for numpy.percentile.
-        return float(numpy.percentile(di_train, threshold * 100.0))
+        # FIXED: scale 0-1 quantile to 0-100 for np.percentile.
+        return float(np.percentile(di_train, threshold * 100.0))
     raise ValueError(
         f"threshold must be 'tukey', 'mad', or a float in (0, 1); got {threshold!r}."
     )
