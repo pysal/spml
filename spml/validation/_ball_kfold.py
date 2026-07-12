@@ -118,21 +118,6 @@ class BallKFold:
             W = weights.W.from_sparse(sparr)
         return mapclassify.greedy(X, sw=W, strategy="balanced", balance="count").values
 
-        # networkX path if the networkx strategy is preferable
-        # pairs = X.sindex.query(
-        #     X,
-        #     predicate="dwithin",
-        #     distance=r,
-        # )
-        # keep = pairs[0] != pairs[1]
-
-        # G = nx.Graph()
-        # G.add_nodes_from(range(len(X)))  # retain isolated geometries
-        # G.add_edges_from(zip(pairs[0, keep], pairs[1, keep], strict=True))
-
-        # coloring = nx.algorithms.coloring.greedy_color(G, strategy="largest_first")
-        # return np.array(list(coloring.values()))
-
     def get_n_splits(self, X=None, y=None, groups=None):  # noqa: ARG002
         if hasattr(self, "n_splits_"):
             return self.n_splits_
