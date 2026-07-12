@@ -41,6 +41,12 @@ validation/range_finding
 
 ```{toctree}
 :hidden:
+:caption: Metrics
+metrics/gearygram
+```
+
+```{toctree}
+:hidden:
 :caption: API
 api
 ```
