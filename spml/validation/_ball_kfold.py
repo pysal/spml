@@ -8,13 +8,16 @@ References
         11:45450. https://doi.org/10.1038/s41467-020-18321-y
 """
 
-import numpy
-from sklearn.base import BaseEstimator
+import warnings
+
+import geopandas as gpd
+import numpy as np
+from libpysal import weights
 
 from ._utils import _get_coords
 
 
-class BallKFold(BaseEstimator):
+class BallKFold:
     """Spatially exclusive k-fold cross-validator.
 
     Assigns observations to folds such that no two observations in the
@@ -24,8 +27,8 @@ class BallKFold(BaseEstimator):
 
     The number of folds is determined by greedy graph colouring and
     equals at most the maximum number of points within *r* of any single
-    point plus one.  Colouring uses a largest-degree-first ordering,
-    which minimises the number of colours on most practical inputs.
+    point plus one.  Colouring uses a count-balanced algorithm,
+    which produces the folds or comparable sizes.
 
     Parameters
     ----------
@@ -55,7 +58,7 @@ class BallKFold(BaseEstimator):
         self.radius = radius
         self.n_splits = n_splits
 
-    def split(self, X, y=None, groups=None):
+    def split(self, X, y=None, groups=None):  # noqa: ARG002
         """Yield ``(train_indices, test_indices)`` for each fold.
 
         Parameters
@@ -68,11 +71,9 @@ class BallKFold(BaseEstimator):
         train : ndarray of int
         test  : ndarray of int
         """
-        from scipy.spatial import cKDTree
 
         coords = _get_coords(X)
         n = len(coords)
-        tree = cKDTree(coords)
 
         if self.radius is not None:
             r = float(self.radius)
@@ -82,6 +83,9 @@ class BallKFold(BaseEstimator):
             # r = minimum n_splits-th NN distance across all points.
             # Every point then has at most n_splits-1 neighbours within r,
             # so greedy colouring uses at most n_splits colours.
+            from scipy.spatial import KDTree
+
+            tree = KDTree(coords)
             distances, _ = tree.query(coords, k=self.n_splits + 1)
             r = float(distances[:, self.n_splits].min())
             self.radius_ = r
@@ -89,45 +93,47 @@ class BallKFold(BaseEstimator):
         colors = self._color(X, coords, r)
         self.n_splits_ = int(colors.max() + 1)
 
-        indices = numpy.arange(n)
+        indices = np.arange(n)
         for fold in range(self.n_splits_):
             test = indices[colors == fold]
             train = indices[colors != fold]
             yield train, test
 
     def _color(self, X, coords, r):
-        """Return integer color array using mapclassify for GeoDataFrame inputs,
-        falling back to a networkx greedy colouring for array inputs."""
-        import geopandas
-        from scipy.spatial import cKDTree
+        """Return integer color array using mapclassify's balanced greedy colouring."""
 
-        if isinstance(X, (geopandas.GeoDataFrame, geopandas.GeoSeries)):
-            import mapclassify
+        import mapclassify
 
-            gdf = X if isinstance(X, geopandas.GeoDataFrame) else X.to_frame()
-            return mapclassify.greedy(
-                gdf,
-                strategy="balanced",
-                balance="count",
-                min_distance=r,
-                silence_warnings=True,
-            ).values
+        if not isinstance(X, (gpd.GeoDataFrame, gpd.GeoSeries)):
+            X = gpd.GeoSeries.from_xy(coords[:, 0], coords[:, 1])
 
-        # Array input: build conflict graph and colour with networkx
-        import networkx
-
-        n = len(coords)
-        tree = cKDTree(coords)
-        G = networkx.Graph()
-        G.add_nodes_from(range(n))
-        for i, j in tree.query_pairs(r):
-            G.add_edge(i, j)
-        coloring = networkx.algorithms.coloring.greedy_color(
-            G, strategy="largest_first"
+        sparr = X.sindex.query(
+            X, predicate="dwithin", distance=r, output_format="sparse"
         )
-        return numpy.array([coloring[i] for i in range(n)])
+        sparr.setdiag(0)
 
-    def get_n_splits(self, X=None, y=None, groups=None):
+        # TODO: let mapclassify.greedy understand Graph
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            W = weights.W.from_sparse(sparr)
+        return mapclassify.greedy(X, sw=W, strategy="balanced", balance="count").values
+
+        # networkX path if the networkx strategy is preferable
+        # pairs = X.sindex.query(
+        #     X,
+        #     predicate="dwithin",
+        #     distance=r,
+        # )
+        # keep = pairs[0] != pairs[1]
+
+        # G = nx.Graph()
+        # G.add_nodes_from(range(len(X)))  # retain isolated geometries
+        # G.add_edges_from(zip(pairs[0, keep], pairs[1, keep], strict=True))
+
+        # coloring = nx.algorithms.coloring.greedy_color(G, strategy="largest_first")
+        # return np.array(list(coloring.values()))
+
+    def get_n_splits(self, X=None, y=None, groups=None):  # noqa: ARG002
         if hasattr(self, "n_splits_"):
             return self.n_splits_
         raise ValueError("Call split(X) first to determine the number of folds.")
