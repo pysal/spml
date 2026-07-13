@@ -1,8 +1,8 @@
 """Shared helpers for the validation subpackage."""
 
-import numpy
-
-import geopandas
+import geopandas as gpd
+import numpy as np
+import pandas as pd
 
 # Maps our kernel names to the equivalent libpysal kernel name.
 LIBPYSAL_KERNEL_MAP: dict[str, str] = {
@@ -15,66 +15,58 @@ LIBPYSAL_KERNEL_MAP: dict[str, str] = {
 }
 
 
-def _to_point_gdf(X) -> geopandas.GeoDataFrame:
+def _to_point_gdf(X) -> gpd.GeoDataFrame:
     from geopandas.array import GeometryArray
 
     if isinstance(X, GeometryArray):
-        gdf = geopandas.GeoDataFrame(geometry=geopandas.GeoSeries(X))
-    elif isinstance(X, geopandas.GeoSeries):
-        gdf = geopandas.GeoDataFrame(geometry=X)
+        gdf = gpd.GeoDataFrame(geometry=gpd.GeoSeries(X))
+    elif isinstance(X, gpd.GeoSeries):
+        gdf = gpd.GeoDataFrame(geometry=X)
     else:
         gdf = X.copy()
 
     if not (gdf.geom_type == "Point").all():
         gdf = gdf.copy()
-        gdf["geometry"] = gdf.geometry.centroid
+        gdf["geometry"] = gdf.centroid
 
     return gdf
 
 
 def _idx_and_is_geo(X):
-    import pandas
-
     from geopandas.array import GeometryArray
 
-    if isinstance(X, (geopandas.GeoDataFrame, geopandas.GeoSeries)):
+    if isinstance(X, (gpd.GeoDataFrame, gpd.GeoSeries)):
         return X.index.to_numpy(), True
 
     if isinstance(X, GeometryArray):
         return None, True
 
-    if isinstance(X, pandas.Series):
+    if isinstance(X, pd.Series):
         return X.index.to_numpy(), False
 
     return None, False
 
 
-def _get_coords(X) -> numpy.ndarray:
-    import pandas
-
+def _get_coords(X) -> np.ndarray:
     from geopandas.array import GeometryArray
 
-    if isinstance(X, geopandas.GeoDataFrame):
-        c = X.geometry.centroid
-        return numpy.column_stack([c.x, c.y])
-
-    if isinstance(X, geopandas.GeoSeries):
+    if isinstance(X, gpd.GeoDataFrame | gpd.GeoSeries):
         c = X.centroid
-        return numpy.column_stack([c.x, c.y])
+        return c.get_coordinates().to_numpy()
 
     if isinstance(X, GeometryArray):
-        c = geopandas.GeoSeries(X).centroid
-        return numpy.column_stack([c.x, c.y])
+        c = gpd.GeoSeries(X).centroid
+        return c.get_coordinates().to_numpy()
 
-    if isinstance(X, pandas.Series):
+    if isinstance(X, pd.Series):
         idx = X.index
-        if isinstance(idx, pandas.DatetimeIndex):
+        if isinstance(idx, pd.DatetimeIndex):
             t = (idx - idx[0]).total_seconds().to_numpy()
         else:
-            t = numpy.asarray(idx, dtype=float)
+            t = np.asarray(idx, dtype=float)
         return t.reshape(-1, 1)
 
-    arr = numpy.asarray(X, dtype=float)
+    arr = np.asarray(X, dtype=float)
 
     if arr.ndim == 1:
         return arr.reshape(-1, 1)
@@ -96,7 +88,7 @@ def _assign_noise_to_nearest(coords, labels, noise_label, clusterer=None):
     ``_get_coords`` returns ``(lon, lat)`` in degrees while sklearn's haversine
     implementation expects ``(lat, lon)`` in radians, the coordinates are
     converted automatically.
-    """
+    """  # noqa: E501
     from sklearn.neighbors import NearestNeighbors
 
     noise_mask = labels == noise_label
@@ -111,8 +103,9 @@ def _assign_noise_to_nearest(coords, labels, noise_label, clusterer=None):
         metric = clusterer.metric
         metric_params = getattr(clusterer, "metric_params", None) or {}
         if metric == "haversine":
-            # _get_coords returns (lon, lat) in degrees; haversine needs (lat, lon) in radians
-            fit_coords = numpy.radians(coords[:, [1, 0]])
+            # _get_coords returns (lon, lat) in degrees;
+            # haversine needs (lat, lon) in radians
+            fit_coords = np.radians(coords[:, [1, 0]])
 
     non_noise_mask = ~noise_mask
     nn_kw = dict(n_neighbors=1, metric=metric)
@@ -128,10 +121,10 @@ def _assign_noise_to_nearest(coords, labels, noise_label, clusterer=None):
 
 
 KERNELS: dict = {
-    "gaussian": lambda t: numpy.exp(-0.5 * t ** 2),
-    "exponential": lambda t: numpy.exp(-t),
-    "bisquare": lambda t: numpy.where(t < 1.0, (1.0 - t ** 2) ** 2, 0.0),
-    "triangular": lambda t: numpy.where(t < 1.0, 1.0 - t, 0.0),
-    "uniform": lambda t: numpy.where(t < 1.0, 1.0, 0.0),
-    "parabolic": lambda t: numpy.where(t < 1.0, 0.75 * (1.0 - t ** 2), 0.0),
+    "gaussian": lambda t: np.exp(-0.5 * t**2),
+    "exponential": lambda t: np.exp(-t),
+    "bisquare": lambda t: np.where(t < 1.0, (1.0 - t**2) ** 2, 0.0),
+    "triangular": lambda t: np.where(t < 1.0, 1.0 - t, 0.0),
+    "uniform": lambda t: np.where(t < 1.0, 1.0, 0.0),
+    "parabolic": lambda t: np.where(t < 1.0, 0.75 * (1.0 - t**2), 0.0),
 }

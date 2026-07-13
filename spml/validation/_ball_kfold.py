@@ -13,11 +13,12 @@ import warnings
 import geopandas as gpd
 import numpy as np
 from libpysal import weights
+from sklearn.model_selection import BaseCrossValidator
 
 from ._utils import _get_coords
 
 
-class BallKFold:
+class BallKFold(BaseCrossValidator):
     """Spatially exclusive k-fold cross-validator.
 
     Assigns observations to folds such that no two observations in the
