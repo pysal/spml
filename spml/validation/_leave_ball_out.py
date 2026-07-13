@@ -9,12 +9,12 @@ References
 """
 
 import numpy
-from sklearn.base import BaseEstimator
+from sklearn.model_selection import BaseCrossValidator
 
 from ._utils import _get_coords
 
 
-class LeaveBallOut(BaseEstimator):
+class LeaveBallOut(BaseCrossValidator):
     """Buffered leave-one-out cross-validator.
 
     For each observation i the test set is ``{i}`` and the training set
@@ -51,7 +51,7 @@ class LeaveBallOut(BaseEstimator):
     def __init__(self, radius: float):
         self.radius = radius
 
-    def split(self, X, y=None, groups=None):
+    def split(self, X, y=None, groups=None):  # noqa: ARG002
         """Yield ``(train_indices, test_indices)`` for each observation.
 
         Parameters
@@ -67,12 +67,12 @@ class LeaveBallOut(BaseEstimator):
         test : ndarray of int
             Single-element array containing the index of point i.
         """
-        from scipy.spatial import cKDTree
+        from scipy.spatial import KDTree
 
         coords = _get_coords(X)
         n = len(coords)
         r = float(self.radius)
-        tree = cKDTree(coords)
+        tree = KDTree(coords)
         indices = numpy.arange(n)
 
         for i in range(n):
@@ -82,5 +82,5 @@ class LeaveBallOut(BaseEstimator):
             train_mask[buffered] = False
             yield indices[train_mask], numpy.array([i])
 
-    def get_n_splits(self, X, y=None, groups=None) -> int:
+    def get_n_splits(self, X, y=None, groups=None) -> int:  # noqa: ARG002
         return len(X)
