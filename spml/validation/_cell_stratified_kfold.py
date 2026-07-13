@@ -164,11 +164,7 @@ class CellStratifiedKFold(BaseCrossValidator):
             self.resolution_ = self.resolution
             cell_ids = _assign_cells(lonlat, self.grid, self.resolution)
         else:
-            res, cell_ids = (
-                self.resolution
-                if self.resolution is not None
-                else self._auto_resolution(lonlat)
-            )
+            res, cell_ids = self._auto_resolution(lonlat)
             self.resolution_ = res
 
         self.cell_ids_ = cell_ids
