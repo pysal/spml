@@ -8,15 +8,15 @@ References
        https://doi.org/10.1007/s10661-008-0184-y
 """
 
-import numpy
-import geopandas
-from sklearn.base import BaseEstimator
+import geopandas as gpd
+import numpy as np
+from sklearn.model_selection import BaseCrossValidator
 from sklearn.utils import check_random_state
 
 from ._utils import _get_coords
 
 
-def _hilbert_sort(X, level: int = 16) -> numpy.ndarray:
+def _hilbert_sort(X, level: int = 16) -> np.ndarray:
     """Return indices that sort X along the Hilbert curve.
 
     For GeoDataFrame/GeoSeries input, calls ``hilbert_distance()`` directly
@@ -26,23 +26,18 @@ def _hilbert_sort(X, level: int = 16) -> numpy.ndarray:
     """
     from geopandas.array import GeometryArray
 
-    if isinstance(X, geopandas.GeoDataFrame):
-        hd = X.geometry.hilbert_distance(level=level).values
-        return numpy.argsort(hd, kind="stable")
+    if not isinstance(X, gpd.GeoSeries | gpd.GeoDataFrame | GeometryArray):
+        coords = _get_coords(X)
+        if coords.shape[1] == 1:
+            return np.argsort(coords[:, 0])
+        X = gpd.GeoSeries(gpd.points_from_xy(coords[:, 0], coords[:, 1]))
 
-    if isinstance(X, (geopandas.GeoSeries, GeometryArray)):
-        gs = X if isinstance(X, geopandas.GeoSeries) else geopandas.GeoSeries(X)
-        hd = gs.hilbert_distance(level=level).values
-        return numpy.argsort(hd, kind="stable")
-
-    coords = _get_coords(X)
-    if coords.shape[1] == 1:
-        return numpy.argsort(coords[:, 0])
-    gs = geopandas.GeoSeries(geopandas.points_from_xy(coords[:, 0], coords[:, 1]))
-    return numpy.argsort(gs.hilbert_distance(level=level).values, kind="stable")
+    gs = X if isinstance(X, gpd.GeoSeries | gpd.GeoDataFrame) else gpd.GeoSeries(X)
+    hd = gs.hilbert_distance(level=level).values
+    return np.argsort(hd, kind="stable")
 
 
-class HilbertKFold(BaseEstimator):
+class HilbertKFold(BaseCrossValidator):
     """Spatially balanced k-fold cross-validator via Hilbert curve ordering. [1]
 
     Partitions observations into *n_splits* folds such that each fold is a
@@ -86,7 +81,7 @@ class HilbertKFold(BaseEstimator):
         self.level = level
         self.random_state = random_state
 
-    def split(self, X, y=None, groups=None):
+    def split(self, X, y=None, groups=None):  # noqa: ARG002
         """Yield ``(train_indices, test_indices)`` for each spatial fold.
 
         Parameters
@@ -111,21 +106,21 @@ class HilbertKFold(BaseEstimator):
         # Assign fold IDs in bands of k along the Hilbert curve, with a
         # random within-band shuffle for reproducible but non-deterministic
         # fold membership.
-        band_labels = numpy.empty(n, dtype=int)
+        band_labels = np.empty(n, dtype=int)
         for start in range(0, n, k):
             end = min(start + k, n)
-            band = numpy.arange(end - start)
+            band = np.arange(end - start)
             rng.shuffle(band)
             band_labels[start:end] = band
 
-        labels = numpy.empty(n, dtype=int)
+        labels = np.empty(n, dtype=int)
         labels[order] = band_labels
 
-        indices = numpy.arange(n)
+        indices = np.arange(n)
         for fold in range(k):
             test = indices[labels == fold]
             train = indices[labels != fold]
             yield train, test
 
-    def get_n_splits(self, X=None, y=None, groups=None) -> int:
+    def get_n_splits(self, X=None, y=None, groups=None) -> int:  # noqa: ARG002
         return self.n_splits

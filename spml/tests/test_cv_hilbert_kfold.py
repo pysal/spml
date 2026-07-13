@@ -1,6 +1,6 @@
-import numpy
+import geopandas as gpd
+import numpy as np
 import pytest
-import geopandas
 from shapely.geometry import Point
 
 from spml.validation import HilbertKFold
@@ -9,12 +9,11 @@ from spml.validation import HilbertKFold
 @pytest.fixture
 def grid_gdf():
     """5 * 5 regular grid of points."""
-    return geopandas.GeoDataFrame(
-        geometry=[Point(x, y) for x in range(5) for y in range(5)]
-    )
+    return gpd.GeoDataFrame(geometry=[Point(x, y) for x in range(5) for y in range(5)])
 
 
 # -- Basic split behaviour -----------------------------------------------------
+
 
 def test_correct_number_of_folds(grid_gdf):
     splits = list(HilbertKFold(n_splits=5, random_state=0).split(grid_gdf))
@@ -24,8 +23,8 @@ def test_correct_number_of_folds(grid_gdf):
 def test_train_test_partition(grid_gdf):
     n = len(grid_gdf)
     for train, test in HilbertKFold(n_splits=5, random_state=0).split(grid_gdf):
-        assert len(set(train) & set(test)) == 0         # disjoint
-        assert len(set(train) | set(test)) == n         # exhaustive
+        assert len(set(train) & set(test)) == 0  # disjoint
+        assert len(set(train) | set(test)) == n  # exhaustive
 
 
 def test_non_empty_folds(grid_gdf):
@@ -40,8 +39,9 @@ def test_get_n_splits():
 
 # -- Input types ---------------------------------------------------------------
 
+
 def test_array_input():
-    coords = numpy.random.default_rng(0).uniform(0, 10, (30, 2))
+    coords = np.random.default_rng(0).uniform(0, 10, (30, 2))
     splits = list(HilbertKFold(n_splits=3, random_state=0).split(coords))
     assert len(splits) == 3
 
@@ -52,6 +52,7 @@ def test_geoseries_input(grid_gdf):
 
 
 # -- Spatial balance -----------------------------------------------------------
+
 
 def test_folds_are_spatially_balanced(grid_gdf):
     """Each fold should cover the full spatial extent (well-mixed, not clustered).
@@ -70,10 +71,10 @@ def test_folds_are_spatially_balanced(grid_gdf):
 
 def test_within_fold_spread_greater_than_random(grid_gdf):
     """Mean within-fold nearest-neighbour distance should exceed random k-fold."""
-    from sklearn.model_selection import KFold
     from scipy.spatial.distance import cdist
+    from sklearn.model_selection import KFold
 
-    coords = numpy.column_stack([grid_gdf.geometry.x, grid_gdf.geometry.y])
+    coords = np.column_stack([grid_gdf.geometry.x, grid_gdf.geometry.y])
 
     def mean_min_dist(splits):
         dists = []
@@ -81,19 +82,20 @@ def test_within_fold_spread_greater_than_random(grid_gdf):
             if len(test) < 2:
                 continue
             D = cdist(coords[test], coords[test])
-            numpy.fill_diagonal(D, numpy.inf)
+            np.fill_diagonal(D, np.inf)
             dists.append(D.min(axis=1).mean())
-        return numpy.mean(dists)
+        return np.mean(dists)
 
     skf = HilbertKFold(n_splits=5, random_state=0)
     rkf = KFold(n_splits=5, shuffle=True, random_state=0)
 
     spatial_d = mean_min_dist(skf.split(grid_gdf))
-    random_d  = mean_min_dist(rkf.split(coords))
+    random_d = mean_min_dist(rkf.split(coords))
     assert spatial_d > random_d
 
 
 # -- Edge cases ----------------------------------------------------------------
+
 
 def test_too_many_splits_raises(grid_gdf):
     with pytest.raises(ValueError, match="n_splits"):
@@ -103,27 +105,20 @@ def test_too_many_splits_raises(grid_gdf):
 def test_reproducible(grid_gdf):
     s1 = list(HilbertKFold(n_splits=5, random_state=7).split(grid_gdf))
     s2 = list(HilbertKFold(n_splits=5, random_state=7).split(grid_gdf))
-    for (tr1, te1), (tr2, te2) in zip(s1, s2):
-        numpy.testing.assert_array_equal(tr1, tr2)
-        numpy.testing.assert_array_equal(te1, te2)
+    for (tr1, te1), (tr2, te2) in zip(s1, s2, strict=False):
+        np.testing.assert_array_equal(tr1, tr2)
+        np.testing.assert_array_equal(te1, te2)
 
 
 # -- sklearn compat ------------------------------------------------------------
 
-def test_get_params():
-    p = HilbertKFold(n_splits=3, random_state=1).get_params()
-    assert p["n_splits"] == 3
-    assert p["random_state"] == 1
-    assert "level" in p
-
 
 def test_works_with_cross_val_score(grid_gdf):
-    from sklearn.model_selection import cross_val_score
     from sklearn.dummy import DummyClassifier
-    import numpy
+    from sklearn.model_selection import cross_val_score
 
-    X = numpy.column_stack([grid_gdf.geometry.x, grid_gdf.geometry.y])
-    y = numpy.zeros(len(grid_gdf), dtype=int)
+    X = np.column_stack([grid_gdf.geometry.x, grid_gdf.geometry.y])
+    y = np.zeros(len(grid_gdf), dtype=int)
 
     skf = HilbertKFold(n_splits=5, random_state=0)
     scores = cross_val_score(DummyClassifier(), X, y, cv=skf)
