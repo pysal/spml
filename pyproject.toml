@@ -50,6 +50,7 @@ ignore = [
     "N803", 
     "N806", # name {} should be lowercase
     "C408", # dict as literal
+    "C420", # dict.from_iterable 
     ] 
 
 [tool.ruff.lint.per-file-ignores]
