@@ -46,7 +46,11 @@ extend-include = ["*.ipynb"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "N", "B", "A", "C4", "SIM", "ARG"]
-ignore = ["N803", "N806"] # name {} should be lowercase
+ignore = [
+    "N803", 
+    "N806", # name {} should be lowercase
+    "C408", # dict as literal
+    ] 
 
 [tool.ruff.lint.per-file-ignores]
  "*__init__.py" = [

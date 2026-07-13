@@ -1,32 +1,31 @@
 """Discrete global grid system stratified k-fold cross-validation."""
 
-import numpy
-from sklearn.base import BaseEstimator
-from sklearn.model_selection import StratifiedKFold
-
+import geopandas as gpd
+import numpy as np
+from sklearn.model_selection import BaseCrossValidator, StratifiedKFold
 
 _GRIDS = ("h3", "a5", "healpix", "s2")
 
 # Resolution sequences to scan when auto-detecting (coarse -> fine)
 _RES_RANGES = {
-    "h3":      range(0, 16),
-    "a5":      range(0, 31),
-    "s2":      range(0, 31),
-    "healpix": range(0, 14),   # resolution n means nside = 2**n
+    "h3": range(0, 16),
+    "a5": range(0, 31),
+    "s2": range(0, 31),
+    "healpix": range(0, 14),  # resolution n means nside = 2**n
 }
 
 
 def _to_lonlat(X):
     """Return (n, 2) float64 array of [longitude, latitude] in WGS84 degrees."""
-    import geopandas
 
-    if isinstance(X, (geopandas.GeoDataFrame, geopandas.GeoSeries)):
-        geom = X.geometry if isinstance(X, geopandas.GeoDataFrame) else X
+    if isinstance(X, (gpd.GeoDataFrame, gpd.GeoSeries)):
+        geom = X.geometry
         if geom.crs is not None and not geom.crs.equals("EPSG:4326"):
             geom = geom.to_crs("EPSG:4326")
-        pts = geom.centroid
-        return numpy.column_stack([pts.x, pts.y])
-    arr = numpy.asarray(X, dtype=float)
+        pts = geom.representative_point()
+        return pts.get_coordinates().to_numpy()
+
+    arr = np.asarray(X, dtype=float)
     if arr.ndim == 2 and arr.shape[1] == 2:
         return arr
     raise ValueError("Array input must be (n, 2) with columns [longitude, latitude].")
@@ -35,32 +34,39 @@ def _to_lonlat(X):
 def _assign_cells(lonlat, grid, resolution):
     if grid == "h3":
         import h3
-        return numpy.array([
-            h3.latlng_to_cell(lat, lon, resolution) for lon, lat in lonlat
-        ])
+
+        return np.array(
+            [h3.latlng_to_cell(lat, lon, resolution) for lon, lat in lonlat]
+        )
     if grid == "a5":
-        from a5 import lonlat_to_cell
-        return numpy.array([
-            lonlat_to_cell([lon, lat], resolution) for lon, lat in lonlat
-        ])
+        import a5
+
+        return np.array(
+            [a5.lonlat_to_cell([lon, lat], resolution) for lon, lat in lonlat]
+        )
     if grid == "healpix":
         import healpy
+
         nside = 1 << resolution  # 2**resolution
-        theta = numpy.radians(90.0 - lonlat[:, 1])
-        phi = numpy.radians(lonlat[:, 0] % 360.0)
+        theta = np.radians(90.0 - lonlat[:, 1])
+        phi = np.radians(lonlat[:, 0] % 360.0)
         return healpy.ang2pix(nside, theta, phi)
     if grid == "s2":
+        # TODO: s2sphere has been archived 3 years ago, I would not rely on it.
+        # TODO: https://github.com/sidewalklabs/s2sphere.
+        # TODO: The latest release is from 2017.
         import s2sphere
+
         cells = []
         for lon, lat in lonlat:
             cid = s2sphere.CellId.from_lat_lng(
                 s2sphere.LatLng.from_degrees(lat, lon)
             ).parent(resolution)
             cells.append(cid.id())
-        return numpy.array(cells)
+        return np.array(cells)
 
 
-class CellStratifiedKFold(BaseEstimator):
+class CellStratifiedKFold(BaseCrossValidator):
     """Stratified k-fold cross-validator using a discrete global grid system.
 
     Each observation is indexed to a DGGS cell.  Cell membership becomes
@@ -116,8 +122,9 @@ class CellStratifiedKFold(BaseEstimator):
     ...     score = model.score(X[test], y[test])
     """
 
-    def __init__(self, n_splits=5, grid="h3", resolution=None,
-                 shuffle=False, random_state=None):
+    def __init__(
+        self, n_splits=5, grid="h3", resolution=None, shuffle=False, random_state=None
+    ):
         self.n_splits = n_splits
         self.grid = grid
         self.resolution = resolution
@@ -128,13 +135,13 @@ class CellStratifiedKFold(BaseEstimator):
         for res in _RES_RANGES[self.grid]:
             cells = _assign_cells(lonlat, self.grid, res)
             if len(set(cells)) >= self.n_splits:
-                return res
+                return res, cells
         raise ValueError(
             f"No {self.grid!r} resolution yields >= {self.n_splits} occupied "
             "cells. Try fewer n_splits or a different grid."
         )
 
-    def split(self, X, y=None, groups=None):
+    def split(self, X, y=None, groups=None):  # noqa: ARG002
         """Yield ``(train_indices, test_indices)`` for each fold.
 
         Parameters
@@ -152,14 +159,23 @@ class CellStratifiedKFold(BaseEstimator):
         if self.grid not in _GRIDS:
             raise ValueError(f"grid must be one of {_GRIDS}, got {self.grid!r}")
         lonlat = _to_lonlat(X)
-        res = self.resolution if self.resolution is not None else self._auto_resolution(lonlat)
-        self.resolution_ = res
-        cell_ids = _assign_cells(lonlat, self.grid, res)
+
+        if self.resolution is not None:
+            self.resolution_ = self.resolution
+            cell_ids = _assign_cells(lonlat, self.grid, self.resolution)
+        else:
+            res, cell_ids = (
+                self.resolution
+                if self.resolution is not None
+                else self._auto_resolution(lonlat)
+            )
+            self.resolution_ = res
+
         self.cell_ids_ = cell_ids
         skf = StratifiedKFold(
             n_splits=self.n_splits, shuffle=self.shuffle, random_state=self.random_state
         )
         yield from skf.split(lonlat, cell_ids)
 
-    def get_n_splits(self, X=None, y=None, groups=None):
+    def get_n_splits(self, X=None, y=None, groups=None):  # noqa: ARG002
         return self.n_splits
