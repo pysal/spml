@@ -325,6 +325,32 @@ def test_cross_reproducible(line_gdf, donor_gdf):
         numpy.testing.assert_array_equal(a["value"].values, b["value"].values)
 
 
+# -- coplanar --------------------------------------------------------------------
+
+def test_k_coplanar_raise_by_default():
+    """Duplicate-location points with k= raise a CoplanarError by default."""
+    from libpysal.graph._utils import CoplanarError
+
+    gdf = geopandas.GeoDataFrame(
+        geometry=[Point(0, 0), Point(0, 0), Point(1, 0), Point(5, 0)]
+    )
+    with pytest.raises(CoplanarError):
+        list(LocalBootstrap(k=1, n_bootstraps=1, random_state=0).sample(gdf))
+
+
+def test_k_coplanar_jitter_avoids_error():
+    """coplanar='jitter' resolves duplicate locations instead of raising."""
+    gdf = geopandas.GeoDataFrame(
+        geometry=[Point(0, 0), Point(0, 0), Point(1, 0), Point(5, 0)]
+    )
+    boots = list(
+        LocalBootstrap(
+            k=1, n_bootstraps=1, coplanar="jitter", random_state=0
+        ).sample(gdf)
+    )
+    assert boots[0].shape == (4,)
+
+
 # -- sklearn API ---------------------------------------------------------------
 
 def test_get_params():

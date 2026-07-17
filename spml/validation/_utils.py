@@ -15,23 +15,6 @@ LIBPYSAL_KERNEL_MAP: dict[str, str] = {
 }
 
 
-def _to_point_gdf(X) -> gpd.GeoDataFrame:
-    from geopandas.array import GeometryArray
-
-    if isinstance(X, GeometryArray):
-        gdf = gpd.GeoDataFrame(geometry=gpd.GeoSeries(X))
-    elif isinstance(X, gpd.GeoSeries):
-        gdf = gpd.GeoDataFrame(geometry=X)
-    else:
-        gdf = X.copy()
-
-    if not (gdf.geom_type == "Point").all():
-        gdf = gdf.copy()
-        gdf["geometry"] = gdf.centroid
-
-    return gdf
-
-
 def _idx_and_is_geo(X):
     from geopandas.array import GeometryArray
 

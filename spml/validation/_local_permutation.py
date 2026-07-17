@@ -12,15 +12,14 @@ from sklearn.base import BaseEstimator
 from sklearn.utils import check_random_state
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import min_weight_full_bipartite_matching
-from scipy.spatial import cKDTree
 
 from ._utils import (
     _get_coords,
-    _to_point_gdf,
     _idx_and_is_geo,
-    KERNELS,
     LIBPYSAL_KERNEL_MAP,
 )
+
+_COPLANAR_OPTIONS = ("raise", "jitter", "clique")
 
 
 class LocalPermutation(BaseEstimator):
@@ -52,6 +51,12 @@ class LocalPermutation(BaseEstimator):
     *graph*
         Every directly-connected pair may swap; stored edge weights
         drive the proposal distribution.
+
+    *bandwidth* and *k* adjacencies (when *graph* is not given) are
+    always built via ``libpysal.graph.Graph.build_kernel`` -- for *k*,
+    using ``bandwidth='adaptive'``.  1-D/time-series input is handled by
+    the same code path: the coordinate is duplicated into a second
+    column so libpysal's 2-D machinery applies unchanged.
 
     Algorithm
     ---------
@@ -90,12 +95,15 @@ class LocalPermutation(BaseEstimator):
     graph : libpysal.graph.Graph or None
         Pre-built spatial weights (must expose ``.sparse``).  Edge
         weights drive proposals.  Overrides *bandwidth* and *k*.
+    coplanar : str, default 'raise'
+        How to handle coincident (duplicate-location) points when *k* is
+        given, passed straight through to ``libpysal.graph.Graph.build_kernel``.
     random_state : int, RandomState instance, or None
 
     Raises
     ------
     ValueError
-        If no valid (de)rangement exists for the given constraints, or
+        If no valid derangement exists for the given constraints, or
         if neither *bandwidth*, *k*, nor *graph* is supplied.
 
     Examples
@@ -123,6 +131,7 @@ class LocalPermutation(BaseEstimator):
         n_permutations: int = 99,
         n_burn: int | None = None,
         graph=None,
+        coplanar: str = "raise",
         random_state=None,
     ):
         if bandwidth is not None and k is not None:
@@ -143,6 +152,7 @@ class LocalPermutation(BaseEstimator):
         self.n_permutations = n_permutations
         self.n_burn = n_burn
         self.graph = graph
+        self.coplanar = coplanar
         self.random_state = random_state
 
     def _resolve_auto(self, X, y):
@@ -183,7 +193,6 @@ class LocalPermutation(BaseEstimator):
         self
         """
         bw, k = self._resolve_auto(X, y)
-        _, is_geo = _idx_and_is_geo(X)
 
         if self.graph is not None:
             n = self._n_from_graph(self.graph)
@@ -192,11 +201,17 @@ class LocalPermutation(BaseEstimator):
             )
             self.graph_ = self.graph
         elif bw is not None or k is not None:
-            if self.kernel not in KERNELS:
+            if self.kernel not in LIBPYSAL_KERNEL_MAP:
                 raise ValueError(
-                    f"Unknown kernel '{self.kernel}'. Choose from: {sorted(KERNELS)}."
+                    f"Unknown kernel '{self.kernel}'. "
+                    f"Choose from: {sorted(LIBPYSAL_KERNEL_MAP)}."
                 )
-            adj_csr, adj_sets, edge_i, edge_j, cumw = self._kernel_adj(X, is_geo, bw, k)
+            if self.coplanar not in _COPLANAR_OPTIONS:
+                raise ValueError(
+                    f"coplanar must be one of {_COPLANAR_OPTIONS}; "
+                    f"got {self.coplanar!r}."
+                )
+            adj_csr, adj_sets, edge_i, edge_j, cumw = self._kernel_adj(X, bw, k)
         else:
             raise ValueError("Specify one of 'bandwidth', 'k', or a pre-built 'graph'.")
 
@@ -235,7 +250,7 @@ class LocalPermutation(BaseEstimator):
                 )
             self.fit(X)
 
-        idx, is_geo = _idx_and_is_geo(X)
+        idx, _ = _idx_and_is_geo(X)
         n = self._adj_csr_.shape[0]
         n_burn = self.n_burn if self.n_burn is not None else 10 * n
         perm = self._initial_permutation(self._adj_csr_, n, rng)
@@ -257,106 +272,45 @@ class LocalPermutation(BaseEstimator):
     # Adjacency builders
     # ------------------------------------------------------------------
 
-    def _kernel_adj(self, X, is_geo, bw, k):
-        """Dispatch to bandwidth or k-NN kernel-weighted adjacency builder."""
-        if k is not None:
-            return self._knn_adj(X, k)
-        if is_geo:
-            from libpysal.graph import Graph
+    def _kernel_adj(self, X, bw, k):
+        """Build a kernel-weighted adjacency via libpysal.graph.Graph.build_kernel.
 
-            point_gdf = _to_point_gdf(X)
+        1-D/time-series input is duplicated into a second column so the
+        same 2-D machinery applies unchanged; Euclidean distance on that
+        duplicated array is a constant (sqrt(2)) multiple of the 1-D
+        distance, which cancels exactly under the k-NN adaptive bandwidth
+        and is compensated for explicitly for a fixed *bw*.
+        """
+        from libpysal.graph import Graph
+
+        coords = _get_coords(X)
+        n = len(coords)
+        if coords.shape[1] == 1:
+            coords = numpy.column_stack([coords[:, 0], coords[:, 0]])
+            if k is None:
+                bw = bw * numpy.sqrt(2)
+
+        if k is not None:
+            directed = Graph.build_kernel(
+                coords,
+                k=k,
+                bandwidth="adaptive",
+                kernel=LIBPYSAL_KERNEL_MAP[self.kernel],
+                coplanar=self.coplanar,
+            )
+            # Symmetrise: union of both directions, summing weights where
+            # both directions are already present.
+            W = directed.sparse
+            sym = (W + W.T).tocoo()
+            graph = Graph.from_arrays(sym.row, sym.col, sym.data)
+        else:
             graph = Graph.build_kernel(
-                point_gdf,
+                coords,
                 bandwidth=bw,
                 kernel=LIBPYSAL_KERNEL_MAP[self.kernel],
+                coplanar=self.coplanar,
             )
-            return self._adj_from_graph(graph, len(point_gdf))
-        return self._bandwidth_adj_1d(X, bw)
-
-    def _bandwidth_adj_1d(self, X, bandwidth):
-        """Kernel-weighted adjacency for 1-D (array/Series) input."""
-        coords = _get_coords(X)
-        n = len(coords)
-        tree = cKDTree(coords)
-
-        D = tree.sparse_distance_matrix(
-            tree, max_distance=bandwidth, output_type="coo_matrix"
-        )
-        off_diag = D.row != D.col
-        rows = D.row[off_diag]
-        cols = D.col[off_diag]
-        weights = KERNELS[self.kernel](D.data[off_diag] / bandwidth)
-
-        nonzero = weights > 0
-        rows, cols, weights = rows[nonzero], cols[nonzero], weights[nonzero]
-
-        upper = rows < cols
-        edge_i = rows[upper]
-        edge_j = cols[upper]
-        cumw = numpy.cumsum(weights[upper])
-
-        if not self.derangement:
-            diag = numpy.arange(n)
-            rows = numpy.concatenate([rows, diag])
-            cols = numpy.concatenate([cols, diag])
-
-        data = numpy.ones(len(rows), dtype=bool)
-        adj_csr = csr_matrix((data, (rows, cols)), shape=(n, n))
-        adj_csr.sum_duplicates()
-        adj_sets = self._sets_from_pairs(rows, cols, n)
-        return adj_csr, adj_sets, edge_i, edge_j, cumw
-
-    def _knn_adj(self, X, k):
-        """k-NN kernel-weighted adjacency (adaptive bandwidth, symmetrised)."""
-        from scipy.sparse import coo_matrix
-
-        coords = _get_coords(X)
-        n = len(coords)
-        tree = cKDTree(coords)
-
-        distances, indices = tree.query(coords, k=k + 1)
-        distances = distances[:, 1:]  # drop self (d=0)
-        indices = indices[:, 1:]
-
-        bw = distances[:, -1:] + 1e-10
-        weights = KERNELS[self.kernel](distances / bw)  # (n, k)
-
-        row = numpy.repeat(numpy.arange(n), k)
-        col = indices.ravel()
-        w = weights.ravel()
-
-        nonzero = w > 0
-        row, col, w = row[nonzero], col[nonzero], w[nonzero]
-
-        # Symmetrise by adding both directions; sum_duplicates merges them
-        sym_row = numpy.concatenate([row, col])
-        sym_col = numpy.concatenate([col, row])
-        sym_w = numpy.concatenate([w, w])
-
-        W = coo_matrix((sym_w, (sym_row, sym_col)), shape=(n, n)).tocsr()
-        W.sum_duplicates()
-        W_coo = W.tocoo()
-
-        off_diag = W_coo.row != W_coo.col
-        r = W_coo.row[off_diag]
-        c = W_coo.col[off_diag]
-        wt = W_coo.data[off_diag]
-
-        upper = r < c
-        edge_i = r[upper]
-        edge_j = c[upper]
-        cumw = numpy.cumsum(wt[upper])
-
-        if not self.derangement:
-            diag = numpy.arange(n)
-            r = numpy.concatenate([r, diag])
-            c = numpy.concatenate([c, diag])
-
-        data = numpy.ones(len(r), dtype=bool)
-        adj_csr = csr_matrix((data, (r, c)), shape=(n, n))
-        adj_csr.sum_duplicates()
-        adj_sets = self._sets_from_pairs(r, c, n)
-        return adj_csr, adj_sets, edge_i, edge_j, cumw
+        return self._adj_from_graph(graph, n)
 
     def _adj_from_graph(self, graph, n: int):
         """Weighted adjacency from a pre-built graph."""

@@ -12,15 +12,15 @@ import geopandas
 from sklearn.base import BaseEstimator
 from sklearn.utils import check_random_state
 from scipy.sparse import diags
-from scipy.spatial.distance import cdist
 
 from ._utils import (
     _get_coords,
-    _to_point_gdf,
     _idx_and_is_geo,
     KERNELS,
     LIBPYSAL_KERNEL_MAP,
 )
+
+_COPLANAR_OPTIONS = ("raise", "jitter", "clique")
 
 
 class LocalBootstrap(BaseEstimator):
@@ -55,14 +55,24 @@ class LocalBootstrap(BaseEstimator):
     graph : libpysal.graph.Graph or None
         Pre-built spatial weights (must expose ``.sparse``).
         Overrides *bandwidth* / *kernel*.
+    coplanar : str, default 'raise'
+        How to handle coincident (duplicate-location) points when *k* is
+        given, passed straight through to
+        ``libpysal.graph.Graph.build_kernel``.  One of ``'raise'`` (error
+        on any duplicate location), ``'jitter'`` (randomly perturb
+        duplicates before the k-NN search), or ``'clique'`` (fully connect
+        same-location points to each other).  Ignored when only
+        *bandwidth* is given (no k-NN search is performed).
     random_state : int, RandomState instance, or None
 
     Notes
     -----
-    When input is a GeoDataFrame/GeoSeries and a supported kernel is given,
-    a libpysal Graph is built internally -- the weight matrix stays sparse.
-    The dense O(n**2) path is used only for raw array inputs or when kernel is
-    ``'exponential'`` (not supported by libpysal).
+    Self-sampling weights (``graph=`` not given) are always built via
+    ``libpysal.graph.Graph.build_kernel`` -- for *k*, this uses
+    ``bandwidth='adaptive'`` (each point's own distance to its k-th
+    neighbour); for *bandwidth*, a fixed-radius kernel.  1-D/time-series
+    input is handled by the same code path: the coordinate is duplicated
+    into a second column so libpysal's 2-D machinery applies unchanged.
 
     Explored initially in
 
@@ -95,6 +105,7 @@ class LocalBootstrap(BaseEstimator):
         k: int | str | None = None,
         kernel: str = "gaussian",
         graph=None,
+        coplanar: str = "raise",
         random_state=None,
     ):
         if bandwidth is not None and k is not None:
@@ -113,6 +124,7 @@ class LocalBootstrap(BaseEstimator):
         self.k = k
         self.kernel = kernel
         self.graph = graph
+        self.coplanar = coplanar
         self.random_state = random_state
 
     def _resolve_auto(self, X, y):
@@ -149,7 +161,6 @@ class LocalBootstrap(BaseEstimator):
         self
         """
         bw, k = self._resolve_auto(X, y)
-        _, is_geo = _idx_and_is_geo(X)
 
         if self.graph is not None:
             self.graph_ = self.graph
@@ -157,33 +168,39 @@ class LocalBootstrap(BaseEstimator):
 
         if bw is None and k is None:
             raise ValueError("Specify one of 'bandwidth', 'k', or a pre-built 'graph'.")
-        if self.kernel not in KERNELS:
+        if self.kernel not in LIBPYSAL_KERNEL_MAP:
             raise ValueError(
-                f"Unknown kernel '{self.kernel}'. Choose from: {sorted(KERNELS)}."
+                f"Unknown kernel '{self.kernel}'. "
+                f"Choose from: {sorted(LIBPYSAL_KERNEL_MAP)}."
+            )
+        if self.coplanar not in _COPLANAR_OPTIONS:
+            raise ValueError(
+                f"coplanar must be one of {_COPLANAR_OPTIONS}; got {self.coplanar!r}."
             )
 
-        if k is not None:
-            from libpysal.graph import Graph
-
-            coords = _get_coords(X)
-            W_csr = self._knn_weight_csr(coords, coords, k, skip_self=True)
-            coo = W_csr.tocoo()
-            self.graph_ = Graph.from_arrays(coo.row, coo.col, coo.data)
-            return self
-
-        if is_geo:
-            from libpysal.graph import Graph
-
-            point_gdf = _to_point_gdf(X)
-            self.graph_ = Graph.build_kernel(
-                point_gdf,
-                bandwidth=bw,
-                kernel=LIBPYSAL_KERNEL_MAP[self.kernel],
-            )
-            return self
+        from libpysal.graph import Graph
 
         coords = _get_coords(X)
-        self._W_dense_ = self._dense_weight_matrix(coords, bw)
+        if coords.shape[1] == 1:
+            coords = numpy.column_stack([coords[:, 0], coords[:, 0]])
+            if k is None:
+                bw = bw * numpy.sqrt(2)
+
+        if k is not None:
+            self.graph_ = Graph.build_kernel(
+                coords,
+                k=k,
+                bandwidth="adaptive",
+                kernel=LIBPYSAL_KERNEL_MAP[self.kernel],
+                coplanar=self.coplanar,
+            )
+        else:
+            self.graph_ = Graph.build_kernel(
+                coords,
+                bandwidth=bw,
+                kernel=LIBPYSAL_KERNEL_MAP[self.kernel],
+                coplanar=self.coplanar,
+            )
         return self
 
     def sample(self, X, donor=None):
@@ -238,8 +255,7 @@ class LocalBootstrap(BaseEstimator):
                 )
             return self._sample_cross(X, donor, rng, bw, k)
 
-        _fitted = hasattr(self, "graph_") or hasattr(self, "_W_dense_")
-        if not _fitted:
+        if not hasattr(self, "graph_"):
             if self.bandwidth == "auto" or self.k == "auto":
                 raise NotFittedError(
                     f"This {type(self).__name__} instance has bandwidth='auto' "
@@ -247,13 +263,10 @@ class LocalBootstrap(BaseEstimator):
                 )
             self.fit(X)
 
-        idx, is_geo = _idx_and_is_geo(X)
+        idx, _ = _idx_and_is_geo(X)
 
         def _out(positions):
             return idx[positions] if idx is not None else positions
-
-        if hasattr(self, "_W_dense_"):
-            return self._yield_dense(self._W_dense_, rng, _out)
 
         W_csr = self._sparse_weights_from_graph(self.graph_)
         return self._yield_csr(W_csr, rng, _out)
@@ -306,12 +319,13 @@ class LocalBootstrap(BaseEstimator):
         for _ in range(self.n_bootstraps):
             yield out_fn(self._sample_csr(W_csr, rng))
 
-    def _yield_dense(self, W, rng, out_fn):
-        for _ in range(self.n_bootstraps):
-            yield out_fn(self._sample_dense(W, rng))
-
     # ------------------------------------------------------------------
-    # Sparse weight matrix builders
+    # Sparse weight matrix builders -- cross-geometry (X vs donor) only.
+    #
+    # libpysal.graph.Graph has no bipartite construction primitive, so the
+    # donor= cross-sampling path (X and donor are different point sets) stays
+    # on cKDTree. Self-sampling (X == donor) is built entirely through
+    # Graph.build_kernel in fit() instead.
     # ------------------------------------------------------------------
 
     def _knn_weight_csr(
@@ -319,26 +333,18 @@ class LocalBootstrap(BaseEstimator):
         X_coords: numpy.ndarray,
         donor_coords: numpy.ndarray,
         k: int,
-        skip_self: bool = False,
     ):
         """Sparse (|X|, |donor|) CSR weight matrix via k-NN query.
 
         Kernel weights use an adaptive bandwidth equal to the distance to
         the k-th nearest neighbour, so the nearest neighbour always receives
         the maximum weight regardless of absolute distance.
-        When skip_self=True the self-hit (distance 0) is dropped, which is
-        correct for the self-sampling case where X == donor.
         """
         from scipy.spatial import cKDTree
         from scipy.sparse import csr_matrix
 
-        n_query = k + (1 if skip_self else 0)
         tree = cKDTree(donor_coords)
-        distances, indices = tree.query(X_coords, k=n_query)
-
-        if skip_self:
-            distances = distances[:, 1:]
-            indices = indices[:, 1:]
+        distances, indices = tree.query(X_coords, k=k)
 
         n_X = len(X_coords)
         n_donor = len(donor_coords)
@@ -390,23 +396,6 @@ class LocalBootstrap(BaseEstimator):
         W = diags(1.0 / row_sums) @ W
         W.eliminate_zeros()
         return W
-
-    # ------------------------------------------------------------------
-    # Weight matrix builders
-    # ------------------------------------------------------------------
-
-    def _dense_weight_matrix(
-        self, coords: numpy.ndarray, bandwidth: float
-    ) -> numpy.ndarray:
-        """Build a row-normalised (n, n) dense weight matrix."""
-        if coords.shape[1] == 1:
-            D = numpy.abs(coords - coords.T)
-        else:
-            D = cdist(coords, coords)
-        W = KERNELS[self.kernel](D / bandwidth)
-        row_sums = W.sum(axis=1, keepdims=True)
-        row_sums = numpy.where(row_sums == 0, 1.0, row_sums)
-        return W / row_sums
 
     def _sparse_weights_from_graph(self, graph):
         """Return a row-normalised CSR sparse matrix -- stays sparse throughout."""
@@ -471,13 +460,3 @@ class LocalBootstrap(BaseEstimator):
             idx = numpy.searchsorted(cumw, u[i] * cumw[-1])
             result[i] = W_csr.indices[start + min(idx, end - start - 1)]
         return result
-
-    @staticmethod
-    def _sample_dense(W, rng) -> numpy.ndarray:
-        """Draw one index per row from a row-normalised dense weight matrix."""
-        n = W.shape[0]
-        u = rng.uniform(size=n)
-        cumW = W.cumsum(axis=1)
-        return numpy.array(
-            [numpy.searchsorted(cumW[i], u[i]) for i in range(n)], dtype=numpy.intp
-        )
