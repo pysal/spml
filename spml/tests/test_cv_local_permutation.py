@@ -178,6 +178,51 @@ def test_geometry_array_input():
         assert sorted(perm) == list(range(10))
 
 
+# -- k= (adaptive-bandwidth k-NN) -----------------------------------------------
+
+def test_k_valid_permutation(grid_gdf):
+    """k= path: output must still be a valid (de)rangement."""
+    n = len(grid_gdf)
+    lp = LocalPermutation(k=3, derangement=True, n_permutations=10, random_state=0)
+    for perm in lp.sample(grid_gdf):
+        assert sorted(perm) == list(range(n)), "Not a valid permutation"
+        assert not any(perm[i] == i for i in range(n)), "Fixed point in derangement"
+
+
+def test_k_1d_input():
+    """k= path also works for 1-D/time-series input."""
+    t = numpy.arange(10, dtype=float)
+    lp = LocalPermutation(k=2, derangement=True, n_permutations=5, random_state=0)
+    for perm in lp.sample(t):
+        assert sorted(perm) == list(range(10))
+
+
+# -- coplanar --------------------------------------------------------------------
+
+def test_k_coplanar_raise_by_default():
+    """Duplicate-location points with k= raise a CoplanarError by default."""
+    from libpysal.graph._utils import CoplanarError
+
+    gdf = geopandas.GeoDataFrame(
+        geometry=[Point(0, 0), Point(0, 0), Point(1, 0), Point(5, 0)]
+    )
+    lp = LocalPermutation(k=1, n_permutations=1, random_state=0)
+    with pytest.raises(CoplanarError):
+        list(lp.sample(gdf))
+
+
+def test_k_coplanar_jitter_avoids_error():
+    """coplanar='jitter' resolves duplicate locations instead of raising."""
+    gdf = geopandas.GeoDataFrame(
+        geometry=[Point(0, 0), Point(0, 0), Point(1, 0), Point(5, 0)]
+    )
+    lp = LocalPermutation(
+        k=1, derangement=False, n_permutations=1, coplanar="jitter", random_state=0
+    )
+    perm = next(lp.sample(gdf))
+    assert sorted(perm) == list(range(4))
+
+
 # -- sklearn API ---------------------------------------------------------------
 
 def test_no_bandwidth_no_graph_raises():

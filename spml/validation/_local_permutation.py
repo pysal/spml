@@ -299,7 +299,8 @@ class LocalPermutation(BaseEstimator):
                 coplanar=self.coplanar,
             )
             # Symmetrise: union of both directions, summing weights where
-            # both directions are already present.
+            # both directions are already present. Vectorised sparse add --
+            # much faster than Graph.make_symmetric().
             W = directed.sparse
             sym = (W + W.T).tocoo()
             graph = Graph.from_arrays(sym.row, sym.col, sym.data)

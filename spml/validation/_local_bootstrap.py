@@ -345,6 +345,10 @@ class LocalBootstrap(BaseEstimator):
 
         tree = cKDTree(donor_coords)
         distances, indices = tree.query(X_coords, k=k)
+        if k == 1:
+            # cKDTree.query drops the trailing axis when k=1
+            distances = distances.reshape(-1, 1)
+            indices = indices.reshape(-1, 1)
 
         n_X = len(X_coords)
         n_donor = len(donor_coords)

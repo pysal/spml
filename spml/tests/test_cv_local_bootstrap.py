@@ -312,6 +312,18 @@ def test_k_cross_sampling(line_gdf, donor_gdf):
     assert set(boot["value"]).issubset(set(donor_gdf["value"]))
 
 
+def test_k1_cross_sampling(line_gdf, donor_gdf):
+    """k=1 with donor: cKDTree.query squeezes the trailing axis at k=1 --
+    every X row must draw its single nearest donor deterministically."""
+    boot = next(
+        LocalBootstrap(k=1, n_bootstraps=1, random_state=0)
+        .sample(line_gdf, donor=donor_gdf)
+    )
+    assert isinstance(boot, geopandas.GeoDataFrame)
+    numpy.testing.assert_array_equal(boot.index, line_gdf.index)
+    assert set(boot["value"]).issubset(set(donor_gdf["value"]))
+
+
 def test_bandwidth_k_both_raises(line_gdf):
     with pytest.raises(ValueError, match="mutually exclusive"):
         LocalBootstrap(bandwidth=1.0, k=3)
