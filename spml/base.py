@@ -953,7 +953,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         name: Hashable,
         focal_x: np.ndarray,
         model_kwargs: dict,
-    ) -> list[Hashable]:
+    ) -> list:
         """Fit individual local model"""
 
         if self.undersample:
