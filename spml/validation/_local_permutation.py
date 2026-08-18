@@ -7,16 +7,16 @@ References
         https://doi.org/10.1214/22-AOS2233
 """
 
-import numpy
+import numpy as np
+from scipy.sparse import csr_array
+from scipy.sparse.csgraph import min_weight_full_bipartite_matching
 from sklearn.base import BaseEstimator
 from sklearn.utils import check_random_state
-from scipy.sparse import csr_matrix
-from scipy.sparse.csgraph import min_weight_full_bipartite_matching
 
 from ._utils import (
+    LIBPYSAL_KERNEL_MAP,
     _get_coords,
     _idx_and_is_geo,
-    LIBPYSAL_KERNEL_MAP,
 )
 
 _COPLANAR_OPTIONS = ("raise", "jitter", "clique")
@@ -33,43 +33,6 @@ class LocalPermutation(BaseEstimator):
 
     Optionally enforced as a **derangement**: no row may remain at its
     original site.
-
-    Connectivity / proposal weighting
-    -----------------------------------
-    *bandwidth* + *kernel* (default ``'uniform'``)
-        Kernel-weighted adjacency.  With ``kernel='uniform'`` (the
-        default) this is a hard distance cutoff -- binary adjacency,
-        proposals drawn uniformly over edges -- which recovers the
-        classic threshold behaviour.  Smooth kernels (bisquare,
-        gaussian, ...) weight proposals so nearby pairs are proposed
-        more often.
-    *k* + *kernel*
-        k-nearest-neighbour adjacency with an adaptive per-site
-        bandwidth equal to the distance to the k-th neighbour.  The
-        adjacency is symmetrised (union of both directions) and
-        proposals are weighted by the kernel values.
-    *graph*
-        Every directly-connected pair may swap; stored edge weights
-        drive the proposal distribution.
-
-    *bandwidth* and *k* adjacencies (when *graph* is not given) are
-    always built via ``libpysal.graph.Graph.build_kernel`` -- for *k*,
-    using ``bandwidth='adaptive'``.  1-D/time-series input is handled by
-    the same code path: the coordinate is duplicated into a second
-    column so libpysal's 2-D machinery applies unchanged.
-
-    Algorithm
-    ---------
-    1. Build a weighted adjacency: feasible pairs plus proposal weights.
-    2. Find an initial feasible permutation via
-       ``scipy.sparse.csgraph.min_weight_full_bipartite_matching`` on
-       a sparse cost matrix with i.i.d. Uniform[0, 1] weights on
-       feasible pairs -- a random feasible matching without a dense
-       (n, n) array.
-    3. Mix with a **Markov chain**: sample candidate pair (i, j)
-       proportional to edge weight, propose swapping perm[i] <-> perm[j],
-       accept iff both moves stay within the adjacency and neither
-       creates a fixed point.  Run *n_burn* steps between yields.
 
     Parameters
     ----------
@@ -286,9 +249,9 @@ class LocalPermutation(BaseEstimator):
         coords = _get_coords(X)
         n = len(coords)
         if coords.shape[1] == 1:
-            coords = numpy.column_stack([coords[:, 0], coords[:, 0]])
+            coords = np.column_stack([coords[:, 0], coords[:, 0]])
             if k is None:
-                bw = bw * numpy.sqrt(2)
+                bw = bw * np.sqrt(2)
 
         if k is not None:
             directed = Graph.build_kernel(
@@ -317,11 +280,11 @@ class LocalPermutation(BaseEstimator):
         """Weighted adjacency from a pre-built graph."""
         try:
             W = graph.sparse.tocsr().astype(float)
-        except AttributeError:
+        except AttributeError as e:
             raise TypeError(
                 "Expected a libpysal Graph with a '.sparse' attribute "
                 "(scipy sparse matrix)."
-            )
+            ) from e
 
         W_coo = W.tocoo()
         mask = W_coo.data != 0
@@ -335,15 +298,15 @@ class LocalPermutation(BaseEstimator):
         upper = row < col
         edge_i = row[upper]
         edge_j = col[upper]
-        cumw = numpy.cumsum(weights[upper])
+        cumw = np.cumsum(weights[upper])
 
         if not self.derangement:
-            diag = numpy.arange(n)
-            row = numpy.concatenate([row, diag])
-            col = numpy.concatenate([col, diag])
+            diag = np.arange(n)
+            row = np.concatenate([row, diag])
+            col = np.concatenate([col, diag])
 
-        data = numpy.ones(len(row), dtype=bool)
-        adj_csr = csr_matrix((data, (row, col)), shape=(n, n))
+        data = np.ones(len(row), dtype=bool)
+        adj_csr = csr_array((data, (row, col)), shape=(n, n))
         adj_csr.sum_duplicates()
         adj_sets = self._sets_from_pairs(row, col, n)
         return adj_csr, adj_sets, edge_i, edge_j, cumw
@@ -352,7 +315,7 @@ class LocalPermutation(BaseEstimator):
     def _sets_from_pairs(rows, cols, n) -> list:
         """Build a list-of-sets adjacency for O(1) Markov-chain lookups."""
         adj_sets: list[set] = [set() for _ in range(n)]
-        for i, j in zip(rows, cols):
+        for i, j in zip(rows, cols, strict=True):
             adj_sets[i].add(j)
         return adj_sets
 
@@ -360,14 +323,16 @@ class LocalPermutation(BaseEstimator):
     def _n_from_graph(graph) -> int:
         try:
             return graph.n
-        except AttributeError:
-            raise TypeError("Expected a libpysal Graph with a '.sparse' attribute.")
+        except AttributeError as e:
+            raise TypeError(
+                "Expected a libpysal Graph with a '.sparse' attribute."
+            ) from e
 
     # ------------------------------------------------------------------
     # Initial permutation -- sparse assignment
     # ------------------------------------------------------------------
 
-    def _initial_permutation(self, adj_csr, n: int, rng) -> numpy.ndarray:
+    def _initial_permutation(self, adj_csr, n: int, rng) -> np.ndarray:
         """Find a random feasible matching via min_weight_full_bipartite_matching.
 
         Assigns i.i.d. Uniform[0,1] weights to feasible pairs so the
@@ -376,11 +341,11 @@ class LocalPermutation(BaseEstimator):
         """
         rows, cols = adj_csr.nonzero()
         weights = rng.uniform(0.0, 1.0, len(rows)).astype(float)
-        cost_csr = csr_matrix((weights, (rows, cols)), shape=(n, n))
+        cost_csr = csr_array((weights, (rows, cols)), shape=(n, n))
 
         try:
             row_ind, col_ind = min_weight_full_bipartite_matching(cost_csr)
-        except ValueError:
+        except ValueError as e:
             kind = "derangement" if self.derangement else "permutation"
             src = (
                 "the supplied graph"
@@ -393,9 +358,9 @@ class LocalPermutation(BaseEstimator):
                 f"No valid constrained {kind} exists within {src}.  "
                 "Increase bandwidth/k, use a denser graph, or set "
                 "derangement=False."
-            )
+            ) from e
 
-        perm = numpy.empty(n, dtype=int)
+        perm = np.empty(n, dtype=int)
         perm[row_ind] = col_ind
         return perm
 
@@ -405,14 +370,14 @@ class LocalPermutation(BaseEstimator):
 
     def _markov_mix(
         self,
-        perm: numpy.ndarray,
+        perm: np.ndarray,
         adj_sets: list,
-        edge_i: numpy.ndarray,
-        edge_j: numpy.ndarray,
-        cumw: numpy.ndarray,
+        edge_i: np.ndarray,
+        edge_j: np.ndarray,
+        cumw: np.ndarray,
         n_steps: int,
         rng,
-    ) -> numpy.ndarray:
+    ) -> np.ndarray:
         """Random-transposition Markov chain with edge-weighted proposals.
 
         Samples candidate pair (i, j) proportional to graph edge weight
@@ -426,7 +391,7 @@ class LocalPermutation(BaseEstimator):
         total_w = float(cumw[-1])
 
         for _ in range(n_steps):
-            idx = numpy.searchsorted(cumw, rng.uniform() * total_w)
+            idx = np.searchsorted(cumw, rng.uniform() * total_w)
             i, j = int(edge_i[idx]), int(edge_j[idx])
             vi, vj = perm[i], perm[j]
 
