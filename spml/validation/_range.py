@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import warnings
 
-import numpy
+import numpy as np
 from sklearn.utils import check_random_state
 
 from ._utils import _get_coords
@@ -60,7 +60,7 @@ def correlogram_range(
 
     rng = check_random_state(random_state)
     coords = _get_coords(X)
-    y = numpy.asarray(y, dtype=float)
+    y = np.asarray(y, dtype=float)
 
     if len(coords) != len(y):
         raise ValueError("X and y must have the same length.")
@@ -83,14 +83,14 @@ def correlogram_range(
         max_distance = float(dists.max()) / 2.0
 
     # Pairwise z-score products for the upper triangle
-    iu = numpy.triu_indices(n, k=1)
-    prods = numpy.outer(y_z, y_z)[iu]
+    iu = np.triu_indices(n, k=1)
+    prods = np.outer(y_z, y_z)[iu]
 
-    bins = numpy.linspace(0.0, max_distance, n_bins + 1)
+    bins = np.linspace(0.0, max_distance, n_bins + 1)
     bin_centers = 0.5 * (bins[:-1] + bins[1:])
-    bin_corrs = numpy.full(n_bins, numpy.nan)
+    bin_corrs = np.full(n_bins, np.nan)
 
-    for k, (lo, hi) in enumerate(zip(bins[:-1], bins[1:])):
+    for k, (lo, hi) in enumerate(zip(bins[:-1], bins[1:], strict=True)):
         mask = (dists >= lo) & (dists < hi)
         if mask.sum() >= 2:
             bin_corrs[k] = float(prods[mask].mean())
@@ -98,7 +98,7 @@ def correlogram_range(
     # Linear interpolation of first zero crossing
     for i in range(n_bins - 1):
         c1, c2 = bin_corrs[i], bin_corrs[i + 1]
-        if numpy.isnan(c1) or numpy.isnan(c2):
+        if np.isnan(c1) or np.isnan(c2):
             continue
         if c1 >= 0.0 > c2:
             d1, d2 = bin_centers[i], bin_centers[i + 1]
@@ -146,7 +146,7 @@ def knn_range(X, y, max_k: int = 30) -> int:
     >>> graph = Graph.build_knn(gdf, k=k)
     >>> lb = LocalBootstrap(graph=graph)
     """
-    from scipy.spatial import cKDTree
+    from scipy.spatial import KDTree
 
     coords = _get_coords(X)
     if coords.shape[1] == 1:
@@ -154,7 +154,7 @@ def knn_range(X, y, max_k: int = 30) -> int:
             "knn_range requires 2-D spatial coordinates, not a 1-D time index."
         )
 
-    y = numpy.asarray(y, dtype=float)
+    y = np.asarray(y, dtype=float)
     if len(coords) != len(y):
         raise ValueError("X and y must have the same length.")
 
@@ -166,7 +166,7 @@ def knn_range(X, y, max_k: int = 30) -> int:
     n = len(coords)
     max_k = min(max_k, n - 1)
 
-    tree = cKDTree(coords)
+    tree = KDTree(coords)
     # Query all neighbours at once; first column is the point itself
     _, all_idx = tree.query(coords, k=max_k + 1)
     all_idx = all_idx[:, 1:]  # drop self -> shape (n, max_k)
@@ -176,7 +176,7 @@ def knn_range(X, y, max_k: int = 30) -> int:
 
     for k in range(1, max_k + 1):
         lag = y_z[all_idx[:, :k]].mean(axis=1)
-        r = float(numpy.corrcoef(y_z, lag)[0, 1])
+        r = float(np.corrcoef(y_z, lag)[0, 1])
 
         if k == 1 and r <= 0:
             warnings.warn(
