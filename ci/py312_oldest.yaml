@@ -4,6 +4,7 @@ channels:
   - conda-forge
 dependencies:
   - python=3.12
+  - esda=2.6.0
   - geopandas=1.1.0
   - joblib=1.5.0
   - libpysal=4.15

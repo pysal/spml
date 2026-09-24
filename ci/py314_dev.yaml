@@ -24,5 +24,6 @@ dependencies:
       - scikit-learn
       - git+https://github.com/geopandas/geopandas.git
       - git+https://github.com/pysal/libpysal.git
+      - git+https://github.com/pysal/esda.git
       - git+https://github.com/pysal/mgwr.git
       - git+https://github.com/joblib/joblib.git
