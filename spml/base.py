@@ -170,11 +170,13 @@ class _BaseModel(BaseEstimator):
         if invariant.any():
             if self.strict:
                 raise ValueError(
-                    f"y at locations {invariant.index[invariant]} is invariant."
+                    f"y at locations {invariant.index[invariant].to_list()} "
+                    "is invariant."
                 )
             elif self.strict is None:
                 warnings.warn(
-                    f"y at locations {invariant.index[invariant]} is invariant.",
+                    f"y at locations {invariant.index[invariant].to_list()} "
+                    "is invariant.",
                     stacklevel=3,
                 )
 
