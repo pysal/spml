@@ -1034,12 +1034,15 @@ def test_binary_target_zero_one(sample_data):
     pd.testing.assert_index_equal(clf.proba_.columns, pd.Index([0, 1]))
 
 
-def test_non_binary_target_raises_error(sample_data):
-    """Test that non-binary target variables raise an error."""
+def test_multiclass_target(sample_data):
+    """Test that multiclass target labels are supported."""
     X, _, geometry = sample_data
+    X = (X - X.mean()) / X.std()
 
     # Create a non-binary target with values 1, 2, 3
-    y_non_binary = pd.Series(np.random.choice([1, 2, 3], size=len(X)), index=X.index)
+    y_non_binary = pd.Series(
+        np.random.default_rng(42).choice([1, 2, 3], size=len(X)), index=X.index
+    )
 
     clf = BaseClassifier(
         LogisticRegression,
@@ -1050,17 +1053,20 @@ def test_non_binary_target_raises_error(sample_data):
         max_iter=500,
     )
 
-    # This should raise a ValueError due to non-binary target
-    with pytest.raises(ValueError, match="Only binary dependent variable is supported"):
-        clf.fit(X, y_non_binary)
+    clf.fit(X, y_non_binary, geometry)
+    assert list(clf.classes_) == [1, 2, 3]
+    assert clf.pred_.dropna().isin(clf.classes_).all()
 
 
-def test_binary_with_string_values_raises_error(sample_data):
-    """Test that binary target with string values raises an error."""
+def test_binary_with_string_values(sample_data):
+    """Test that binary string labels are supported."""
     X, _, geometry = sample_data
+    X = (X - X.mean()) / X.std()
 
     # Create a binary target with string values
-    y_str = pd.Series(np.random.choice(["yes", "no"], size=len(X)), index=X.index)
+    y_str = pd.Series(
+        np.random.default_rng(42).choice(["yes", "no"], size=len(X)), index=X.index
+    )
 
     clf = BaseClassifier(
         LogisticRegression,
@@ -1071,9 +1077,9 @@ def test_binary_with_string_values_raises_error(sample_data):
         max_iter=500,
     )
 
-    # This should raise a ValueError due to string values
-    with pytest.raises(ValueError, match="Only binary dependent variable is supported"):
-        clf.fit(X, y_str)
+    clf.fit(X, y_str, geometry)
+    assert list(clf.classes_) == ["no", "yes"]
+    assert clf.pred_.dropna().isin(clf.classes_).all()
 
 
 def test_undersample_boolean(sample_data):

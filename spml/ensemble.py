@@ -29,7 +29,7 @@ class GWRandomForestClassifier(BaseClassifier):
 
     Notes
     -----
-    - ``y`` must be binary (``{0, 1}`` or boolean).
+    - ``y`` may contain binary or multiclass labels.
     - To enable prediction on new data via :meth:`predict`/:meth:`predict_proba`, you
       must set ``keep_models=True`` (store in memory) or ``keep_models=Path(...)``
       (serialize to disk).
@@ -73,7 +73,8 @@ class GWRandomForestClassifier(BaseClassifier):
     strict : bool | None, optional
         Do not fit any models if at least one neighborhood has invariant ``y``, by
         default False. None is treated as False but provides a warning if there are
-        invariant models.
+        invariant models. For classification, also warns when neighborhoods contain
+        at least two but not all global classes.
     keep_models : bool | str | Path, optional
         Keep all local models (required for prediction), by default False. Note that for
         some models, like random forests, the objects can be large. If string or Path is
@@ -87,15 +88,17 @@ class GWRandomForestClassifier(BaseClassifier):
         Number of models to process in each batch. Specify batch_size if your models do
         not fit into memory. By default None
     min_proportion : float, optional
-        Minimum proportion of minority class for a model to be fitted, by default 0.2
+        Minimum ratio of the least frequent to most frequent locally present class
+        for a model to be fitted, by default 0.2. Absent classes are ignored.
     undersample : bool | float, optional
         Whether to apply random undersampling to balance classes.
 
-        If ``True``, undersample the majority class to match the minority class
+        If ``True``, undersample all larger classes to match the smallest class
         (i.e., minority/majority ratio = 1.0).
 
         If a float ``alpha > 0``, target a minority/majority ratio of ``alpha`` after
-        resampling, i.e. ``alpha = N_min / N_resampled_majority``.
+        resampling, i.e. ``alpha = N_min / N_resampled_majority``. For multiclass
+        targets, apply this cap to every class larger than the smallest.
         By default False
     leave_out : float | int, optional
         Leave out a fraction (when float) or a set number (when int) of random
@@ -121,13 +124,19 @@ class GWRandomForestClassifier(BaseClassifier):
         Probability predictions for focal locations based on a local model trained
         around the point itself.
     pred_ : pd.Series
-        Binary predictions for focal locations based on a local model trained around the
+        Class predictions for focal locations based on a local model trained around the
         location itself.
     feature_importances_ : pd.DataFrame
         Feature importance values for each local model
     prediction_rate_ : float
         Proportion of models that are fitted, where the rest are skipped due to not
         fulfilling ``min_proportion``.
+    classes_ : numpy.ndarray
+        Sorted global class labels, matching probability columns.
+    local_class_presence_ : pd.DataFrame
+        Boolean presence of each global class in each original neighborhood, before
+        undersampling or leaving observations out. Absent classes have zero probability
+        in fitted models; skipped models have NaN probabilities for every class.
     local_class_support_: pd.Series
         Number of distinct class labels in each local neighborhood.
     left_out_y_ : numpy.ndarray
@@ -240,7 +249,7 @@ class GWRandomForestClassifier(BaseClassifier):
         X : pandas.DataFrame
             Feature matrix.
         y : pandas.Series
-            Binary target encoded as boolean or ``{0, 1}``.
+            Binary or multiclass target labels.
         geometry : geopandas.GeoSeries | None
             Geographic location of the observations in the sample. Used to determine the
             spatial interaction weight based on specification by ``bandwidth``,
@@ -313,7 +322,7 @@ class GWGradientBoostingClassifier(BaseClassifier):
 
     Notes
     -----
-    - ``y`` must be binary (``{0, 1}`` or boolean).
+    - ``y`` may contain binary or multiclass labels.
     - To enable prediction on new data via :meth:`predict`/:meth:`predict_proba`, you
       must set ``keep_models=True`` (store in memory) or ``keep_models=Path(...)``
       (serialize to disk).
@@ -357,7 +366,8 @@ class GWGradientBoostingClassifier(BaseClassifier):
     strict : bool | None, optional
         Do not fit any models if at least one neighborhood has invariant ``y``,
         by default False. None is treated as False but provides a warning if there are
-        invariant models.
+        invariant models. For classification, also warns when neighborhoods contain
+        at least two but not all global classes.
     keep_models : bool | str | Path, optional
         Keep all local models (required for prediction), by default False. Note that
         for some models, like random forests, the objects can be large. If string or
@@ -371,15 +381,17 @@ class GWGradientBoostingClassifier(BaseClassifier):
         Number of models to process in each batch. Specify batch_size fi your models do
         not fit into memory. By default None
     min_proportion : float, optional
-        Minimum proportion of minority class for a model to be fitted, by default 0.2
+        Minimum ratio of the least frequent to most frequent locally present class
+        for a model to be fitted, by default 0.2. Absent classes are ignored.
     undersample : bool | float, optional
         Whether to apply random undersampling to balance classes.
 
-        If ``True``, undersample the majority class to match the minority class
+        If ``True``, undersample all larger classes to match the smallest class
         (i.e., minority/majority ratio = 1.0).
 
         If a float ``alpha > 0``, target a minority/majority ratio of ``alpha`` after
-        resampling, i.e. ``alpha = N_min / N_resampled_majority``.
+        resampling, i.e. ``alpha = N_min / N_resampled_majority``. For multiclass
+        targets, apply this cap to every class larger than the smallest.
         By default False
     random_state : int | None, optional
         Random seed for reproducibility, by default None
@@ -399,7 +411,7 @@ class GWGradientBoostingClassifier(BaseClassifier):
         Probability predictions for focal locations based on a local model trained
         around the point itself.
     pred_ : pd.Series
-        Binary predictions for focal locations based on a local model trained around the
+        Class predictions for focal locations based on a local model trained around the
         location itself.
     feature_importances_ : pd.DataFrame
         Feature importance values for each local model
@@ -495,7 +507,7 @@ class GWGradientBoostingClassifier(BaseClassifier):
         X : pandas.DataFrame
             Feature matrix.
         y : pandas.Series
-            Binary target encoded as boolean or ``{0, 1}``.
+            Binary or multiclass target labels.
         geometry : geopandas.GeoSeries | None
             Geographic location of the observations in the sample. Used to determine the
             spatial interaction weight based on specification by ``bandwidth``,

@@ -14,6 +14,7 @@ from libpysal import graph, kernels
 from scipy.spatial import KDTree
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.model_selection import train_test_split
+from sklearn.utils.multiclass import check_classification_targets
 from sklearn.utils.parallel import Parallel, delayed
 
 __all__ = ["BaseClassifier", "BaseRegressor"]
@@ -235,7 +236,10 @@ class _BaseModel(BaseEstimator):
         (``"random_forest"``, ``"gradient_boosting"``) do not satisfy these
         preconditions, so those attributes are simply not computed or exposed.
         """
-        return self._model_type in {"linear", "logistic"}
+        return self._model_type == "linear" or (
+            self._model_type == "logistic"
+            and len(getattr(self, "_global_classes", [])) <= 2
+        )
 
     def _compute_hat_value(
         self, X: pd.DataFrame, weights: np.ndarray, focal_x: np.ndarray
@@ -581,7 +585,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
 
     Notes
     -----
-    - ``y`` must be binary (``{0, 1}`` or boolean).
+    - ``y`` may contain binary or multiclass labels.
     - To enable prediction on new data via :meth:`predict`/:meth:`predict_proba`, you
       must set ``keep_models=True`` (store in memory) or ``keep_models=Path(...)``
       (serialize to disk).
@@ -629,7 +633,8 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
     strict : bool | None, optional
         Do not fit any models if at least one neighborhood has invariant ``y``, by
         default False. None is treated as False but provides a warning if there are
-        invariant models.
+        invariant models. For classification, also warns when neighborhoods contain
+        at least two but not all global classes.
     keep_models : bool | str | Path, optional
         Keep all local models (required for prediction), by default False. Note that for
         some models, like random forests, the objects can be large. If string or Path is
@@ -643,15 +648,17 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         Number of models to process in each batch. Specify batch_size if your models do
         not fit into memory. By default None
     min_proportion : float, optional
-        Minimum proportion of minority class for a model to be fitted, by default 0.2
+        Minimum ratio of the least frequent to most frequent locally present class
+        for a model to be fitted, by default 0.2. Absent classes are ignored.
     undersample : bool | float, optional
         Whether to apply random undersampling to balance classes.
 
-        If ``True``, undersample the majority class to match the minority class
+        If ``True``, undersample all larger classes to match the smallest class
         (i.e., minority/majority ratio = 1.0).
 
         If a float ``alpha > 0``, target a minority/majority ratio of ``alpha`` after
-        resampling, i.e. ``alpha = N_min / N_resampled_majority``.
+        resampling, i.e. ``alpha = N_min / N_resampled_majority``. For multiclass
+        targets, apply this cap to every class larger than the smallest.
         By default False
     leave_out : float | int, optional
         Leave out a fraction (when float) or a set number (when int) of random
@@ -677,29 +684,35 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         Probability predictions for focal locations based on a local model trained
         around the point itself.
     pred_ : pd.Series
-        Binary predictions for focal locations based on a local model trained around the
+        Class predictions for focal locations based on a local model trained around the
         location itself.
     hat_values_ : pd.Series
         Hat values for each location (diagonal elements of the hat matrix).
-        Only available for logistic models.
+        Only available for binary logistic models.
     effective_df_ : float
         Effective degrees of freedom (sum of hat values).
-        Only available for logistic models.
+        Only available for binary logistic models.
     log_likelihood_ : float
         Global log-likelihood of the model.
-        Only available for logistic models.
+        Only available for binary logistic models.
     aic_ : float
         Akaike information criterion.
-        Only available for logistic models.
+        Only available for binary logistic models.
     aicc_ : float
         Corrected Akaike information criterion (small-sample correction).
-        Only available for logistic models.
+        Only available for binary logistic models.
     bic_ : float
         Bayesian information criterion.
-        Only available for logistic models.
+        Only available for binary logistic models.
     prediction_rate_ : float
         Proportion of models that are fitted, where the rest are skipped due to not
         fulfilling ``min_proportion``.
+    classes_ : numpy.ndarray
+        Sorted global class labels, matching probability columns.
+    local_class_presence_ : pd.DataFrame
+        Boolean presence of each global class in each original neighborhood, before
+        undersampling or leaving observations out. Absent classes have zero probability
+        in fitted models; skipped models have NaN probabilities for every class.
     local_class_support_: pd.Series
         Number of distinct class labels in each local neighborhood.
     left_out_y_ : numpy.ndarray
@@ -812,7 +825,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         X : pandas.DataFrame
             Feature matrix.
         y : pandas.Series
-            Binary target encoded as boolean or ``{0, 1}``.
+            Target labels.
         geometry : geopandas.GeoSeries | None
             Geographic location of the observations in the sample. Used to determine the
             spatial interaction weight based on specification by ``bandwidth``,
@@ -834,19 +847,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         """
         self._start = time()
 
-        def _is_binary(series: pd.Series) -> bool:
-            """Check if a pandas Series encodes a binary variable (bool or 0/1)."""
-            unique_values = set(np.unique(series))
-
-            # Check for boolean type
-            if series.dtype == bool or unique_values.issubset({True, False}):
-                return True
-
-            # Check for 0, 1 encoding
-            return bool(unique_values.issubset({0, 1}))
-
-        if not _is_binary(y):
-            raise ValueError("Only binary dependent variable is supported.")
+        check_classification_targets(y)
         self._validate_fit_inputs(X, y, geometry)
         self.geometry = geometry
 
@@ -858,7 +859,34 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
             print(f"{(time() - self._start):.2f}s: Weights ready")
         self._setup_model_storage()
 
-        self._global_classes = np.unique(y)
+        self.classes_ = self._global_classes = np.unique(y)
+
+        for attr in (
+            "hat_values_",
+            "effective_df_",
+            "log_likelihood_",
+            "aic_",
+            "aicc_",
+            "bic_",
+        ):
+            self.__dict__.pop(attr, None)
+
+        presence = weights.apply(y, set)
+        self.local_class_presence_ = pd.DataFrame(
+            [[label in labels for label in self.classes_] for labels in presence],
+            index=presence.index,
+            columns=self.classes_,
+            dtype=bool,
+        )
+        partial = self.local_class_presence_.sum(axis=1).between(
+            2, len(self.classes_) - 1
+        )
+        if self.strict is None and partial.any():
+            warnings.warn(
+                f"y at locations {partial.index[partial]} "
+                "is missing some global classes.",
+                stacklevel=2,
+            )
 
         if isinstance(X, pd.DataFrame):
             self.feature_names_in_ = X.columns.to_numpy()
@@ -905,16 +933,11 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
             self.hat_values_ = pd.Series(hat_values, index=self._names)
             self.effective_df_ = np.nansum(self.hat_values_)
 
-        # support both bool and 0, 1 encoding of binary variable
-        col = True if True in self.proba_.columns else 1
-        # global GW accuracy
-        nan_mask = self.proba_[col].isna()
-
-        self.pred_ = pd.Series(pd.NA, index=y.index, dtype="boolean")
-        self.pred_.loc[~nan_mask] = self.proba_[col][~nan_mask] > 0.5
-
-        self._n_fitted_models = (~self.proba_[col].isna()).sum()
-        self.prediction_rate_ = self._n_fitted_models / nan_mask.shape[0]
+        nan_mask = self.proba_.isna().all(axis=1)
+        self.pred_ = pd.Series(pd.NA, index=y.index, dtype=y.convert_dtypes().dtype)
+        self.pred_.loc[~nan_mask] = self.proba_.loc[~nan_mask].idxmax(axis=1)
+        self._n_fitted_models = (~nan_mask).sum()
+        self.prediction_rate_ = self._n_fitted_models / len(nan_mask)
         self._y_local = [x[0] for x in self._score_data]
         self._pred_local = [x[1] for x in self._score_data]
 
@@ -959,13 +982,14 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         """Fit individual local model"""
 
         if self.undersample:
-            from .undersample import BinaryRandomUnderSampler
+            from .undersample import RandomUnderSampler
 
         vc = data["_y"].value_counts()
+        vc = vc[vc > 0]
         n_labels = len(vc)
         skip = n_labels == 1
         if n_labels > 1:
-            skip = (vc.iloc[1] / vc.iloc[0]) < self.min_proportion
+            skip = (vc.iloc[-1] / vc.iloc[0]) < self.min_proportion
 
         # empty data for skipped models
         score_data = self._empty_score_data
@@ -977,7 +1001,11 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
             feature_imp,
             pd.Series(np.nan, index=self._global_classes),
             np.nan,
-            (np.zeros(shape=(0, 2)), data["_y"].iloc[:0], data["_weight"].iloc[:0]),
+            (
+                np.zeros(shape=(0, len(self.classes_))),
+                data["_y"].iloc[:0],
+                data["_weight"].iloc[:0],
+            ),
         ]
         if self.keep_models:
             output.append(None)
@@ -992,11 +1020,11 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
 
         if self.undersample:
             if isinstance(self.undersample, float):
-                rus = BinaryRandomUnderSampler(
+                rus = RandomUnderSampler(
                     sampling_strategy=self.undersample, random_state=self.random_state
                 )
             else:
-                rus = BinaryRandomUnderSampler(random_state=self.random_state)
+                rus = RandomUnderSampler(random_state=self.random_state)
             data, _ = rus.fit_resample(data, data["_y"])
 
         if self.leave_out:
@@ -1020,7 +1048,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         focal_x_df = pd.DataFrame(focal_x.reshape(1, -1), columns=X.columns)
         focal_proba = pd.Series(
             local_model.predict_proba(focal_x_df).flatten(), index=local_model.classes_
-        )
+        ).reindex(self.classes_, fill_value=0.0)
 
         # Hat value is only meaningful for linear/logistic models.
         hat_value = (
@@ -1032,6 +1060,11 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         if self.leave_out:
             left_out_proba = local_model.predict_proba(
                 left_out_data.drop(columns=["_y", "_weight"])
+            )
+            left_out_proba = (
+                pd.DataFrame(left_out_proba, columns=local_model.classes_)
+                .reindex(columns=self.classes_, fill_value=0.0)
+                .to_numpy()
             )
             left_out_proba = (
                 left_out_proba,
@@ -1069,18 +1102,9 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         y_valid = y[mask]
         proba_valid = self.proba_[mask]
 
-        # Handle both boolean and 0/1 encoding
-        if True in proba_valid.columns:
-            p = proba_valid[True]
-            y_binary = y_valid.astype(int) if y_valid.dtype == bool else y_valid
-        else:
-            p = proba_valid[1]
-            y_binary = y_valid
-
-        # Clip probabilities to avoid log(0)
-        p = np.clip(p, 1e-15, 1 - 1e-15)
-
-        log_likelihood = np.sum(y_binary * np.log(p) + (1 - y_binary) * np.log(1 - p))
+        columns = proba_valid.columns.get_indexer(y_valid)
+        p = proba_valid.to_numpy()[np.arange(len(y_valid)), columns]
+        log_likelihood = np.log(np.clip(p, 1e-15, 1 - 1e-15)).sum()
 
         return log_likelihood
 
@@ -1197,7 +1221,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
                     pd.Series(
                         local_model.predict_proba(x_).flatten(),
                         index=local_model.classes_,
-                    )
+                    ).reindex(self.classes_, fill_value=0.0)
                 )
             else:
                 pred.append(
@@ -1228,7 +1252,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
             return pd.Series(
                 local_model.predict_proba(x_).flatten(),
                 index=local_model.classes_,
-            )
+            ).reindex(self.classes_, fill_value=0.0)
         else:
             return pd.Series(
                 np.nan,
@@ -1300,7 +1324,11 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
 
         mask = proba.iloc[:, 0].notna()
         if not mask.all():
-            r = pd.Series(pd.NA, index=proba.index, dtype="boolean")
+            r = pd.Series(
+                pd.NA,
+                index=proba.index,
+                dtype=pd.Series(self.classes_).convert_dtypes().dtype,
+            )
             r[mask] = proba[mask].idxmax(axis=1)
             return r
 
