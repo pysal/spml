@@ -1208,12 +1208,12 @@
 <p>Get sample data</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">get_path</span><span class="p">(</span><span class="s2">&quot;geoda.south&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="mi">5070</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">get_path</span><span class="p">(</span><span class="s2">"geoda.south"</span><span class="p">))</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="mi">5070</span><span class="p">)</span>
 
-<span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;point&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">representative_point</span><span class="p">()</span>
-<span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;point&quot;</span><span class="p">)</span>
+<span class="n">gdf</span><span class="p">[</span><span class="s2">"point"</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">representative_point</span><span class="p">()</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">"point"</span><span class="p">)</span>
 
-<span class="n">y</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;FH90&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;FH90&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>  <span class="c1"># binary target for classification</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="s2">"FH90"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">gdf</span><span class="p">[</span><span class="s2">"FH90"</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>  <span class="c1"># binary target for classification</span>
 <span class="n">X</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">9</span><span class="p">:</span><span class="mi">15</span><span class="p">]</span>
 </code></pre></div>
 </div>
@@ -1237,16 +1237,6 @@
 </div>
 <div class="cell_output docutils container">
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
-  warn(
-/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
-  warn(
-/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
-  warn(
-/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
-  warn(
-/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
-  warn(
-/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
   warn(
 /home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
   warn(
@@ -1884,6 +1874,14 @@ a.param-doc-link::before {
     width: 14px;
     height: 14px;
     cursor: pointer;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+}
+
+.copy-paste-icon:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 1px;
 }
 
 .features {
@@ -1942,7 +1940,6 @@ a.param-doc-link::before {
 }
 
 .features .features-container {
-  max-width: 15em;
   max-height: 10em;
   overflow: auto;
   scrollbar-width: thin;
@@ -2014,170 +2011,187 @@ a.param-doc-link::before {
                   <tbody>
                     
         <tr class="user-set">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy bandwidth to clipboard"
                  onclick="copyToClipboard('bandwidth',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">bandwidth</td>
             <td class="value">150</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fixed to clipboard"
                  onclick="copyToClipboard('fixed',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fixed</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy kernel to clipboard"
                  onclick="copyToClipboard('kernel',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">kernel</td>
             <td class="value">&#x27;bisquare&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy include_focal to clipboard"
                  onclick="copyToClipboard('include_focal',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">include_focal</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy graph to clipboard"
                  onclick="copyToClipboard('graph',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">graph</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy n_jobs to clipboard"
                  onclick="copyToClipboard('n_jobs',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">n_jobs</td>
             <td class="value">-1</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fit_global_model to clipboard"
                  onclick="copyToClipboard('fit_global_model',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fit_global_model</td>
             <td class="value">True</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy strict to clipboard"
                  onclick="copyToClipboard('strict',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">strict</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy keep_models to clipboard"
                  onclick="copyToClipboard('keep_models',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">keep_models</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy temp_folder to clipboard"
                  onclick="copyToClipboard('temp_folder',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">temp_folder</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy batch_size to clipboard"
                  onclick="copyToClipboard('batch_size',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">batch_size</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy min_proportion to clipboard"
                  onclick="copyToClipboard('min_proportion',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">min_proportion</td>
             <td class="value">0.2</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy undersample to clipboard"
                  onclick="copyToClipboard('undersample',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">undersample</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy leave_out to clipboard"
                  onclick="copyToClipboard('leave_out',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">leave_out</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy random_state to clipboard"
                  onclick="copyToClipboard('random_state',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">random_state</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy coplanar to clipboard"
                  onclick="copyToClipboard('coplanar',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">coplanar</td>
             <td class="value">&#x27;raise&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy verbose to clipboard"
                  onclick="copyToClipboard('verbose',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">verbose</td>
             <td class="value">False</td>
         </tr>
@@ -2464,7 +2478,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7671464860287892
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.768839966130398
 </code></pre></div>
 </div>
 </div>
@@ -2478,7 +2492,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7327180355630821
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7334180073384138
 </code></pre></div>
 </div>
 </div>
@@ -2493,22 +2507,22 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>array([0.66666667, 0.62666667, 0.63333333, ..., 0.56      , 0.70666667,
-       0.66      ], shape=(1412,))
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>array([0.65333333, 0.64666667, 0.65333333, ..., 0.59333333, 0.68      ,
+       0.63333333], shape=(1412,))
 </code></pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">local_accuracy</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">missing_kwds</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;lightgray&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">local_accuracy</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">missing_kwds</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">"lightgray"</span><span class="p">)</span>
 <span class="p">)</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/6f25171d39ee7514a8e784dc5c15f07b562b3b843ed3f39818cbb4896f475f59.png" src="_images/6f25171d39ee7514a8e784dc5c15f07b562b3b843ed3f39818cbb4896f475f59.png" />
+<img alt="_images/e506110e1fe669916cca3b78272e04ee867f4069cf308bc8b1f33adf9015c18f.png" src="_images/e506110e1fe669916cca3b78272e04ee867f4069cf308bc8b1f33adf9015c18f.png" />
 </div>
 </div>
 <h3 id="feature-importance">Feature importance<a class="headerlink" href="#feature-importance" title="Link to this heading">¶</a></h3>
@@ -2549,48 +2563,48 @@ forceTheme('sk-container-id-1');</script></body></div></div>
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.156606</td>
-      <td>0.172801</td>
-      <td>0.214276</td>
-      <td>0.217965</td>
-      <td>0.118060</td>
-      <td>0.120291</td>
+      <td>0.158056</td>
+      <td>0.173120</td>
+      <td>0.197433</td>
+      <td>0.229615</td>
+      <td>0.118679</td>
+      <td>0.123098</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.173020</td>
-      <td>0.147790</td>
-      <td>0.212723</td>
-      <td>0.236094</td>
-      <td>0.124564</td>
-      <td>0.105809</td>
+      <td>0.171213</td>
+      <td>0.166893</td>
+      <td>0.202214</td>
+      <td>0.219382</td>
+      <td>0.122290</td>
+      <td>0.118008</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.180678</td>
-      <td>0.172620</td>
-      <td>0.169022</td>
-      <td>0.254066</td>
-      <td>0.113741</td>
-      <td>0.109873</td>
+      <td>0.170616</td>
+      <td>0.147092</td>
+      <td>0.200688</td>
+      <td>0.248127</td>
+      <td>0.129364</td>
+      <td>0.104114</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.181262</td>
-      <td>0.158133</td>
-      <td>0.176757</td>
-      <td>0.240862</td>
-      <td>0.115674</td>
-      <td>0.127312</td>
+      <td>0.173518</td>
+      <td>0.156456</td>
+      <td>0.188642</td>
+      <td>0.250655</td>
+      <td>0.126925</td>
+      <td>0.103804</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.115610</td>
-      <td>0.166698</td>
-      <td>0.222544</td>
-      <td>0.230152</td>
-      <td>0.119296</td>
-      <td>0.145700</td>
+      <td>0.117044</td>
+      <td>0.159104</td>
+      <td>0.211964</td>
+      <td>0.237745</td>
+      <td>0.121487</td>
+      <td>0.152657</td>
     </tr>
     <tr>
       <th>...</th>
@@ -2603,48 +2617,48 @@ forceTheme('sk-container-id-1');</script></body></div></div>
     </tr>
     <tr>
       <th>1407</th>
-      <td>0.139233</td>
-      <td>0.172304</td>
-      <td>0.289329</td>
-      <td>0.245520</td>
-      <td>0.072714</td>
-      <td>0.080900</td>
+      <td>0.120061</td>
+      <td>0.183186</td>
+      <td>0.272745</td>
+      <td>0.253799</td>
+      <td>0.078792</td>
+      <td>0.091416</td>
     </tr>
     <tr>
       <th>1408</th>
-      <td>0.172267</td>
-      <td>0.157390</td>
-      <td>0.194470</td>
-      <td>0.267210</td>
-      <td>0.113181</td>
-      <td>0.095481</td>
+      <td>0.175504</td>
+      <td>0.163290</td>
+      <td>0.204365</td>
+      <td>0.243655</td>
+      <td>0.119750</td>
+      <td>0.093435</td>
     </tr>
     <tr>
       <th>1409</th>
-      <td>0.160111</td>
-      <td>0.173456</td>
-      <td>0.216177</td>
-      <td>0.197086</td>
-      <td>0.142115</td>
-      <td>0.111055</td>
+      <td>0.160106</td>
+      <td>0.181130</td>
+      <td>0.205134</td>
+      <td>0.202089</td>
+      <td>0.146807</td>
+      <td>0.104734</td>
     </tr>
     <tr>
       <th>1410</th>
-      <td>0.149798</td>
-      <td>0.194269</td>
-      <td>0.222959</td>
-      <td>0.190678</td>
-      <td>0.100750</td>
-      <td>0.141547</td>
+      <td>0.139444</td>
+      <td>0.187393</td>
+      <td>0.226561</td>
+      <td>0.197943</td>
+      <td>0.099270</td>
+      <td>0.149389</td>
     </tr>
     <tr>
       <th>1411</th>
-      <td>0.154040</td>
-      <td>0.166751</td>
-      <td>0.235686</td>
-      <td>0.204966</td>
-      <td>0.112561</td>
-      <td>0.125997</td>
+      <td>0.157014</td>
+      <td>0.180805</td>
+      <td>0.235223</td>
+      <td>0.189682</td>
+      <td>0.105176</td>
+      <td>0.132101</td>
     </tr>
   </tbody>
 </table>
@@ -2653,14 +2667,14 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">gwrf</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">[</span><span class="s2">&quot;HC60&quot;</span><span class="p">],</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">gwrf</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">[</span><span class="s2">"HC60"</span><span class="p">],</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/5df6b163e4c2ef3262a986f94a688316c4123077faa22cbb80747d72c9ee8686.png" src="_images/5df6b163e4c2ef3262a986f94a688316c4123077faa22cbb80747d72c9ee8686.png" />
+<img alt="_images/0a1bdb7a16240b550e2993447cfce46b33f370037434cd3b1519aa503622a57a.png" src="_images/0a1bdb7a16240b550e2993447cfce46b33f370037434cd3b1519aa503622a57a.png" />
 </div>
 </div>
 <p>You can compare all of this to values extracted from a global model, fitted alongside.</p>
@@ -2671,8 +2685,8 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>array([0.14031455, 0.15003254, 0.22608115, 0.26693562, 0.11662885,
-       0.1000073 ])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>array([0.14733313, 0.14978459, 0.20894788, 0.26352136, 0.10886222,
+       0.12155083])
 </code></pre></div>
 </div>
 </div>
@@ -2684,12 +2698,12 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>HR60    0.153387
-HR70    0.159048
-HR80    0.202961
-HR90    0.222615
-HC60    0.140607
-HC70    0.121382
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>HR60    0.153743
+HR70    0.159043
+HR80    0.202461
+HR90    0.222853
+HC60    0.140480
+HC70    0.121420
 dtype: float64
 </code></pre></div>
 </div>
@@ -2699,7 +2713,7 @@ dtype: float64
 <p>The <code class="docutils literal notranslate"><span class="pre">GWRandomForestRegressor</span></code> provides the same functionality as the classifier version but for continuous target variables. It uses local Random Forest models to capture spatial heterogeneity in regression relationships.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">y_reg</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;FH90&quot;</span><span class="p">]</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">y_reg</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="s2">"FH90"</span><span class="p">]</span>
 </code></pre></div>
 </div>
 </div>
@@ -3428,6 +3442,14 @@ a.param-doc-link::before {
     width: 14px;
     height: 14px;
     cursor: pointer;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+}
+
+.copy-paste-icon:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 1px;
 }
 
 .features {
@@ -3486,7 +3508,6 @@ a.param-doc-link::before {
 }
 
 .features .features-container {
-  max-width: 15em;
   max-height: 10em;
   overflow: auto;
   scrollbar-width: thin;
@@ -3558,140 +3579,154 @@ a.param-doc-link::before {
                   <tbody>
                     
         <tr class="user-set">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy bandwidth to clipboard"
                  onclick="copyToClipboard('bandwidth',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">bandwidth</td>
             <td class="value">150</td>
         </tr>
     
 
         <tr class="user-set">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy random_state to clipboard"
                  onclick="copyToClipboard('random_state',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">random_state</td>
             <td class="value">0</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fixed to clipboard"
                  onclick="copyToClipboard('fixed',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fixed</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy kernel to clipboard"
                  onclick="copyToClipboard('kernel',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">kernel</td>
             <td class="value">&#x27;bisquare&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy include_focal to clipboard"
                  onclick="copyToClipboard('include_focal',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">include_focal</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy graph to clipboard"
                  onclick="copyToClipboard('graph',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">graph</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy n_jobs to clipboard"
                  onclick="copyToClipboard('n_jobs',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">n_jobs</td>
             <td class="value">-1</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fit_global_model to clipboard"
                  onclick="copyToClipboard('fit_global_model',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fit_global_model</td>
             <td class="value">True</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy strict to clipboard"
                  onclick="copyToClipboard('strict',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">strict</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy keep_models to clipboard"
                  onclick="copyToClipboard('keep_models',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">keep_models</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy temp_folder to clipboard"
                  onclick="copyToClipboard('temp_folder',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">temp_folder</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy batch_size to clipboard"
                  onclick="copyToClipboard('batch_size',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">batch_size</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy coplanar to clipboard"
                  onclick="copyToClipboard('coplanar',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">coplanar</td>
             <td class="value">&#x27;raise&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy verbose to clipboard"
                  onclick="copyToClipboard('verbose',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">verbose</td>
             <td class="value">False</td>
         </tr>
@@ -3995,12 +4030,12 @@ dtype: float64
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">gwrf_reg</span><span class="o">.</span><span class="n">local_r2_</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">gwrf_reg</span><span class="o">.</span><span class="n">local_r2_</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/8be534088ff989d9794006fab53e6abb067da479905f1a45d30b1fe848f5449a.png" src="_images/8be534088ff989d9794006fab53e6abb067da479905f1a45d30b1fe848f5449a.png" />
+<img alt="_images/11e78000bc97666f23d4faac37716ad84f1bc0b6c0de60ad0e81ac48730da0f4.png" src="_images/11e78000bc97666f23d4faac37716ad84f1bc0b6c0de60ad0e81ac48730da0f4.png" />
 </div>
 </div>
 <h3 id="out-of-bag-performance">Out-of-bag performance<a class="headerlink" href="#out-of-bag-performance" title="Link to this heading">¶</a></h3>
@@ -4106,14 +4141,14 @@ dtype: float64
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">gwrf_reg</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">[</span><span class="s2">&quot;HC60&quot;</span><span class="p">],</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">gwrf_reg</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">[</span><span class="s2">"HC60"</span><span class="p">],</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/f8fae4a376df1ae3e7abe2e8febfe6af05529e14af9e906692a3a851a929e241.png" src="_images/f8fae4a376df1ae3e7abe2e8febfe6af05529e14af9e906692a3a851a929e241.png" />
+<img alt="_images/ed2dcb0cb23dd6de16fcceec650c6234e429a4e54e6f7d9af8debb5644d95ff0.png" src="_images/ed2dcb0cb23dd6de16fcceec650c6234e429a4e54e6f7d9af8debb5644d95ff0.png" />
 </div>
 </div>
 <h2 id="gradient-boosting-classifier">Gradient Boosting Classifier<a class="headerlink" href="#gradient-boosting-classifier" title="Link to this heading">¶</a></h2>
@@ -4709,6 +4744,14 @@ a.param-doc-link::before {
     width: 14px;
     height: 14px;
     cursor: pointer;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+}
+
+.copy-paste-icon:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 1px;
 }
 
 .features {
@@ -4767,7 +4810,6 @@ a.param-doc-link::before {
 }
 
 .features .features-container {
-  max-width: 15em;
   max-height: 10em;
   overflow: auto;
   scrollbar-width: thin;
@@ -4839,160 +4881,176 @@ a.param-doc-link::before {
                   <tbody>
                     
         <tr class="user-set">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy bandwidth to clipboard"
                  onclick="copyToClipboard('bandwidth',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">bandwidth</td>
             <td class="value">150</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fixed to clipboard"
                  onclick="copyToClipboard('fixed',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fixed</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy kernel to clipboard"
                  onclick="copyToClipboard('kernel',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">kernel</td>
             <td class="value">&#x27;bisquare&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy include_focal to clipboard"
                  onclick="copyToClipboard('include_focal',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">include_focal</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy graph to clipboard"
                  onclick="copyToClipboard('graph',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">graph</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy n_jobs to clipboard"
                  onclick="copyToClipboard('n_jobs',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">n_jobs</td>
             <td class="value">-1</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fit_global_model to clipboard"
                  onclick="copyToClipboard('fit_global_model',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fit_global_model</td>
             <td class="value">True</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy strict to clipboard"
                  onclick="copyToClipboard('strict',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">strict</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy keep_models to clipboard"
                  onclick="copyToClipboard('keep_models',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">keep_models</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy temp_folder to clipboard"
                  onclick="copyToClipboard('temp_folder',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">temp_folder</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy batch_size to clipboard"
                  onclick="copyToClipboard('batch_size',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">batch_size</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy min_proportion to clipboard"
                  onclick="copyToClipboard('min_proportion',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">min_proportion</td>
             <td class="value">0.2</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy undersample to clipboard"
                  onclick="copyToClipboard('undersample',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">undersample</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy random_state to clipboard"
                  onclick="copyToClipboard('random_state',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">random_state</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy coplanar to clipboard"
                  onclick="copyToClipboard('coplanar',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">coplanar</td>
             <td class="value">&#x27;raise&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy verbose to clipboard"
                  onclick="copyToClipboard('verbose',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">verbose</td>
             <td class="value">False</td>
         </tr>
@@ -5253,7 +5311,7 @@ forceTheme('sk-container-id-3');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7544453852667231
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7552921253175275
 </code></pre></div>
 </div>
 </div>
@@ -5295,48 +5353,48 @@ forceTheme('sk-container-id-3');</script></body></div></div>
   <tbody>
     <tr>
       <th>0</th>
-      <td>0.153233</td>
-      <td>0.250684</td>
-      <td>0.186083</td>
-      <td>0.221121</td>
-      <td>0.084682</td>
-      <td>0.104196</td>
+      <td>0.157011</td>
+      <td>0.254559</td>
+      <td>0.186350</td>
+      <td>0.221007</td>
+      <td>0.080818</td>
+      <td>0.100256</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>0.184043</td>
-      <td>0.177412</td>
-      <td>0.196992</td>
-      <td>0.234090</td>
-      <td>0.080868</td>
-      <td>0.126595</td>
+      <td>0.189724</td>
+      <td>0.176897</td>
+      <td>0.196854</td>
+      <td>0.233463</td>
+      <td>0.076914</td>
+      <td>0.126147</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>0.245428</td>
-      <td>0.127648</td>
-      <td>0.167924</td>
-      <td>0.289115</td>
-      <td>0.075577</td>
-      <td>0.094308</td>
+      <td>0.236344</td>
+      <td>0.124679</td>
+      <td>0.157737</td>
+      <td>0.287585</td>
+      <td>0.083576</td>
+      <td>0.110079</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>0.176353</td>
-      <td>0.198164</td>
-      <td>0.170044</td>
-      <td>0.265121</td>
-      <td>0.089484</td>
-      <td>0.100834</td>
+      <td>0.172367</td>
+      <td>0.206553</td>
+      <td>0.170262</td>
+      <td>0.266314</td>
+      <td>0.091212</td>
+      <td>0.093291</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>0.071107</td>
-      <td>0.186435</td>
-      <td>0.254615</td>
-      <td>0.239504</td>
-      <td>0.095651</td>
-      <td>0.152688</td>
+      <td>0.069940</td>
+      <td>0.183639</td>
+      <td>0.253884</td>
+      <td>0.241333</td>
+      <td>0.100952</td>
+      <td>0.150251</td>
     </tr>
     <tr>
       <th>...</th>
@@ -5349,48 +5407,48 @@ forceTheme('sk-container-id-3');</script></body></div></div>
     </tr>
     <tr>
       <th>1407</th>
-      <td>0.121126</td>
-      <td>0.174074</td>
-      <td>0.385610</td>
-      <td>0.253435</td>
-      <td>0.028154</td>
-      <td>0.037600</td>
+      <td>0.119657</td>
+      <td>0.174543</td>
+      <td>0.382101</td>
+      <td>0.255142</td>
+      <td>0.031572</td>
+      <td>0.036986</td>
     </tr>
     <tr>
       <th>1408</th>
-      <td>0.235102</td>
-      <td>0.149738</td>
-      <td>0.276374</td>
-      <td>0.204940</td>
-      <td>0.087121</td>
-      <td>0.046724</td>
+      <td>0.229552</td>
+      <td>0.138638</td>
+      <td>0.287083</td>
+      <td>0.206721</td>
+      <td>0.090485</td>
+      <td>0.047521</td>
     </tr>
     <tr>
       <th>1409</th>
-      <td>0.132825</td>
-      <td>0.316217</td>
-      <td>0.252493</td>
-      <td>0.165721</td>
-      <td>0.090022</td>
-      <td>0.042722</td>
+      <td>0.131013</td>
+      <td>0.324274</td>
+      <td>0.248668</td>
+      <td>0.171875</td>
+      <td>0.081691</td>
+      <td>0.042479</td>
     </tr>
     <tr>
       <th>1410</th>
-      <td>0.126257</td>
-      <td>0.229086</td>
-      <td>0.263182</td>
-      <td>0.229505</td>
-      <td>0.027779</td>
-      <td>0.124190</td>
+      <td>0.124043</td>
+      <td>0.229559</td>
+      <td>0.264192</td>
+      <td>0.229615</td>
+      <td>0.030246</td>
+      <td>0.122345</td>
     </tr>
     <tr>
       <th>1411</th>
-      <td>0.070343</td>
-      <td>0.179254</td>
-      <td>0.328630</td>
-      <td>0.244879</td>
-      <td>0.108665</td>
-      <td>0.068230</td>
+      <td>0.070167</td>
+      <td>0.190566</td>
+      <td>0.326132</td>
+      <td>0.246206</td>
+      <td>0.115130</td>
+      <td>0.051799</td>
     </tr>
   </tbody>
 </table>
@@ -5991,6 +6049,14 @@ a.param-doc-link::before {
     width: 14px;
     height: 14px;
     cursor: pointer;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+}
+
+.copy-paste-icon:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 1px;
 }
 
 .features {
@@ -6049,7 +6115,6 @@ a.param-doc-link::before {
 }
 
 .features .features-container {
-  max-width: 15em;
   max-height: 10em;
   overflow: auto;
   scrollbar-width: thin;
@@ -6121,160 +6186,176 @@ a.param-doc-link::before {
                   <tbody>
                     
         <tr class="user-set">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy bandwidth to clipboard"
                  onclick="copyToClipboard('bandwidth',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">bandwidth</td>
             <td class="value">150</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fixed to clipboard"
                  onclick="copyToClipboard('fixed',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fixed</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy kernel to clipboard"
                  onclick="copyToClipboard('kernel',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">kernel</td>
             <td class="value">&#x27;bisquare&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy include_focal to clipboard"
                  onclick="copyToClipboard('include_focal',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">include_focal</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy graph to clipboard"
                  onclick="copyToClipboard('graph',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">graph</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy n_jobs to clipboard"
                  onclick="copyToClipboard('n_jobs',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">n_jobs</td>
             <td class="value">-1</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fit_global_model to clipboard"
                  onclick="copyToClipboard('fit_global_model',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fit_global_model</td>
             <td class="value">True</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy strict to clipboard"
                  onclick="copyToClipboard('strict',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">strict</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy keep_models to clipboard"
                  onclick="copyToClipboard('keep_models',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">keep_models</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy temp_folder to clipboard"
                  onclick="copyToClipboard('temp_folder',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">temp_folder</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy batch_size to clipboard"
                  onclick="copyToClipboard('batch_size',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">batch_size</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy min_proportion to clipboard"
                  onclick="copyToClipboard('min_proportion',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">min_proportion</td>
             <td class="value">0.2</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy undersample to clipboard"
                  onclick="copyToClipboard('undersample',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">undersample</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy random_state to clipboard"
                  onclick="copyToClipboard('random_state',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">random_state</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy coplanar to clipboard"
                  onclick="copyToClipboard('coplanar',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">coplanar</td>
             <td class="value">&#x27;raise&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy verbose to clipboard"
                  onclick="copyToClipboard('verbose',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">verbose</td>
             <td class="value">False</td>
         </tr>
@@ -6316,13 +6397,13 @@ a.param-doc-link::before {
        <tr class="default">
            <td class="param"><a class="param-doc-link" style="text-decoration:none;">left_out_proba_</a></td>
            <td class="fitted-att-type">ndarray[float64](35430, 2)</td>
-           <td>[[1.  ,0.  ],
+           <td>[[0.14,0.86],
  [0.96,0.04],
- [0.96,0.04],
+ [0.35,0.65],
  ...,
- [0.51,0.49],
- [0.9 ,0.1 ],
- [0.09,0.91]]</td>
+ [0.63,0.37],
+ [0.83,0.17],
+ [0.96,0.04]]</td>
 
 
        </tr>
@@ -6331,7 +6412,7 @@ a.param-doc-link::before {
        <tr class="default">
            <td class="param"><a class="param-doc-link" style="text-decoration:none;">left_out_w_</a></td>
            <td class="fitted-att-type">ndarray[float64](35430,)</td>
-           <td>[0.3 ,0.01,0.2 ,...,0.76,0.9 ,0.01]</td>
+           <td>[0.24,0.37,0.04,...,0.9 ,0.82,0.39]</td>
 
 
        </tr>
@@ -6340,7 +6421,7 @@ a.param-doc-link::before {
        <tr class="default">
            <td class="param"><a class="param-doc-link" style="text-decoration:none;">left_out_y_</a></td>
            <td class="fitted-att-type">ndarray[bool](35430,)</td>
-           <td>[False,False, True,...,False,False, True]</td>
+           <td>[ True,False, True,...,False, True,False]</td>
 
 
        </tr>
@@ -6567,7 +6648,7 @@ forceTheme('sk-container-id-4');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7251481795088908
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0.7222128139994355
 </code></pre></div>
 </div>
 </div>
@@ -7167,6 +7248,14 @@ a.param-doc-link::before {
     width: 14px;
     height: 14px;
     cursor: pointer;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+}
+
+.copy-paste-icon:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 1px;
 }
 
 .features {
@@ -7225,7 +7314,6 @@ a.param-doc-link::before {
 }
 
 .features .features-container {
-  max-width: 15em;
   max-height: 10em;
   overflow: auto;
   scrollbar-width: thin;
@@ -7297,140 +7385,154 @@ a.param-doc-link::before {
                   <tbody>
                     
         <tr class="user-set">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy bandwidth to clipboard"
                  onclick="copyToClipboard('bandwidth',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">bandwidth</td>
             <td class="value">150</td>
         </tr>
     
 
         <tr class="user-set">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy random_state to clipboard"
                  onclick="copyToClipboard('random_state',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">random_state</td>
             <td class="value">0</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fixed to clipboard"
                  onclick="copyToClipboard('fixed',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fixed</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy kernel to clipboard"
                  onclick="copyToClipboard('kernel',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">kernel</td>
             <td class="value">&#x27;bisquare&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy include_focal to clipboard"
                  onclick="copyToClipboard('include_focal',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">include_focal</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy graph to clipboard"
                  onclick="copyToClipboard('graph',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">graph</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy n_jobs to clipboard"
                  onclick="copyToClipboard('n_jobs',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">n_jobs</td>
             <td class="value">-1</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fit_global_model to clipboard"
                  onclick="copyToClipboard('fit_global_model',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fit_global_model</td>
             <td class="value">True</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy strict to clipboard"
                  onclick="copyToClipboard('strict',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">strict</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy keep_models to clipboard"
                  onclick="copyToClipboard('keep_models',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">keep_models</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy temp_folder to clipboard"
                  onclick="copyToClipboard('temp_folder',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">temp_folder</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy batch_size to clipboard"
                  onclick="copyToClipboard('batch_size',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">batch_size</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy coplanar to clipboard"
                  onclick="copyToClipboard('coplanar',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">coplanar</td>
             <td class="value">&#x27;raise&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy verbose to clipboard"
                  onclick="copyToClipboard('verbose',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">verbose</td>
             <td class="value">False</td>
         </tr>
@@ -7710,12 +7812,12 @@ dtype: float64
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">gwgb_reg</span><span class="o">.</span><span class="n">local_r2_</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">gwgb_reg</span><span class="o">.</span><span class="n">local_r2_</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/6c54b105cf599bcbb2ef4a81bf7c468885f763d0c433e8f5db9bbfa7af37d709.png" src="_images/6c54b105cf599bcbb2ef4a81bf7c468885f763d0c433e8f5db9bbfa7af37d709.png" />
+<img alt="_images/59f49b04b29c59d73462f511180301fdd391dd7197feda2a44c8ad6fcf2db847.png" src="_images/59f49b04b29c59d73462f511180301fdd391dd7197feda2a44c8ad6fcf2db847.png" />
 </div>
 </div>
 <h3 id="id2">Feature importance<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
@@ -7805,14 +7907,14 @@ dtype: float64
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">gwgb_reg</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">[</span><span class="s2">&quot;HC60&quot;</span><span class="p">],</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">gwgb_reg</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">[</span><span class="s2">"HC60"</span><span class="p">],</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/aab188e618dfa35a9d0ec3fd7541d20984cbe6d8c0bf086aadc651b38d9deac6.png" src="_images/aab188e618dfa35a9d0ec3fd7541d20984cbe6d8c0bf086aadc651b38d9deac6.png" />
+<img alt="_images/4735f52b96b6f89b5b121a3677c8df84ba02753f72241015c8802305b902382b.png" src="_images/4735f52b96b6f89b5b121a3677c8df84ba02753f72241015c8802305b902382b.png" />
 </div>
 </div>
 <h3 id="comparison-with-global-model">Comparison with global model<a class="headerlink" href="#comparison-with-global-model" title="Link to this heading">¶</a></h3>
@@ -7824,8 +7926,8 @@ dtype: float64
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>array([0.06444355, 0.10304881, 0.20498635, 0.45914658, 0.10850131,
-       0.0598734 ])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>array([0.06485599, 0.10303418, 0.20499437, 0.45868868, 0.10918431,
+       0.05924247])
 </code></pre></div>
 </div>
 </div>

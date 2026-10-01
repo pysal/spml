@@ -1001,9 +1001,9 @@
 <p>Let’s compare the two on a simple example of a suicide rate prediction.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">get_path</span><span class="p">(</span><span class="s2">&quot;geoda.guerry&quot;</span><span class="p">))</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[[</span><span class="s2">&quot;Crm_prp&quot;</span><span class="p">,</span> <span class="s2">&quot;Litercy&quot;</span><span class="p">,</span> <span class="s2">&quot;Donatns&quot;</span><span class="p">,</span> <span class="s2">&quot;Lottery&quot;</span><span class="p">]]</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;Suicids&quot;</span><span class="p">]</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">get_path</span><span class="p">(</span><span class="s2">"geoda.guerry"</span><span class="p">))</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[[</span><span class="s2">"Crm_prp"</span><span class="p">,</span> <span class="s2">"Litercy"</span><span class="p">,</span> <span class="s2">"Donatns"</span><span class="p">,</span> <span class="s2">"Lottery"</span><span class="p">]]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="s2">"Suicids"</span><span class="p">]</span>
 <span class="n">geometry</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">representative_point</span><span class="p">()</span>
 </code></pre></div>
 </div>
@@ -1018,14 +1018,14 @@
 <span class="n">gw</span> <span class="o">=</span> <span class="n">GWLinearRegression</span><span class="p">(</span><span class="n">bandwidth</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">gw</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;spml R²: </span><span class="si">{</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">gw</span><span class="o">.</span><span class="n">pred_</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  AICc: </span><span class="si">{</span><span class="n">gw</span><span class="o">.</span><span class="n">aicc_</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"spml R²: </span><span class="si">{</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">gw</span><span class="o">.</span><span class="n">pred_</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  AICc: </span><span class="si">{</span><span class="n">gw</span><span class="o">.</span><span class="n">aicc_</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>spml R²: 0.7251  AICc: 2011.2
-CPU times: user 161 ms, sys: 15.2 ms, total: 176 ms
-Wall time: 2.7 s
+CPU times: user 160 ms, sys: 12.3 ms, total: 172 ms
+Wall time: 2.58 s
 </code></pre></div>
 </div>
 </div>
@@ -1042,14 +1042,14 @@ Wall time: 2.7 s
     <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mgwr R²: </span><span class="si">{</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">mg</span><span class="o">.</span><span class="n">predy</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  AICc: </span><span class="si">{</span><span class="n">mg</span><span class="o">.</span><span class="n">aicc</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"mgwr R²: </span><span class="si">{</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">mg</span><span class="o">.</span><span class="n">predy</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  AICc: </span><span class="si">{</span><span class="n">mg</span><span class="o">.</span><span class="n">aicc</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>mgwr R²: 0.7251  AICc: 2011.2
-CPU times: user 33.9 ms, sys: 201 μs, total: 34.1 ms
-Wall time: 66.4 ms
+CPU times: user 31.4 ms, sys: 2.38 ms, total: 33.7 ms
+Wall time: 69.5 ms
 </code></pre></div>
 </div>
 </div>
@@ -1061,11 +1061,11 @@ Wall time: 66.4 ms
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;R²:   spml=</span><span class="si">{</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">gw</span><span class="o">.</span><span class="n">pred_</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">,  mgwr=</span><span class="si">{</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">mg</span><span class="o">.</span><span class="n">predy</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="sa">f</span><span class="s2">"R²:   spml=</span><span class="si">{</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">gw</span><span class="o">.</span><span class="n">pred_</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">,  mgwr=</span><span class="si">{</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">mg</span><span class="o">.</span><span class="n">predy</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span>
 <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;AIC:  spml=</span><span class="si">{</span><span class="n">gw</span><span class="o">.</span><span class="n">aic_</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, mgwr=</span><span class="si">{</span><span class="n">mg</span><span class="o">.</span><span class="n">aic</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;BIC:  spml=</span><span class="si">{</span><span class="n">gw</span><span class="o">.</span><span class="n">bic_</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, mgwr=</span><span class="si">{</span><span class="n">mg</span><span class="o">.</span><span class="n">bic</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;AICc: spml=</span><span class="si">{</span><span class="n">gw</span><span class="o">.</span><span class="n">aicc_</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, mgwr=</span><span class="si">{</span><span class="n">mg</span><span class="o">.</span><span class="n">aicc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"AIC:  spml=</span><span class="si">{</span><span class="n">gw</span><span class="o">.</span><span class="n">aic_</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, mgwr=</span><span class="si">{</span><span class="n">mg</span><span class="o">.</span><span class="n">aic</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"BIC:  spml=</span><span class="si">{</span><span class="n">gw</span><span class="o">.</span><span class="n">bic_</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, mgwr=</span><span class="si">{</span><span class="n">mg</span><span class="o">.</span><span class="n">bic</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"AICc: spml=</span><span class="si">{</span><span class="n">gw</span><span class="o">.</span><span class="n">aicc_</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, mgwr=</span><span class="si">{</span><span class="n">mg</span><span class="o">.</span><span class="n">aicc</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 </div>
@@ -1087,16 +1087,16 @@ AICc: spml=2011.20, mgwr=2011.20
 <span class="n">mgwr_selector</span> <span class="o">=</span> <span class="n">Sel_BW</span><span class="p">(</span>
     <span class="n">geometry</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">X</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span>
 <span class="p">)</span>
-<span class="n">mgwr_bw</span> <span class="o">=</span> <span class="n">mgwr_selector</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">criterion</span><span class="o">=</span><span class="s2">&quot;AICc&quot;</span><span class="p">)</span>
+<span class="n">mgwr_bw</span> <span class="o">=</span> <span class="n">mgwr_selector</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">criterion</span><span class="o">=</span><span class="s2">"AICc"</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mgwr optimal bandwidth: </span><span class="si">{</span><span class="n">mgwr_bw</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"mgwr optimal bandwidth: </span><span class="si">{</span><span class="n">mgwr_bw</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>mgwr optimal bandwidth: 70.0
-CPU times: user 163 ms, sys: 20.5 ms, total: 184 ms
-Wall time: 207 ms
+CPU times: user 165 ms, sys: 22.9 ms, total: 188 ms
+Wall time: 212 ms
 </code></pre></div>
 </div>
 </div>
@@ -1108,18 +1108,18 @@ Wall time: 207 ms
 <span class="n">spml_search</span> <span class="o">=</span> <span class="n">BandwidthSearch</span><span class="p">(</span>
     <span class="n">GWLinearRegression</span><span class="p">,</span>
     <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">criterion</span><span class="o">=</span><span class="s2">&quot;aicc&quot;</span><span class="p">,</span>
+    <span class="n">criterion</span><span class="o">=</span><span class="s2">"aicc"</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">spml_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;spml optimal bandwidth: </span><span class="si">{</span><span class="n">spml_search</span><span class="o">.</span><span class="n">optimal_bandwidth_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"spml optimal bandwidth: </span><span class="si">{</span><span class="n">spml_search</span><span class="o">.</span><span class="n">optimal_bandwidth_</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>spml optimal bandwidth: 70
-CPU times: user 682 ms, sys: 30.2 ms, total: 712 ms
-Wall time: 1.18 s
+CPU times: user 712 ms, sys: 28.4 ms, total: 741 ms
+Wall time: 1.22 s
 </code></pre></div>
 </div>
 </div>

@@ -936,7 +936,7 @@
 <p>Linear regression is a classical example of geographically weighted regression models. In this example, you can predict the number of suicides based on other population data in the <a class="reference external" href="https://geodacenter.github.io/data-and-lab//Guerry/">Guerry</a> dataset.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">get_path</span><span class="p">(</span><span class="s2">&quot;geoda.guerry&quot;</span><span class="p">))</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">get_path</span><span class="p">(</span><span class="s2">"geoda.guerry"</span><span class="p">))</span>
 </code></pre></div>
 </div>
 </div>
@@ -949,16 +949,16 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/7916d3c948b9f04cdece2698433c8dd2c9e02a7069752d1f12d2dea3243cc4da.png" src="_images/7916d3c948b9f04cdece2698433c8dd2c9e02a7069752d1f12d2dea3243cc4da.png" />
+<img alt="_images/53cb20dcef421e2e689bc43e133555557cd6e80edd8bea34d236f88e0f0c201c.png" src="_images/53cb20dcef421e2e689bc43e133555557cd6e80edd8bea34d236f88e0f0c201c.png" />
 </div>
 </div>
 <p>Specify the model and fit the data.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">adaptive</span> <span class="o">=</span> <span class="n">GWLinearRegression</span><span class="p">(</span><span class="n">bandwidth</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;tricube&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">adaptive</span> <span class="o">=</span> <span class="n">GWLinearRegression</span><span class="p">(</span><span class="n">bandwidth</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="s2">"tricube"</span><span class="p">)</span>
 <span class="n">adaptive</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-    <span class="n">gdf</span><span class="p">[[</span><span class="s2">&quot;Crm_prp&quot;</span><span class="p">,</span> <span class="s2">&quot;Litercy&quot;</span><span class="p">,</span> <span class="s2">&quot;Donatns&quot;</span><span class="p">,</span> <span class="s2">&quot;Lottery&quot;</span><span class="p">]],</span>
-    <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;Suicids&quot;</span><span class="p">],</span>
+    <span class="n">gdf</span><span class="p">[[</span><span class="s2">"Crm_prp"</span><span class="p">,</span> <span class="s2">"Litercy"</span><span class="p">,</span> <span class="s2">"Donatns"</span><span class="p">,</span> <span class="s2">"Lottery"</span><span class="p">]],</span>
+    <span class="n">gdf</span><span class="p">[</span><span class="s2">"Suicids"</span><span class="p">],</span>
     <span class="n">geometry</span><span class="o">=</span><span class="n">gdf</span><span class="o">.</span><span class="n">representative_point</span><span class="p">(),</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -1541,6 +1541,14 @@ a.param-doc-link::before {
     width: 14px;
     height: 14px;
     cursor: pointer;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+}
+
+.copy-paste-icon:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 1px;
 }
 
 .features {
@@ -1599,7 +1607,6 @@ a.param-doc-link::before {
 }
 
 .features .features-container {
-  max-width: 15em;
   max-height: 10em;
   overflow: auto;
   scrollbar-width: thin;
@@ -1671,130 +1678,143 @@ a.param-doc-link::before {
                   <tbody>
                     
         <tr class="user-set">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy bandwidth to clipboard"
                  onclick="copyToClipboard('bandwidth',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">bandwidth</td>
             <td class="value">25</td>
         </tr>
     
 
         <tr class="user-set">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy kernel to clipboard"
                  onclick="copyToClipboard('kernel',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">kernel</td>
             <td class="value">&#x27;tricube&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fixed to clipboard"
                  onclick="copyToClipboard('fixed',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fixed</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy include_focal to clipboard"
                  onclick="copyToClipboard('include_focal',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">include_focal</td>
             <td class="value">True</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy graph to clipboard"
                  onclick="copyToClipboard('graph',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">graph</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy n_jobs to clipboard"
                  onclick="copyToClipboard('n_jobs',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">n_jobs</td>
             <td class="value">-1</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fit_global_model to clipboard"
                  onclick="copyToClipboard('fit_global_model',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fit_global_model</td>
             <td class="value">True</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy strict to clipboard"
                  onclick="copyToClipboard('strict',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">strict</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy keep_models to clipboard"
                  onclick="copyToClipboard('keep_models',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">keep_models</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy temp_folder to clipboard"
                  onclick="copyToClipboard('temp_folder',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">temp_folder</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy batch_size to clipboard"
                  onclick="copyToClipboard('batch_size',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">batch_size</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy coplanar to clipboard"
                  onclick="copyToClipboard('coplanar',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">coplanar</td>
             <td class="value">&#x27;raise&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy verbose to clipboard"
                  onclick="copyToClipboard('verbose',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">verbose</td>
             <td class="value">False</td>
         </tr>
@@ -2153,7 +2173,7 @@ Length: 85, dtype: float64
 <p>This allows you to measure model performance metrics like $R^2$. This value would be comparable to the R2 reported by <code class="docutils literal notranslate"><span class="pre">mgwr</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;Suicids&quot;</span><span class="p">],</span> <span class="n">adaptive</span><span class="o">.</span><span class="n">pred_</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">(</span><span class="n">gdf</span><span class="p">[</span><span class="s2">"Suicids"</span><span class="p">],</span> <span class="n">adaptive</span><span class="o">.</span><span class="n">pred_</span><span class="p">)</span>
 </code></pre></div>
 </div>
 </div>
@@ -2195,7 +2215,7 @@ Length: 85, dtype: float64
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/e3fa459e8b2d463e9f51f49ae68bc8ad8697c1874f7d6b6781a7f3f6e5fd4304.png" src="_images/e3fa459e8b2d463e9f51f49ae68bc8ad8697c1874f7d6b6781a7f3f6e5fd4304.png" />
+<img alt="_images/09bda406777d731a728e017eac0b09400bec399c5e2acd0c9463a5bdf76b03b3.png" src="_images/09bda406777d731a728e017eac0b09400bec399c5e2acd0c9463a5bdf76b03b3.png" />
 </div>
 </div>
 <p>Similarly, you can access residuals.</p>
@@ -2206,7 +2226,7 @@ Length: 85, dtype: float64
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/325bb6d0c22400d74e8e98ddb2173d322e3f1fc959dadd65d838672a93ec3f0b.png" src="_images/325bb6d0c22400d74e8e98ddb2173d322e3f1fc959dadd65d838672a93ec3f0b.png" />
+<img alt="_images/a9268e7a2e78ea7a115bedc1c8e8f7f998bcbc6180661f8f8a6fe30994f24407.png" src="_images/a9268e7a2e78ea7a115bedc1c8e8f7f998bcbc6180661f8f8a6fe30994f24407.png" />
 </div>
 </div>
 <p>Each local model then have its own local coefficients.</p>
@@ -2337,7 +2357,7 @@ Length: 85, dtype: float64
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/4c24ce8fdf773bbf6f57246a5434ea815204473461d6e197c6af406a09f7f63a.png" src="_images/4c24ce8fdf773bbf6f57246a5434ea815204473461d6e197c6af406a09f7f63a.png" />
+<img alt="_images/a43fe806ee37520bec10080890c33ef9247f56ac0ebed1cbc2deda7b5bc9a666.png" src="_images/a43fe806ee37520bec10080890c33ef9247f56ac0ebed1cbc2deda7b5bc9a666.png" />
 </div>
 </div>
 <p>Alongside local coefficients, you can retireve a local intercept value.</p>
@@ -2348,7 +2368,7 @@ Length: 85, dtype: float64
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/b98fa81b8a2724dc97f7310e781b69e199bc074938cbae6bba93d982ceb36b30.png" src="_images/b98fa81b8a2724dc97f7310e781b69e199bc074938cbae6bba93d982ceb36b30.png" />
+<img alt="_images/ec709197261b848379f84e234d4a90614d3c32a4e3491a3019981c7981e3e8e3.png" src="_images/ec709197261b848379f84e234d4a90614d3c32a4e3491a3019981c7981e3e8e3.png" />
 </div>
 </div>
 <p>For details on prediction, see the <a class="reference internal" href="predict.html"><span class="std std-doc">Prediction</span></a> guide.</p>
@@ -2357,7 +2377,7 @@ Length: 85, dtype: float64
 <p>Let’s illustrate it by prediciting whether the number of suicides is over or under median.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">y</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;Suicids&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;Suicids&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">y</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="s2">"Suicids"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">gdf</span><span class="p">[</span><span class="s2">"Suicids"</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>
@@ -2367,7 +2387,7 @@ Length: 85, dtype: float64
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">binary</span> <span class="o">=</span> <span class="n">GWLogisticRegression</span><span class="p">(</span><span class="n">bandwidth</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
 <span class="n">binary</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-    <span class="n">gdf</span><span class="p">[[</span><span class="s2">&quot;Crm_prp&quot;</span><span class="p">,</span> <span class="s2">&quot;Litercy&quot;</span><span class="p">,</span> <span class="s2">&quot;Donatns&quot;</span><span class="p">,</span> <span class="s2">&quot;Lottery&quot;</span><span class="p">]],</span>
+    <span class="n">gdf</span><span class="p">[[</span><span class="s2">"Crm_prp"</span><span class="p">,</span> <span class="s2">"Litercy"</span><span class="p">,</span> <span class="s2">"Donatns"</span><span class="p">,</span> <span class="s2">"Lottery"</span><span class="p">]],</span>
     <span class="n">y</span><span class="p">,</span>
     <span class="n">geometry</span><span class="o">=</span><span class="n">gdf</span><span class="o">.</span><span class="n">representative_point</span><span class="p">(),</span>
 <span class="p">)</span>
@@ -2951,6 +2971,14 @@ a.param-doc-link::before {
     width: 14px;
     height: 14px;
     cursor: pointer;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+}
+
+.copy-paste-icon:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 1px;
 }
 
 .features {
@@ -3009,7 +3037,6 @@ a.param-doc-link::before {
 }
 
 .features .features-container {
-  max-width: 15em;
   max-height: 10em;
   overflow: auto;
   scrollbar-width: thin;
@@ -3081,170 +3108,187 @@ a.param-doc-link::before {
                   <tbody>
                     
         <tr class="user-set">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy bandwidth to clipboard"
                  onclick="copyToClipboard('bandwidth',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">bandwidth</td>
             <td class="value">25</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fixed to clipboard"
                  onclick="copyToClipboard('fixed',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fixed</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy kernel to clipboard"
                  onclick="copyToClipboard('kernel',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">kernel</td>
             <td class="value">&#x27;bisquare&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy include_focal to clipboard"
                  onclick="copyToClipboard('include_focal',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">include_focal</td>
             <td class="value">True</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy graph to clipboard"
                  onclick="copyToClipboard('graph',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">graph</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy n_jobs to clipboard"
                  onclick="copyToClipboard('n_jobs',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">n_jobs</td>
             <td class="value">-1</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fit_global_model to clipboard"
                  onclick="copyToClipboard('fit_global_model',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fit_global_model</td>
             <td class="value">True</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy strict to clipboard"
                  onclick="copyToClipboard('strict',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">strict</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy keep_models to clipboard"
                  onclick="copyToClipboard('keep_models',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">keep_models</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy temp_folder to clipboard"
                  onclick="copyToClipboard('temp_folder',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">temp_folder</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy batch_size to clipboard"
                  onclick="copyToClipboard('batch_size',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">batch_size</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy min_proportion to clipboard"
                  onclick="copyToClipboard('min_proportion',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">min_proportion</td>
             <td class="value">0.2</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy undersample to clipboard"
                  onclick="copyToClipboard('undersample',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">undersample</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy leave_out to clipboard"
                  onclick="copyToClipboard('leave_out',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">leave_out</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy random_state to clipboard"
                  onclick="copyToClipboard('random_state',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">random_state</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy coplanar to clipboard"
                  onclick="copyToClipboard('coplanar',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">coplanar</td>
             <td class="value">&#x27;raise&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy verbose to clipboard"
                  onclick="copyToClipboard('verbose',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">verbose</td>
             <td class="value">False</td>
         </tr>
@@ -3762,13 +3806,13 @@ Length: 85, dtype: boolean
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-    <span class="n">local_accuracy</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">missing_kwds</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;lightgray&quot;</span><span class="p">)</span>
+    <span class="n">local_accuracy</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">missing_kwds</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">"lightgray"</span><span class="p">)</span>
 <span class="p">)</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/eec21d6b2112bb65f5b577c253a0d5a00a28f39b175c34f986d937c57258dea3.png" src="_images/eec21d6b2112bb65f5b577c253a0d5a00a28f39b175c34f986d937c57258dea3.png" />
+<img alt="_images/2a12d3cdbfd06894f4c9cb59c54ca755f22747359a0f2c186266e04e5b43bdf3.png" src="_images/2a12d3cdbfd06894f4c9cb59c54ca755f22747359a0f2c186266e04e5b43bdf3.png" />
 </div>
 </div>
 <p>The local coefficients are available as in the regression counterpart.</p>
@@ -3896,7 +3940,7 @@ Length: 85, dtype: boolean
         <span class="n">binary</span><span class="o">.</span><span class="n">local_coef_</span><span class="p">[</span><span class="n">column</span><span class="p">],</span>
         <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
-        <span class="n">missing_kwds</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;lightgray&quot;</span><span class="p">),</span>
+        <span class="n">missing_kwds</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">"lightgray"</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
@@ -3904,7 +3948,7 @@ Length: 85, dtype: boolean
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/59561b37dc2c8b95b88c32c3692b1a8ccf4cadd60839c8ca905f5ffa604f0645.png" src="_images/59561b37dc2c8b95b88c32c3692b1a8ccf4cadd60839c8ca905f5ffa604f0645.png" />
+<img alt="_images/15f19f5f23afa3cfdf65442f2812c4e04c01b28f2bdc5731f0ee9907b771b7a0.png" src="_images/15f19f5f23afa3cfdf65442f2812c4e04c01b28f2bdc5731f0ee9907b771b7a0.png" />
 </div>
 </div>
 <p>For details on prediction, see the <a class="reference internal" href="predict.html"><span class="std std-doc">Prediction</span></a> guide.</p>

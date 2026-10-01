@@ -934,16 +934,16 @@ geographically weighted linear regression in a following manner.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">spml.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">GWLinearRegression</span>
 
 
-<span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">get_path</span><span class="p">(</span><span class="s1">&#39;geoda.guerry&#39;</span><span class="p">))</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">get_path</span><span class="p">(</span><span class="s1">'geoda.guerry'</span><span class="p">))</span>
 
 <span class="n">adaptive</span> <span class="o">=</span> <span class="n">GWLinearRegression</span><span class="p">(</span>
     <span class="n">bandwidth</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
     <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;bisquare&#39;</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="s1">'bisquare'</span>
 <span class="p">)</span>
 <span class="n">adaptive</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-    <span class="n">gdf</span><span class="p">[[</span><span class="s1">&#39;Crm_prp&#39;</span><span class="p">,</span> <span class="s1">&#39;Litercy&#39;</span><span class="p">,</span> <span class="s1">&#39;Donatns&#39;</span><span class="p">,</span> <span class="s1">&#39;Lottery&#39;</span><span class="p">]],</span>
-    <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;Suicids&quot;</span><span class="p">],</span>
+    <span class="n">gdf</span><span class="p">[[</span><span class="s1">'Crm_prp'</span><span class="p">,</span> <span class="s1">'Litercy'</span><span class="p">,</span> <span class="s1">'Donatns'</span><span class="p">,</span> <span class="s1">'Lottery'</span><span class="p">]],</span>
+    <span class="n">gdf</span><span class="p">[</span><span class="s2">"Suicids"</span><span class="p">],</span>
     <span class="n">geometry</span><span class="o">=</span><span class="n">gdf</span><span class="o">.</span><span class="n">representative_point</span><span class="p">(),</span>
 <span class="p">)</span>
 </code></pre></div>

@@ -852,13 +852,13 @@
 <p>Get some data you want to model. This dataset is assumed to contain both dependent and independent variables.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">geodatasets</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s2">&quot;geoda Cincinnati&quot;</span><span class="p">))</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">geodatasets</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s2">"geoda Cincinnati"</span><span class="p">))</span>
 </code></pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>Downloading file &#39;walnuthills_updated.zip&#39; from &#39;https://geodacenter.github.io/data-and-lab//data/walnuthills_updated.zip&#39; to &#39;/home/runner/.cache/geodatasets&#39;.
-Extracting &#39;walnuthills_updated&#39; from &#39;/home/runner/.cache/geodatasets/walnuthills_updated.zip&#39; to &#39;/home/runner/.cache/geodatasets/walnuthills_updated.zip.unzip&#39;
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>Downloading file 'walnuthills_updated.zip' from 'https://geodacenter.github.io/data-and-lab//data/walnuthills_updated.zip' to '/home/runner/.cache/geodatasets'.
+Extracting 'walnuthills_updated' from '/home/runner/.cache/geodatasets/walnuthills_updated.zip' to '/home/runner/.cache/geodatasets/walnuthills_updated.zip.unzip'
 </code></pre></div>
 </div>
 </div>
@@ -872,13 +872,14 @@ Extracting &#39;walnuthills_updated&#39; from &#39;/home/runner/.cache/geodatase
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>Generating contraction hierarchies with 4 threads.
-Setting CH node vector of size 8862
-Setting CH edge vector of size 25852
-Range graph removed 26376 edges of 51704
+Setting CH node vector of size 8888
+Setting CH edge vector of size 25930
+Range graph removed 26452 edges of 51860
 . 10% . 20% . 30% . 40% . 50% . 60% . 70% . 80% . 90% . 100%
+ 100%
 </code></pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/pandarm/loaders/osm.py:68: UserWarning: GeoDataFrame is stored in coordinate system PROJCS[&quot;Lambert_Conformal_Conic&quot;,GEOGCS[&quot;GCS_GRS 1980(IUGG, 1980)&quot;,DATUM[&quot;unknown&quot;,SPHEROID[&quot;GRS80&quot;,6378137,298.257222101]],PRIMEM[&quot;Greenwich&quot;,0],UNIT[&quot;Degree&quot;,0.0174532925199433]],PROJECTION[&quot;Lambert_Conformal_Conic_2SP&quot;],PARAMETER[&quot;latitude_of_origin&quot;,38],PARAMETER[&quot;central_meridian&quot;,-82.5],PARAMETER[&quot;standard_parallel_1&quot;,40.0333333333333],PARAMETER[&quot;standard_parallel_2&quot;,38.7333333333333],PARAMETER[&quot;false_easting&quot;,1968500],PARAMETER[&quot;false_northing&quot;,0],UNIT[&quot;US survey foot&quot;,0.304800609601219,AUTHORITY[&quot;EPSG&quot;,&quot;9003&quot;]],AXIS[&quot;Easting&quot;,EAST],AXIS[&quot;Northing&quot;,NORTH]] so the pandarm.Network will also be stored in this system
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/pandarm/loaders/osm.py:68: UserWarning: GeoDataFrame is stored in coordinate system PROJCS["Lambert_Conformal_Conic",GEOGCS["GCS_GRS 1980(IUGG, 1980)",DATUM["unknown",SPHEROID["GRS80",6378137,298.257222101]],PRIMEM["Greenwich",0],UNIT["Degree",0.0174532925199433]],PROJECTION["Lambert_Conformal_Conic_2SP"],PARAMETER["latitude_of_origin",38],PARAMETER["central_meridian",-82.5],PARAMETER["standard_parallel_1",40.0333333333333],PARAMETER["standard_parallel_2",38.7333333333333],PARAMETER["false_easting",1968500],PARAMETER["false_northing",0],UNIT["US survey foot",0.304800609601219,AUTHORITY["EPSG","9003"]],AXIS["Easting",EAST],AXIS["Northing",NORTH]] so the pandarm.Network will also be stored in this system
   warn(
 </code></pre></div>
 </div>
@@ -891,7 +892,7 @@ Range graph removed 26376 edges of 51704
     <span class="n">df</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">representative_point</span><span class="p">()),</span>
     <span class="n">network</span><span class="p">,</span>
     <span class="n">threshold</span><span class="o">=</span><span class="mi">1500</span><span class="p">,</span>
-    <span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;bisquare&quot;</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="s2">"bisquare"</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
 </div>
@@ -914,7 +915,7 @@ Range graph removed 26376 edges of 51704
                 </tr>
                 <tr>
                     <td>Number of edges:</td>
-                    <td>       59287</td>
+                    <td>       59273</td>
                 </tr>
                 <tr>
                     <td>Number of connected components:</td>
@@ -926,11 +927,11 @@ Range graph removed 26376 edges of 51704
                 </tr>
                 <tr>
                     <td>Number of non-zero edges:</td>
-                    <td>       59287</td>
+                    <td>       59273</td>
                 </tr>
                 <tr>
                     <td>Percentage of non-zero edges:</td>
-                    <td>      28.39%</td>
+                    <td>      28.38%</td>
                 </tr>
                 <tr>
                     <td>Number of asymmetries:</td>
@@ -991,21 +992,21 @@ Range graph removed 26376 edges of 51704
                 <caption>Sum of weights and Traces</caption>
                 <tr>
                     <td>S0:</td>
-                    <td>       19938</td>
+                    <td>       19924</td>
                     <td>GG:</td>
-                    <td>       11682</td>
+                    <td>       11673</td>
                 </tr>
                 <tr>
                     <td>S1:</td>
-                    <td>       23364</td>
+                    <td>       23345</td>
                     <td>G'G:</td>
-                    <td>       11682</td>
+                    <td>       11673</td>
                 </tr>
                 <tr>
                     <td>S3:</td>
-                    <td>     4422507</td>
+                    <td>     4415726</td>
                     <td>G'G + GG:</td>
-                    <td>       23364</td>
+                    <td>       23345</td>
                 </tr>
             </table>
             <div>
@@ -1020,22 +1021,22 @@ Range graph removed 26376 edges of 51704
 <span class="n">gwlr</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
     <span class="n">X</span><span class="o">=</span><span class="n">df</span><span class="p">[</span>
         <span class="p">[</span>
-            <span class="s2">&quot;AGE_0_5&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;AGE_5_9&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;AGE_10_14&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;AGE_15_19&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;AGE_20_24&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;AGE_25_34&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;AGE_35_44&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;AGE_45_54&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;AGE_55_59&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;AGE_60_64&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;AGE_65_74&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;AGE_75_84&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;AGE_85&quot;</span><span class="p">,</span>
+            <span class="s2">"AGE_0_5"</span><span class="p">,</span>
+            <span class="s2">"AGE_5_9"</span><span class="p">,</span>
+            <span class="s2">"AGE_10_14"</span><span class="p">,</span>
+            <span class="s2">"AGE_15_19"</span><span class="p">,</span>
+            <span class="s2">"AGE_20_24"</span><span class="p">,</span>
+            <span class="s2">"AGE_25_34"</span><span class="p">,</span>
+            <span class="s2">"AGE_35_44"</span><span class="p">,</span>
+            <span class="s2">"AGE_45_54"</span><span class="p">,</span>
+            <span class="s2">"AGE_55_59"</span><span class="p">,</span>
+            <span class="s2">"AGE_60_64"</span><span class="p">,</span>
+            <span class="s2">"AGE_65_74"</span><span class="p">,</span>
+            <span class="s2">"AGE_75_84"</span><span class="p">,</span>
+            <span class="s2">"AGE_85"</span><span class="p">,</span>
         <span class="p">]</span>
     <span class="p">],</span>
-    <span class="n">y</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;WHITE&quot;</span><span class="p">],</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s2">"WHITE"</span><span class="p">],</span>
 <span class="p">)</span>
 </code></pre></div>
 </div>
@@ -1617,6 +1618,14 @@ a.param-doc-link::before {
     width: 14px;
     height: 14px;
     cursor: pointer;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+}
+
+.copy-paste-icon:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 1px;
 }
 
 .features {
@@ -1675,7 +1684,6 @@ a.param-doc-link::before {
 }
 
 .features .features-container {
-  max-width: 15em;
   max-height: 10em;
   overflow: auto;
   scrollbar-width: thin;
@@ -1739,7 +1747,7 @@ a.param-doc-link::before {
   justify-content: center;
   margin-top: 0.5em;
 }
-</style><body><div id="sk-container-id-1" tabindex="0" class="sk-top-container sk-global"><div class="sk-text-repr-fallback"><pre>GWLinearRegression(graph=&lt;Graph of 457 nodes and 59287 nonzero edges (1 component, 0 isolates) indexed by
+</style><body><div id="sk-container-id-1" tabindex="0" class="sk-top-container sk-global"><div class="sk-text-repr-fallback"><pre>GWLinearRegression(graph=&lt;Graph of 457 nodes and 59273 nonzero edges (1 component, 0 isolates) indexed by
  [0, 1, 2, 3, 4, ...]&gt;)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually sk-global" id="sk-estimator-id-1" type="checkbox" checked><label for="sk-estimator-id-1" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>GWLinearRegression</div></div><div><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted" data-param-prefix="">
         <div class="estimator-table">
             <details>
@@ -1748,130 +1756,143 @@ a.param-doc-link::before {
                   <tbody>
                     
         <tr class="user-set">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy graph to clipboard"
                  onclick="copyToClipboard('graph',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">graph</td>
             <td class="value">&lt;Graph of 457...2, 3, 4, ...]&gt;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy bandwidth to clipboard"
                  onclick="copyToClipboard('bandwidth',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">bandwidth</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fixed to clipboard"
                  onclick="copyToClipboard('fixed',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fixed</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy kernel to clipboard"
                  onclick="copyToClipboard('kernel',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">kernel</td>
             <td class="value">&#x27;bisquare&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy include_focal to clipboard"
                  onclick="copyToClipboard('include_focal',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">include_focal</td>
             <td class="value">True</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy n_jobs to clipboard"
                  onclick="copyToClipboard('n_jobs',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">n_jobs</td>
             <td class="value">-1</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy fit_global_model to clipboard"
                  onclick="copyToClipboard('fit_global_model',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">fit_global_model</td>
             <td class="value">True</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy strict to clipboard"
                  onclick="copyToClipboard('strict',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">strict</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy keep_models to clipboard"
                  onclick="copyToClipboard('keep_models',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">keep_models</td>
             <td class="value">False</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy temp_folder to clipboard"
                  onclick="copyToClipboard('temp_folder',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">temp_folder</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy batch_size to clipboard"
                  onclick="copyToClipboard('batch_size',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">batch_size</td>
             <td class="value">None</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy coplanar to clipboard"
                  onclick="copyToClipboard('coplanar',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">coplanar</td>
             <td class="value">&#x27;raise&#x27;</td>
         </tr>
     
 
         <tr class="default">
-            <td><i class="copy-paste-icon"
+            <td><button type="button" class="copy-paste-icon"
+                 aria-label="Copy verbose to clipboard"
                  onclick="copyToClipboard('verbose',
                           this.parentElement.nextElementSibling)"
-            ></i></td>
+            ></button></td>
             <td class="param">verbose</td>
             <td class="value">False</td>
         </tr>
@@ -1977,7 +1998,7 @@ a.param-doc-link::before {
        <tr class="default">
            <td class="param"><a class="param-doc-link" style="text-decoration:none;">local_intercept_</a></td>
            <td class="fitted-att-type">Series[float64](457,)</td>
-           <td>0     -8.1949...dtype: float64</td>
+           <td>0     -8.2002...dtype: float64</td>
 
 
        </tr>
@@ -1986,7 +2007,7 @@ a.param-doc-link::before {
        <tr class="default">
            <td class="param"><a class="param-doc-link" style="text-decoration:none;">local_r2_</a></td>
            <td class="fitted-att-type">Series[float64](457,)</td>
-           <td>0      0.9538...dtype: float64</td>
+           <td>0      0.9539...dtype: float64</td>
 
 
        </tr>
@@ -1995,7 +2016,7 @@ a.param-doc-link::before {
        <tr class="default">
            <td class="param"><a class="param-doc-link" style="text-decoration:none;">log_likelihood_</a></td>
            <td class="fitted-att-type">float64</td>
-           <td>-1644</td>
+           <td>-1643</td>
 
 
        </tr>
@@ -2004,7 +2025,7 @@ a.param-doc-link::before {
        <tr class="default">
            <td class="param"><a class="param-doc-link" style="text-decoration:none;">pred_</a></td>
            <td class="fitted-att-type">Series[float64](457,)</td>
-           <td>0      384.27...dtype: float64</td>
+           <td>0      384.25...dtype: float64</td>
 
 
        </tr>
@@ -2013,7 +2034,7 @@ a.param-doc-link::before {
        <tr class="default">
            <td class="param"><a class="param-doc-link" style="text-decoration:none;">resid_</a></td>
            <td class="fitted-att-type">Series[float64](457,)</td>
-           <td>0      48.725...dtype: float64</td>
+           <td>0      48.741...dtype: float64</td>
 
 
        </tr>
@@ -2022,7 +2043,7 @@ a.param-doc-link::before {
        <tr class="default">
            <td class="param"><a class="param-doc-link" style="text-decoration:none;">y_bar_</a></td>
            <td class="fitted-att-type">Series[float64](457,)</td>
-           <td>0      52.768...dtype: float64</td>
+           <td>0      52.767...dtype: float64</td>
 
 
        </tr>
@@ -2211,16 +2232,16 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0      384.274445
-1       11.429434
-2       16.851599
-3       17.588386
-4       47.073175
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0      384.258323
+1       11.429327
+2       16.850578
+3       17.588361
+4       47.075496
           ...    
-452      5.448053
-453      0.680018
-454      0.243695
-455      1.216862
+452      5.441805
+453      0.681026
+454      0.240366
+455      1.217476
 456      2.340879
 Length: 457, dtype: float64
 </code></pre></div>
@@ -2235,17 +2256,17 @@ Length: 457, dtype: float64
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0      0.953899
-1      0.976193
-2      0.986353
-3      0.974714
-4      0.982399
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>0      0.953933
+1      0.976236
+2      0.986362
+3      0.974752
+4      0.982416
          ...   
-452    0.774716
-453    0.646991
-454    0.690971
-455    0.864361
-456    0.844933
+452    0.774605
+453    0.646835
+454    0.690720
+455    0.864193
+456    0.844926
 Length: 457, dtype: float64
 </code></pre></div>
 </div>
@@ -2259,7 +2280,7 @@ Length: 457, dtype: float64
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/8622b27fef42c02b92b35356a32a9c6a12ce1792888d676661f4d9859e4cecb4.png" src="_images/8622b27fef42c02b92b35356a32a9c6a12ce1792888d676661f4d9859e4cecb4.png" />
+<img alt="_images/118cf6854e8dfec852385565f380bb1d79f6eb689bc1266a7b6155009f962417.png" src="_images/118cf6854e8dfec852385565f380bb1d79f6eb689bc1266a7b6155009f962417.png" />
 </div>
 </div>
 
