@@ -531,7 +531,7 @@ def test_fit_with_strict_option(sample_data):
     )
 
     # This should raise a ValueError due to invariant y
-    with pytest.raises(ValueError, match="y at locations .* is invariant"):
+    with pytest.raises(ValueError, match="y at locations * is invariant"):
         clf.fit(X, y, geometry)
 
     # But with strict=False, it should just warn
