@@ -58,3 +58,50 @@ Tooling to determine the optimal bandwidths of geographically weighted models.
    :toctree: generated/
 
    BandwidthSearch
+
+Validation
+----------
+
+Spatial cross-validation splitters, point samplers, and range-finding
+utilities for validating spatial models.
+
+Cross-validation splitters
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. currentmodule:: spml.validation
+.. autosummary::
+   :toctree: generated/
+
+   BallKFold
+   CellStratifiedKFold
+   ClusterStratifiedKFold
+   HilbertKFold
+   LeaveBallOut
+   LeaveCellOut
+   LeaveClusterOut
+   LocalBootstrap
+   LocalPermutation
+
+
+Point samplers
+~~~~~~~~~~~~~~
+
+.. currentmodule:: spml.validation
+.. autosummary::
+   :toctree: generated/
+
+   PointSampler
+   ConstantClassSampler
+   StratifiedClassSampler
+   MultinomialSampler
+   PoissonSampler
+
+Range finders
+~~~~~~~~~~~~~
+
+.. currentmodule:: spml.validation
+.. autosummary::
+   :toctree: generated/
+
+   correlogram_range
+   knn_range

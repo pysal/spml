@@ -10,6 +10,11 @@ dependencies:
   - scipy
   - scikit-learn
   - joblib
+  # optional
+  - h3-py
+  - healpy
+  - s2sphere
+  - rasterio
   # testing
   - geodatasets
   - mgwr
@@ -18,3 +23,6 @@ dependencies:
   - pytest-cov
   - pytest-xdist
   - pytest-doctestplus
+  - pip
+  - pip:
+    - pya5

@@ -72,6 +72,10 @@ jobs:
           geodatasets.fetch("geoda guerry")
           '
 
+      - name: Set OpenMP threads
+        if: matrix.os == 'windows-latest'
+        run: echo "OMP_NUM_THREADS=1" >> "$GITHUB_ENV"
+
       - name: run tests
         run: |
           pytest \

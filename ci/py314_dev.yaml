@@ -6,6 +6,9 @@ dependencies:
   - python=3.14
   - git
   - pip
+  # optional
+  - h3-py
+  - rasterio
   # testing
   - geodatasets
   - pre-commit

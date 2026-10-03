@@ -31,7 +31,7 @@ jobs:
               run: |
                   uv venv
                   uv pip install ty
-                  uv pip install .
+                  uv pip install .[optional]
 
             - name: Run checks
               run: uv run ty check spml

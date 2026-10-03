@@ -10,6 +10,11 @@ dependencies:
   - scipy
   - scikit-learn
   - joblib
+  # optional
+  - h3-py
+  - healpy
+  - s2sphere
+  - rasterio
   # testing
   - geodatasets
   - mgwr
@@ -22,3 +27,6 @@ dependencies:
   - sphinx-autosummary-accessors
   - sphinx-copybutton
   - sphinx-immaterial
+  - pip
+  - pip:
+    - pya5

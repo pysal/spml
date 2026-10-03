@@ -26,15 +26,11 @@ from geodatasets import get_path
 from spml.linear_model import GWLinearRegression
 
 
-gdf = gpd.read_file(get_path('geoda.guerry'))
+gdf = gpd.read_file(get_path("geoda.guerry"))
 
-adaptive = GWLinearRegression(
-    bandwidth=25,
-    fixed=False,
-    kernel='bisquare'
-)
+adaptive = GWLinearRegression(bandwidth=25, fixed=False, kernel="bisquare")
 adaptive.fit(
-    gdf[['Crm_prp', 'Litercy', 'Donatns', 'Lottery']],
+    gdf[["Crm_prp", "Litercy", "Donatns", "Lottery"]],
     gdf["Suicids"],
     geometry=gdf.representative_point(),
 )

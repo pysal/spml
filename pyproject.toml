@@ -30,6 +30,15 @@ dependencies = [
     "pandas>=2.3.0",
 ]
 
+[project.optional-dependencies]
+optional = [
+    "h3",
+    "healpy",
+    "s2sphere",
+    "rasterio",
+    "pya5",
+]
+
 [project.urls]
 Homepage = "https://pysal.org/spml/"
 Documentation = "https://pysal.org/spml/"
@@ -46,7 +55,12 @@ extend-include = ["*.ipynb"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "N", "B", "A", "C4", "SIM", "ARG"]
-ignore = ["N803", "N806"] # name {} should be lowercase
+ignore = [
+    "N803", 
+    "N806", # name {} should be lowercase
+    "C408", # dict as literal
+    "C420", # dict.from_iterable 
+    ] 
 
 [tool.ruff.lint.per-file-ignores]
  "*__init__.py" = [
@@ -89,5 +103,6 @@ filterwarnings = [
     "ignore:This process \\(pid=\\d+\\) is multi-threaded*:DeprecationWarning",
     "ignore:divide by zero encountered in power:RuntimeWarning",
     "ignore:Some inputs do not have OOB scores.",
-    "ignore:Setting the shape on a NumPy array"
+    "ignore:Setting the shape on a NumPy array",
+    "ignore:Use `@` matmul instead of `\\*` mul operator for matrix multiplication:PendingDeprecationWarning:rasterio"
 ]

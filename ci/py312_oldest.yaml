@@ -7,10 +7,13 @@ dependencies:
   - geopandas=1.1.0
   - joblib=1.5.0
   - libpysal=4.15
-  - numpy=2.0.0
+  - numpy=2.2.0
   - scipy=1.14.0
-  - scikit-learn=1.5.0
+  - scikit-learn=1.6.0
   - pandas=2.3.0
+  # optional
+  - h3-py
+  - rasterio
   # testing
   - geodatasets
   - mgwr
