@@ -4322,7 +4322,7 @@ must set <code class="docutils literal notranslate"><span class="pre">keep_model
 <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html#sklearn.linear_model.LogisticRegression" title="(in scikit-learn v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.linear_model.LogisticRegression</span></code></a>). The class (not an instance)
 is instantiated internally for each local model.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype">float | int | None</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p><p>Bandwidth for defining neighborhoods.</p>
+<dt id="spml.base.BaseClassifier.__init__.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a> | None</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p><p>Bandwidth for defining neighborhoods.</p>
 <ul class="simple">
 <li><p>If <code class="docutils literal notranslate"><span class="pre">fixed=True</span></code>, this is a distance threshold.</p></li>
 <li><p>If <code class="docutils literal notranslate"><span class="pre">fixed=False</span></code>, this is the number of nearest neighbors used to form the
@@ -4331,12 +4331,12 @@ local neighborhood.</p></li>
 <p>If <code class="docutils literal notranslate"><span class="pre">graph</span></code> is provided, <code class="docutils literal notranslate"><span class="pre">bandwidth</span></code> is ignored.</p>
 </p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.fixed"><span class="sig-name descname">fixed</span><span class="p"> : </span><span class="desctype"><span class="desctype">bool, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.fixed" title="Permalink to this definition">¶</a></dt><dd><p>True for distance based bandwidth and False for adaptive (nearest neighbor)
+<dt id="spml.base.BaseClassifier.__init__.fixed"><span class="sig-name descname">fixed</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a>, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.fixed" title="Permalink to this definition">¶</a></dt><dd><p>True for distance based bandwidth and False for adaptive (nearest neighbor)
 bandwidth, by default False</p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.kernel"><span class="sig-name descname">kernel</span><span class="p"> : </span><span class="desctype"><span class="desctype">str | Callable, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.kernel" title="Permalink to this definition">¶</a></dt><dd><p>Type of kernel function used to weight observations, by default “bisquare”</p>
+<dt id="spml.base.BaseClassifier.__init__.kernel"><span class="sig-name descname">kernel</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a> | Callable, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.kernel" title="Permalink to this definition">¶</a></dt><dd><p>Type of kernel function used to weight observations, by default “bisquare”</p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.include_focal"><span class="sig-name descname">include_focal</span><span class="p"> : </span><span class="desctype"><span class="desctype">bool, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.include_focal" title="Permalink to this definition">¶</a></dt><dd><p>Include focal in the local model training. Excluding it allows assessment of
+<dt id="spml.base.BaseClassifier.__init__.include_focal"><span class="sig-name descname">include_focal</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a>, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.include_focal" title="Permalink to this definition">¶</a></dt><dd><p>Include focal in the local model training. Excluding it allows assessment of
 geographically weighted metrics on unseen data without a need for train/test
 split, hence providing value for all samples. This is needed for further spatial
 analysis of the model performance (and generalises to models that do not support
@@ -4350,31 +4350,31 @@ observations in the sample. If given, it is used directly and <code class="docut
 required to specify <code class="docutils literal notranslate"><span class="pre">geometry</span></code>. Potentially, both can be specified where
 <code class="docutils literal notranslate"><span class="pre">graph</span></code> encodes spatial interaction between observations in <code class="docutils literal notranslate"><span class="pre">geometry</span></code>.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.n_jobs"><span class="sig-name descname">n_jobs</span><span class="p"> : </span><span class="desctype"><span class="desctype">int, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.n_jobs" title="Permalink to this definition">¶</a></dt><dd><p>The number of jobs to run in parallel. <code class="docutils literal notranslate"><span class="pre">-1</span></code> means using all processors by
+<dt id="spml.base.BaseClassifier.__init__.n_jobs"><span class="sig-name descname">n_jobs</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a>, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.n_jobs" title="Permalink to this definition">¶</a></dt><dd><p>The number of jobs to run in parallel. <code class="docutils literal notranslate"><span class="pre">-1</span></code> means using all processors by
 default <code class="docutils literal notranslate"><span class="pre">-1</span></code></p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.fit_global_model"><span class="sig-name descname">fit_global_model</span><span class="p"> : </span><span class="desctype"><span class="desctype">bool, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.fit_global_model" title="Permalink to this definition">¶</a></dt><dd><p>Determines if the global baseline model shall be fitted alongside the
+<dt id="spml.base.BaseClassifier.__init__.fit_global_model"><span class="sig-name descname">fit_global_model</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a>, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.fit_global_model" title="Permalink to this definition">¶</a></dt><dd><p>Determines if the global baseline model shall be fitted alongside the
 geographically weighted, by default True</p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.strict"><span class="sig-name descname">strict</span><span class="p"> : </span><span class="desctype"><span class="desctype">bool | None, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.strict" title="Permalink to this definition">¶</a></dt><dd><p>Do not fit any models if at least one neighborhood has invariant <code class="docutils literal notranslate"><span class="pre">y</span></code>, by
+<dt id="spml.base.BaseClassifier.__init__.strict"><span class="sig-name descname">strict</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a> | None, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.strict" title="Permalink to this definition">¶</a></dt><dd><p>Do not fit any models if at least one neighborhood has invariant <code class="docutils literal notranslate"><span class="pre">y</span></code>, by
 default False. None is treated as False but provides a warning if there are
 invariant models.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.keep_models"><span class="sig-name descname">keep_models</span><span class="p"> : </span><span class="desctype"><span class="desctype">bool | str | Path, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.keep_models" title="Permalink to this definition">¶</a></dt><dd><p>Keep all local models (required for prediction), by default False. Note that for
+<dt id="spml.base.BaseClassifier.__init__.keep_models"><span class="sig-name descname">keep_models</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a> | Path, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.keep_models" title="Permalink to this definition">¶</a></dt><dd><p>Keep all local models (required for prediction), by default False. Note that for
 some models, like random forests, the objects can be large. If string or Path is
 provided, the local models are not held in memory but serialized to the disk
 from which they are loaded in prediction.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.temp_folder"><span class="sig-name descname">temp_folder</span><span class="p"> : </span><span class="desctype"><span class="desctype">str | None, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.temp_folder" title="Permalink to this definition">¶</a></dt><dd><p>Folder to be used by the pool for memmapping large arrays for sharing memory
+<dt id="spml.base.BaseClassifier.__init__.temp_folder"><span class="sig-name descname">temp_folder</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a> | None, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.temp_folder" title="Permalink to this definition">¶</a></dt><dd><p>Folder to be used by the pool for memmapping large arrays for sharing memory
 with worker processes, e.g., <code class="docutils literal notranslate"><span class="pre">/tmp</span></code>. Passed to <code class="docutils literal notranslate"><span class="pre">joblib.Parallel</span></code>, by default
 None</p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.batch_size"><span class="sig-name descname">batch_size</span><span class="p"> : </span><span class="desctype"><span class="desctype">int | None, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.batch_size" title="Permalink to this definition">¶</a></dt><dd><p>Number of models to process in each batch. Specify batch_size if your models do
+<dt id="spml.base.BaseClassifier.__init__.batch_size"><span class="sig-name descname">batch_size</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a> | None, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.batch_size" title="Permalink to this definition">¶</a></dt><dd><p>Number of models to process in each batch. Specify batch_size if your models do
 not fit into memory. By default None</p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.min_proportion"><span class="sig-name descname">min_proportion</span><span class="p"> : </span><span class="desctype"><span class="desctype">float, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.min_proportion" title="Permalink to this definition">¶</a></dt><dd><p>Minimum proportion of minority class for a model to be fitted, by default 0.2</p>
+<dt id="spml.base.BaseClassifier.__init__.min_proportion"><span class="sig-name descname">min_proportion</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a>, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.min_proportion" title="Permalink to this definition">¶</a></dt><dd><p>Minimum proportion of minority class for a model to be fitted, by default 0.2</p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.undersample"><span class="sig-name descname">undersample</span><span class="p"> : </span><span class="desctype"><span class="desctype">bool | float, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.undersample" title="Permalink to this definition">¶</a></dt><dd><p><p>Whether to apply random undersampling to balance classes.</p>
+<dt id="spml.base.BaseClassifier.__init__.undersample"><span class="sig-name descname">undersample</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a>, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.undersample" title="Permalink to this definition">¶</a></dt><dd><p><p>Whether to apply random undersampling to balance classes.</p>
 <p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, undersample the majority class to match the minority class
 (i.e., minority/majority ratio = 1.0).</p>
 <p>If a float <code class="docutils literal notranslate"><span class="pre">alpha</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>, target a minority/majority ratio of <code class="docutils literal notranslate"><span class="pre">alpha</span></code> after
@@ -4382,20 +4382,20 @@ resampling, i.e. <code class="docutils literal notranslate"><span class="pre">al
 By default False</p>
 </p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.leave_out"><span class="sig-name descname">leave_out</span><span class="p"> : </span><span class="desctype"><span class="desctype">float | int, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.leave_out" title="Permalink to this definition">¶</a></dt><dd><p>Leave out a fraction (when float) or a set number (when int) of random
+<dt id="spml.base.BaseClassifier.__init__.leave_out"><span class="sig-name descname">leave_out</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a>, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.leave_out" title="Permalink to this definition">¶</a></dt><dd><p>Leave out a fraction (when float) or a set number (when int) of random
 observations from each local model to be used to measure out-of-sample log loss
 based on pooled samples from all the models. This is useful for bandwidth
 selection for cases where some local models are not fitted due to local
 invariance and resulting information criteria are not comparable.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.random_state"><span class="sig-name descname">random_state</span><span class="p"> : </span><span class="desctype"><span class="desctype">int | None, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.random_state" title="Permalink to this definition">¶</a></dt><dd><p>Random seed for reproducibility, by default None</p>
+<dt id="spml.base.BaseClassifier.__init__.random_state"><span class="sig-name descname">random_state</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a> | None, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.random_state" title="Permalink to this definition">¶</a></dt><dd><p>Random seed for reproducibility, by default None</p>
 </dd>
 <dt id="spml.base.BaseClassifier.__init__.coplanar"><span class="sig-name descname">coplanar</span><span class="p"> : </span><span class="desctype"><span class="desctype">&quot;raise&quot;, &quot;jitter&quot;, &quot;clique&quot;, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.coplanar" title="Permalink to this definition">¶</a></dt><dd><p>Method for handling coplanar points with adaptive kernel. Options are
 <code class="docutils literal notranslate"><span class="pre">'raise'</span></code> (raising an exception when coplanar points are present),
 <code class="docutils literal notranslate"><span class="pre">'jitter'</span></code> (randomly displace coplanar points to produce uniqueness), &amp;
 <code class="docutils literal notranslate"><span class="pre">'clique'</span></code> (induce fully-connected sub cliques for coplanar points).</p>
 </dd>
-<dt id="spml.base.BaseClassifier.__init__.verbose"><span class="sig-name descname">verbose</span><span class="p"> : </span><span class="desctype"><span class="desctype">bool, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.verbose" title="Permalink to this definition">¶</a></dt><dd><p>Whether to print progress information, by default False</p>
+<dt id="spml.base.BaseClassifier.__init__.verbose"><span class="sig-name descname">verbose</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a>, optional</span></span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.verbose" title="Permalink to this definition">¶</a></dt><dd><p>Whether to print progress information, by default False</p>
 </dd>
 <dt id="spml.base.BaseClassifier.__init__.kwargs"><span class="o">**</span><span class="n sig-name">kwargs</span><a class="headerlink" href="#spml.base.BaseClassifier.__init__.kwargs" title="Permalink to this definition">¶</a></dt><dd><p>Additional keyword arguments passed to <code class="docutils literal notranslate"><span class="pre">model</span></code> initialisation</p>
 </dd>
@@ -4445,7 +4445,7 @@ Only available for logistic models.</p>
 Only available for logistic models.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.base.BaseClassifier.effective_df_-type">Type<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.effective_df_-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4457,7 +4457,7 @@ Only available for logistic models.</p>
 Only available for logistic models.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.base.BaseClassifier.log_likelihood_-type">Type<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.log_likelihood_-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4469,7 +4469,7 @@ Only available for logistic models.</p>
 Only available for logistic models.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.base.BaseClassifier.aic_-type">Type<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.aic_-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4481,7 +4481,7 @@ Only available for logistic models.</p>
 Only available for logistic models.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.base.BaseClassifier.aicc_-type">Type<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.aicc_-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4493,7 +4493,7 @@ Only available for logistic models.</p>
 Only available for logistic models.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.base.BaseClassifier.bic_-type">Type<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.bic_-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4505,7 +4505,7 @@ Only available for logistic models.</p>
 fulfilling <code class="docutils literal notranslate"><span class="pre">min_proportion</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.base.BaseClassifier.prediction_rate_-type">Type<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.prediction_rate_-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4649,7 +4649,7 @@ checks and <code class="docutils literal notranslate"><span class="pre">min_prop
 </dd>
 <dt id="spml.base.BaseClassifier.fit.y"><span class="sig-name descname">y</span><span class="p"> : </span><span class="desctype"><span class="desctype">pandas.Series</span></span><a class="headerlink" href="#spml.base.BaseClassifier.fit.y" title="Permalink to this definition">¶</a></dt><dd><p>Binary target encoded as boolean or <code class="docutils literal notranslate"><span class="pre">{0,</span> <span class="pre">1}</span></code>.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.fit.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://geopandas.org/en/latest/docs/reference/api/geopandas.GeoSeries.html#geopandas.GeoSeries" title="(in GeoPandas v1.2.1.dev0.dev+g199fc53c8)">geopandas.GeoSeries</a> | None</span></span><a class="headerlink" href="#spml.base.BaseClassifier.fit.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Geographic location of the observations in the sample. Used to determine the
+<dt id="spml.base.BaseClassifier.fit.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://geopandas.org/en/latest/docs/reference/api/geopandas.GeoSeries.html#geopandas.GeoSeries" title="(in GeoPandas v1.2.1.dev1.dev+gcf7059fe7)">geopandas.GeoSeries</a> | None</span></span><a class="headerlink" href="#spml.base.BaseClassifier.fit.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Geographic location of the observations in the sample. Used to determine the
 spatial interaction weight based on specification by <code class="docutils literal notranslate"><span class="pre">bandwidth</span></code>,
 <code class="docutils literal notranslate"><span class="pre">fixed</span></code>, <code class="docutils literal notranslate"><span class="pre">kernel</span></code>, and <code class="docutils literal notranslate"><span class="pre">include_focal</span></code> keywords.  If <cite>None</cite>,
 a precomputed <code class="docutils literal notranslate"><span class="pre">graph</span></code> needs to be specified. To allow prediction,
@@ -4695,7 +4695,7 @@ routing information.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.base.BaseClassifier.get_params-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.get_params-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.base.BaseClassifier.get_params.deep"><span class="sig-name descname">deep</span><span class="p"> : </span><span class="desctype"><span class="desctype">bool, default=True</span></span><a class="headerlink" href="#spml.base.BaseClassifier.get_params.deep" title="Permalink to this definition">¶</a></dt><dd><p>If True, will return the parameters for this estimator and
+<dt id="spml.base.BaseClassifier.get_params.deep"><span class="sig-name descname">deep</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a>, default=True</span></span><a class="headerlink" href="#spml.base.BaseClassifier.get_params.deep" title="Permalink to this definition">¶</a></dt><dd><p>If True, will return the parameters for this estimator and
 contained subobjects that are estimators.</p>
 </dd>
 </dl>
@@ -4704,7 +4704,7 @@ contained subobjects that are estimators.</p>
 <dd class="field-even"><p><strong>params</strong> – Parameter names mapped to their values.</p>
 </dd>
 <dt class="field-odd" id="spml.base.BaseClassifier.get_params-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.get_params-return-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p>dict</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4757,15 +4757,15 @@ when <code class="docutils literal notranslate"><span class="pre">global_model_w
 <dd class="field-odd"><dl class="simple api-field highlight">
 <dt id="spml.base.BaseClassifier.predict.X"><span class="sig-name descname">X</span><span class="p"> : </span><span class="desctype"><span class="desctype">pandas.DataFrame</span></span><a class="headerlink" href="#spml.base.BaseClassifier.predict.X" title="Permalink to this definition">¶</a></dt><dd><p>Feature matrix for new observations.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.predict.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://geopandas.org/en/latest/docs/reference/api/geopandas.GeoSeries.html#geopandas.GeoSeries" title="(in GeoPandas v1.2.1.dev0.dev+g199fc53c8)">geopandas.GeoSeries</a></span></span><a class="headerlink" href="#spml.base.BaseClassifier.predict.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Point geometries for new observations.</p>
+<dt id="spml.base.BaseClassifier.predict.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://geopandas.org/en/latest/docs/reference/api/geopandas.GeoSeries.html#geopandas.GeoSeries" title="(in GeoPandas v1.2.1.dev1.dev+gcf7059fe7)">geopandas.GeoSeries</a></span></span><a class="headerlink" href="#spml.base.BaseClassifier.predict.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Point geometries for new observations.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.predict.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype">&quot;nearest&quot;, float or None</span></span><a class="headerlink" href="#spml.base.BaseClassifier.predict.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Prediction method. Nearest uses the nearest location available at the fit
+<dt id="spml.base.BaseClassifier.predict.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype">&quot;nearest&quot;, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a> or None</span></span><a class="headerlink" href="#spml.base.BaseClassifier.predict.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Prediction method. Nearest uses the nearest location available at the fit
 time and does prediction using its single model. When set to a numeric
 value, uses an ensemble of local models available within the bandwidth, with
 predictions from individual models being weighted based on the distance and
 a set kernel. When <code class="docutils literal notranslate"><span class="pre">None</span></code>, uses the bandwidth set at the fit time.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.predict.global_model_weight"><span class="sig-name descname">global_model_weight</span><span class="p"> : </span><span class="desctype"><span class="desctype">float</span></span><a class="headerlink" href="#spml.base.BaseClassifier.predict.global_model_weight" title="Permalink to this definition">¶</a></dt><dd><p>Weight of the prediction from the global model. When non-zero, the
+<dt id="spml.base.BaseClassifier.predict.global_model_weight"><span class="sig-name descname">global_model_weight</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a></span></span><a class="headerlink" href="#spml.base.BaseClassifier.predict.global_model_weight" title="Permalink to this definition">¶</a></dt><dd><p>Weight of the prediction from the global model. When non-zero, the
 resulting prediction is a weighted average of the values from local model(s)
 and from global model, where local prediction has a weight of 1 and global
 model has a weight equal to <code class="docutils literal notranslate"><span class="pre">global_model_weight</span></code>.</p>
@@ -4811,15 +4811,15 @@ when <code class="docutils literal notranslate"><span class="pre">global_model_w
 <dd class="field-odd"><dl class="simple api-field highlight">
 <dt id="spml.base.BaseClassifier.predict_proba.X"><span class="sig-name descname">X</span><span class="p"> : </span><span class="desctype"><span class="desctype">pandas.DataFrame</span></span><a class="headerlink" href="#spml.base.BaseClassifier.predict_proba.X" title="Permalink to this definition">¶</a></dt><dd><p>Feature matrix for new observations.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.predict_proba.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://geopandas.org/en/latest/docs/reference/api/geopandas.GeoSeries.html#geopandas.GeoSeries" title="(in GeoPandas v1.2.1.dev0.dev+g199fc53c8)">geopandas.GeoSeries</a></span></span><a class="headerlink" href="#spml.base.BaseClassifier.predict_proba.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Point geometries for new observations.</p>
+<dt id="spml.base.BaseClassifier.predict_proba.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://geopandas.org/en/latest/docs/reference/api/geopandas.GeoSeries.html#geopandas.GeoSeries" title="(in GeoPandas v1.2.1.dev1.dev+gcf7059fe7)">geopandas.GeoSeries</a></span></span><a class="headerlink" href="#spml.base.BaseClassifier.predict_proba.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Point geometries for new observations.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.predict_proba.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype">&quot;nearest&quot;, float or None</span></span><a class="headerlink" href="#spml.base.BaseClassifier.predict_proba.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Prediction method. Nearest uses the nearest location available at the fit
+<dt id="spml.base.BaseClassifier.predict_proba.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype">&quot;nearest&quot;, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a> or None</span></span><a class="headerlink" href="#spml.base.BaseClassifier.predict_proba.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Prediction method. Nearest uses the nearest location available at the fit
 time and does prediction using its single model. When set to a numeric
 value, uses an ensemble of local models available within the bandwidth, with
 predictions from individual models being weighted based on the distance and
 a set kernel. When <code class="docutils literal notranslate"><span class="pre">None</span></code>, uses the bandwidth set at the fit time.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.predict_proba.global_model_weight"><span class="sig-name descname">global_model_weight</span><span class="p"> : </span><span class="desctype"><span class="desctype">float</span></span><a class="headerlink" href="#spml.base.BaseClassifier.predict_proba.global_model_weight" title="Permalink to this definition">¶</a></dt><dd><p>Weight of the prediction from the global model. When non-zero, the
+<dt id="spml.base.BaseClassifier.predict_proba.global_model_weight"><span class="sig-name descname">global_model_weight</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a></span></span><a class="headerlink" href="#spml.base.BaseClassifier.predict_proba.global_model_weight" title="Permalink to this definition">¶</a></dt><dd><p>Weight of the prediction from the global model. When non-zero, the
 resulting prediction is a weighted average of the values from local model(s)
 and from global model, where local prediction has a weight of 1 and global
 model has a weight equal to <code class="docutils literal notranslate"><span class="pre">global_model_weight</span></code>.</p>
@@ -4850,11 +4850,11 @@ during fit.</p>
 </dd>
 <dt id="spml.base.BaseClassifier.score.y"><span class="sig-name descname">y</span><span class="p"> : </span><span class="desctype"><span class="desctype">pandas.Series</span></span><a class="headerlink" href="#spml.base.BaseClassifier.score.y" title="Permalink to this definition">¶</a></dt><dd><p>True labels for X.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.score.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://geopandas.org/en/latest/docs/reference/api/geopandas.GeoSeries.html#geopandas.GeoSeries" title="(in GeoPandas v1.2.1.dev0.dev+g199fc53c8)">geopandas.GeoSeries</a></span></span><a class="headerlink" href="#spml.base.BaseClassifier.score.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Point geometries for new observations.</p>
+<dt id="spml.base.BaseClassifier.score.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://geopandas.org/en/latest/docs/reference/api/geopandas.GeoSeries.html#geopandas.GeoSeries" title="(in GeoPandas v1.2.1.dev1.dev+gcf7059fe7)">geopandas.GeoSeries</a></span></span><a class="headerlink" href="#spml.base.BaseClassifier.score.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Point geometries for new observations.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.score.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype">&quot;nearest&quot;, float or None</span></span><a class="headerlink" href="#spml.base.BaseClassifier.score.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Prediction method. See predict().</p>
+<dt id="spml.base.BaseClassifier.score.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype">&quot;nearest&quot;, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a> or None</span></span><a class="headerlink" href="#spml.base.BaseClassifier.score.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Prediction method. See predict().</p>
 </dd>
-<dt id="spml.base.BaseClassifier.score.global_model_weight"><span class="sig-name descname">global_model_weight</span><span class="p"> : </span><span class="desctype"><span class="desctype">float</span></span><a class="headerlink" href="#spml.base.BaseClassifier.score.global_model_weight" title="Permalink to this definition">¶</a></dt><dd><p>Weight of the prediction from the global model.</p>
+<dt id="spml.base.BaseClassifier.score.global_model_weight"><span class="sig-name descname">global_model_weight</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a></span></span><a class="headerlink" href="#spml.base.BaseClassifier.score.global_model_weight" title="Permalink to this definition">¶</a></dt><dd><p>Weight of the prediction from the global model.</p>
 </dd>
 </dl>
 </dd>
@@ -4862,7 +4862,7 @@ during fit.</p>
 <dd class="field-even"><p>Mean accuracy of self.predict(X, geometry).</p>
 </dd>
 <dt class="field-odd" id="spml.base.BaseClassifier.score-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.score-return-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4892,7 +4892,7 @@ parameters and not others.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.base.BaseClassifier.set_fit_request-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.set_fit_request-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.base.BaseClassifier.set_fit_request.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_fit_request.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">geometry</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">fit</span></code>.</p>
+<dt id="spml.base.BaseClassifier.set_fit_request.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_fit_request.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">geometry</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">fit</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -4900,7 +4900,7 @@ parameters and not others.</p>
 <dd class="field-even"><p><strong>self</strong> – The updated object.</p>
 </dd>
 <dt class="field-odd" id="spml.base.BaseClassifier.set_fit_request-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.set_fit_request-return-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p>object</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)">object</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4916,7 +4916,7 @@ possible to update each component of a nested object.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.base.BaseClassifier.set_params-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.set_params-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.base.BaseClassifier.set_params.params"><span class="sig-name descname">**params</span><span class="p"> : </span><span class="desctype"><span class="desctype">dict</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_params.params" title="Permalink to this definition">¶</a></dt><dd><p>Estimator parameters.</p>
+<dt id="spml.base.BaseClassifier.set_params.params"><span class="sig-name descname">**params</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)">dict</a></span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_params.params" title="Permalink to this definition">¶</a></dt><dd><p>Estimator parameters.</p>
 </dd>
 </dl>
 </dd>
@@ -4954,11 +4954,11 @@ parameters and not others.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.base.BaseClassifier.set_predict_proba_request-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_proba_request-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.base.BaseClassifier.set_predict_proba_request.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_proba_request.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">bandwidth</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict_proba</span></code>.</p>
+<dt id="spml.base.BaseClassifier.set_predict_proba_request.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_proba_request.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">bandwidth</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict_proba</span></code>.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.set_predict_proba_request.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_proba_request.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">geometry</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict_proba</span></code>.</p>
+<dt id="spml.base.BaseClassifier.set_predict_proba_request.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_proba_request.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">geometry</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict_proba</span></code>.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.set_predict_proba_request.global_model_weight"><span class="sig-name descname">global_model_weight</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_proba_request.global_model_weight" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">global_model_weight</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict_proba</span></code>.</p>
+<dt id="spml.base.BaseClassifier.set_predict_proba_request.global_model_weight"><span class="sig-name descname">global_model_weight</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_proba_request.global_model_weight" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">global_model_weight</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict_proba</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -4966,7 +4966,7 @@ parameters and not others.</p>
 <dd class="field-even"><p><strong>self</strong> – The updated object.</p>
 </dd>
 <dt class="field-odd" id="spml.base.BaseClassifier.set_predict_proba_request-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_proba_request-return-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p>object</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)">object</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4996,11 +4996,11 @@ parameters and not others.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.base.BaseClassifier.set_predict_request-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_request-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.base.BaseClassifier.set_predict_request.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_request.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">bandwidth</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict</span></code>.</p>
+<dt id="spml.base.BaseClassifier.set_predict_request.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_request.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">bandwidth</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict</span></code>.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.set_predict_request.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_request.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">geometry</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict</span></code>.</p>
+<dt id="spml.base.BaseClassifier.set_predict_request.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_request.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">geometry</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict</span></code>.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.set_predict_request.global_model_weight"><span class="sig-name descname">global_model_weight</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_request.global_model_weight" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">global_model_weight</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict</span></code>.</p>
+<dt id="spml.base.BaseClassifier.set_predict_request.global_model_weight"><span class="sig-name descname">global_model_weight</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_request.global_model_weight" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">global_model_weight</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -5008,7 +5008,7 @@ parameters and not others.</p>
 <dd class="field-even"><p><strong>self</strong> – The updated object.</p>
 </dd>
 <dt class="field-odd" id="spml.base.BaseClassifier.set_predict_request-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.set_predict_request-return-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p>object</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)">object</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -5038,11 +5038,11 @@ parameters and not others.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.base.BaseClassifier.set_score_request-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.set_score_request-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.base.BaseClassifier.set_score_request.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_score_request.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">bandwidth</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p>
+<dt id="spml.base.BaseClassifier.set_score_request.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_score_request.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">bandwidth</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.set_score_request.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_score_request.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">geometry</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p>
+<dt id="spml.base.BaseClassifier.set_score_request.geometry"><span class="sig-name descname">geometry</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_score_request.geometry" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">geometry</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p>
 </dd>
-<dt id="spml.base.BaseClassifier.set_score_request.global_model_weight"><span class="sig-name descname">global_model_weight</span><span class="p"> : </span><span class="desctype"><span class="desctype">str, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_score_request.global_model_weight" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">global_model_weight</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p>
+<dt id="spml.base.BaseClassifier.set_score_request.global_model_weight"><span class="sig-name descname">global_model_weight</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, True, False, or None,                     default=sklearn.utils.metadata_routing.UNCHANGED</span></span><a class="headerlink" href="#spml.base.BaseClassifier.set_score_request.global_model_weight" title="Permalink to this definition">¶</a></dt><dd><p>Metadata routing for <code class="docutils literal notranslate"><span class="pre">global_model_weight</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -5050,7 +5050,7 @@ parameters and not others.</p>
 <dd class="field-even"><p><strong>self</strong> – The updated object.</p>
 </dd>
 <dt class="field-odd" id="spml.base.BaseClassifier.set_score_request-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#spml.base.BaseClassifier.set_score_request-return-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p>object</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)">object</a></p>
 </dd>
 </dl>
 </dd></dl>
