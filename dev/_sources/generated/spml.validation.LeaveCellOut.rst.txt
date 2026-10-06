@@ -1,0 +1,20 @@
+﻿spml.validation.LeaveCellOut
+============================
+
+.. currentmodule:: spml.validation
+
+.. autoclass:: LeaveCellOut
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LeaveCellOut.__init__
+      ~LeaveCellOut.get_metadata_routing
+      ~LeaveCellOut.get_n_splits
+      ~LeaveCellOut.split
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

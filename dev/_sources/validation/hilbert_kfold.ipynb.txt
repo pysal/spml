@@ -1,0 +1,578 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "bc429a29",
+   "metadata": {},
+   "source": [
+    "# Hilbert K-Fold\n",
+    "\n",
+    "`HilbertKFold` assigns observations to folds so that **each fold is a spatially spread-out subsample of the whole study area** -- every fold covers the entire region, not a compact geographic block.\n",
+    "\n",
+    "Points are sorted along the **Hilbert space-filling curve** (`GeoSeries.hilbert_distance`).  The Hilbert curve is continuous with no quadrant-boundary discontinuities, so spatially adjacent observations always receive consecutive codes.  Assigning every k-th point in the sorted order to the same fold guarantees maximum within-fold spatial spread -- analogous to a quasi-random spatial sample.\n",
+    "\n",
+    "This maximises the **mean within-fold nearest-neighbour distance** and ensures each fold is geographically representative of the whole region."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "711bc084",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:42:29.928247Z",
+     "iopub.status.busy": "2026-05-24T16:42:29.928165Z",
+     "iopub.status.idle": "2026-05-24T16:42:32.390812Z",
+     "shell.execute_reply": "2026-05-24T16:42:32.390313Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import geodatasets\n",
+    "import geopandas\n",
+    "import matplotlib.pyplot as plt\n",
+    "import numpy\n",
+    "from matplotlib import colormaps\n",
+    "from scipy import stats\n",
+    "from scipy.spatial.distance import cdist\n",
+    "from sklearn.linear_model import LinearRegression\n",
+    "from sklearn.metrics import root_mean_squared_error\n",
+    "from sklearn.model_selection import KFold\n",
+    "\n",
+    "from spml.validation import HilbertKFold"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3ccdd7a7",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:42:32.392234Z",
+     "iopub.status.busy": "2026-05-24T16:42:32.392106Z",
+     "iopub.status.idle": "2026-05-24T16:42:32.550466Z",
+     "shell.execute_reply": "2026-05-24T16:42:32.550072Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "chicago = geopandas.read_file(geodatasets.get_path(\"geoda.chicago_health\")).to_crs(\n",
+    "    \"EPSG:32616\"\n",
+    ")\n",
+    "print(f\"n = {len(chicago)} community areas\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "858b2327",
+   "metadata": {},
+   "source": [
+    "## Hilbert distance and fold assignment\n",
+    "\n",
+    "`HilbertKFold` internally calls `GeoSeries.hilbert_distance()` to place every area on a 1-D curve that preserves spatial proximity, then assigns every k-th position in that sorted order to the same fold. The first panel below shows the raw Hilbert distances; the second and third show how a 3-fold dispersion split compares with a random split."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2cc00527",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:42:32.551891Z",
+     "iopub.status.busy": "2026-05-24T16:42:32.551755Z",
+     "iopub.status.idle": "2026-05-24T16:42:32.559558Z",
+     "shell.execute_reply": "2026-05-24T16:42:32.559077Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "chicago[\"hilbert_dist\"] = chicago.geometry.hilbert_distance()\n",
+    "chicago[\"hilbert_rank\"] = stats.rankdata(chicago.hilbert_dist)\n",
+    "\n",
+    "N_SPLITS = 3\n",
+    "dkf = HilbertKFold(n_splits=N_SPLITS, random_state=0)\n",
+    "rkf = KFold(n_splits=N_SPLITS, shuffle=True, random_state=0)\n",
+    "\n",
+    "coords = chicago.centroid.get_coordinates()\n",
+    "\n",
+    "disp_labels = numpy.full(len(chicago), -1, dtype=int)\n",
+    "for fi, (_, test) in enumerate(dkf.split(chicago)):\n",
+    "    disp_labels[test] = fi\n",
+    "\n",
+    "rand_labels = numpy.full(len(chicago), -1, dtype=int)\n",
+    "for fi, (_, test) in enumerate(rkf.split(coords)):\n",
+    "    rand_labels[test] = fi\n",
+    "\n",
+    "chicago[\"disp_fold\"] = disp_labels\n",
+    "chicago[\"rand_fold\"] = rand_labels\n",
+    "\n",
+    "print(\n",
+    "    \"HilbertKFold fold sizes:\", [numpy.sum(disp_labels == i) for i in range(N_SPLITS)]\n",
+    ")\n",
+    "print(\n",
+    "    \"Random KFold fold sizes:   \",\n",
+    "    [numpy.sum(rand_labels == i) for i in range(N_SPLITS)],\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e69495f5",
+   "metadata": {},
+   "source": [
+    "## Fold assignment along the Hilbert curve\n",
+    "\n",
+    "For *k* folds, every *k*-th consecutive position in the Hilbert rank order receives the same fold label: rank 0 → fold 0, rank 1 → fold 1, …, rank *k*−1 → fold *k*−1, rank *k* → fold 0, rank *k*+1 → fold 1, and so on.\n",
+    "\n",
+    "The thin black line traces the Hilbert curve path through the community-area centroids; the colour of each polygon shows which fold it belongs to. Because the Hilbert curve visits spatially adjacent areas in consecutive steps, each fold ends up spread across the entire study area rather than concentrated in one corner."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b625f63b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:42:32.560682Z",
+     "iopub.status.busy": "2026-05-24T16:42:32.560608Z",
+     "iopub.status.idle": "2026-05-24T16:42:32.916659Z",
+     "shell.execute_reply": "2026-05-24T16:42:32.916185Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "N_DEMO = 5\n",
+    "\n",
+    "# Sort community areas by their Hilbert rank\n",
+    "sorted_idx = numpy.argsort(chicago[\"hilbert_rank\"].values)\n",
+    "\n",
+    "# Fold label = position-in-rank-order mod N_DEMO\n",
+    "stride_labels = numpy.empty(len(chicago), dtype=int)\n",
+    "for pos, area_i in enumerate(sorted_idx):\n",
+    "    stride_labels[area_i] = pos % N_DEMO\n",
+    "chicago[\"stride_fold\"] = stride_labels\n",
+    "\n",
+    "# Centroid coordinates in Hilbert rank order (for drawing the path)\n",
+    "centroids = chicago.geometry.centroid\n",
+    "cx = centroids.x.values[sorted_idx]\n",
+    "cy = centroids.y.values[sorted_idx]\n",
+    "\n",
+    "cmap = colormaps.get_cmap(\"tab10\")\n",
+    "fig, ax = plt.subplots(figsize=(7, 8))\n",
+    "\n",
+    "# Polygons coloured by fold\n",
+    "for fi in range(N_DEMO):\n",
+    "    chicago[chicago.stride_fold == fi].plot(\n",
+    "        ax=ax,\n",
+    "        color=cmap(fi),\n",
+    "        edgecolor=\"#555\",\n",
+    "        linewidth=0.4,\n",
+    "        label=f\"fold {fi}\",\n",
+    "    )\n",
+    "\n",
+    "# Hilbert curve path through centroids\n",
+    "ax.plot(cx, cy, color=\"k\", linewidth=0.8, alpha=0.3, zorder=4)\n",
+    "\n",
+    "# Centroid dots coloured by fold, labelled with Hilbert rank\n",
+    "for pos in range(len(sorted_idx)):\n",
+    "    fi = pos % N_DEMO\n",
+    "    ax.scatter(\n",
+    "        cx[pos],\n",
+    "        cy[pos],\n",
+    "        color=cmap(fi),\n",
+    "        s=22,\n",
+    "        edgecolors=\"k\",\n",
+    "        linewidths=0.4,\n",
+    "        zorder=5,\n",
+    "    )\n",
+    "    ax.annotate(\n",
+    "        str(pos),\n",
+    "        (cx[pos], cy[pos]),\n",
+    "        fontsize=5,\n",
+    "        ha=\"center\",\n",
+    "        va=\"center\",\n",
+    "        color=\"white\",\n",
+    "        fontweight=\"bold\",\n",
+    "        zorder=6,\n",
+    "    )\n",
+    "\n",
+    "ax.legend(title=f\"{N_DEMO} folds\", fontsize=9, loc=\"lower right\", markerscale=1.4)\n",
+    "ax.set_title(\n",
+    "    \"HilbertKFold: fold assignment along the Hilbert curve\\n\"\n",
+    "    \"(numbers = Hilbert rank;  same colour = same fold)\",\n",
+    "    fontsize=11,\n",
+    ")\n",
+    "ax.axis(\"off\")\n",
+    "plt.tight_layout()\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "92e22758",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:42:32.918239Z",
+     "iopub.status.busy": "2026-05-24T16:42:32.918133Z",
+     "iopub.status.idle": "2026-05-24T16:42:32.921695Z",
+     "shell.execute_reply": "2026-05-24T16:42:32.921272Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def mean_nn(labels, coords, n_splits):\n",
+    "    dists = []\n",
+    "    for fi in range(n_splits):\n",
+    "        c = coords[labels == fi]\n",
+    "        if len(c) < 2:\n",
+    "            continue\n",
+    "        D = cdist(c, c)\n",
+    "        numpy.fill_diagonal(D, numpy.inf)\n",
+    "        dists.append(D.min(axis=1).mean())\n",
+    "    return numpy.mean(dists)\n",
+    "\n",
+    "\n",
+    "d_disp = mean_nn(disp_labels, coords, N_SPLITS)\n",
+    "d_rand = mean_nn(rand_labels, coords, N_SPLITS)\n",
+    "print(f\"HilbertKFold mean within-fold NN: {d_disp / 1000:.2f} km\")\n",
+    "print(f\"Random KFold    mean within-fold NN: {d_rand / 1000:.2f} km\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7041a3ed",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:42:32.923018Z",
+     "iopub.status.busy": "2026-05-24T16:42:32.922937Z",
+     "iopub.status.idle": "2026-05-24T16:42:34.179221Z",
+     "shell.execute_reply": "2026-05-24T16:42:34.178763Z"
+    },
+    "tags": [
+     "hide-input"
+    ]
+   },
+   "outputs": [],
+   "source": [
+    "fig, axes = plt.subplot_mosaic(\n",
+    "    [[\"hilbert\", \"d0\", \"d1\", \"d2\"], [\"hilbert\", \"r0\", \"r1\", \"r2\"]],\n",
+    "    figsize=(18, 8),\n",
+    "    subplot_kw={\"aspect\": \"equal\"},\n",
+    ")\n",
+    "\n",
+    "chicago.plot(\n",
+    "    column=\"hilbert_rank\",\n",
+    "    cmap=\"Oranges\",\n",
+    "    ax=axes[\"hilbert\"],\n",
+    "    edgecolor=\"#555\",\n",
+    "    linewidth=0.5,\n",
+    "    legend=True,\n",
+    ")\n",
+    "axes[\"hilbert\"].set_title(\"Hilbert rank\", fontsize=11)\n",
+    "axes[\"hilbert\"].axis(\"off\")\n",
+    "\n",
+    "for i in range(N_SPLITS):\n",
+    "    for prefix, fold_col, row_title in [\n",
+    "        (\"d\", \"disp_fold\", \"HilbertKFold\"),\n",
+    "        (\"r\", \"rand_fold\", \"Random KFold\"),\n",
+    "    ]:\n",
+    "        ax = axes[f\"{prefix}{i}\"]\n",
+    "        chicago.plot(ax=ax, color=\"#ddd\", edgecolor=\"#aaa\", linewidth=0.5)\n",
+    "        chicago[chicago[fold_col] == i].plot(\n",
+    "            ax=ax, color=cmap(i), edgecolor=\"#333\", linewidth=0.5\n",
+    "        )\n",
+    "        ax.set_title(f\"{row_title} — fold {i + 1}\", fontsize=10)\n",
+    "        ax.axis(\"off\")\n",
+    "\n",
+    "fig.suptitle(\"HilbertKFold vs Random KFold -- Chicago community areas\", fontsize=13)\n",
+    "fig.tight_layout()\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fb609282",
+   "metadata": {},
+   "source": [
+    "## Cross-validation example\n",
+    "\n",
+    "`split(X)` follows the sklearn cross-validator protocol and works\n",
+    "directly with `cross_val_score`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1a5b18ba",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:42:34.180511Z",
+     "iopub.status.busy": "2026-05-24T16:42:34.180426Z",
+     "iopub.status.idle": "2026-05-24T16:42:34.198435Z",
+     "shell.execute_reply": "2026-05-24T16:42:34.197992Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "y = chicago[\"VlntCrRt\"].fillna(0).values\n",
+    "X_feat = chicago[[\"PerCInc14\", \"Pov14\", \"Unemp14\"]].fillna(0).values\n",
+    "\n",
+    "disp_rmse, rand_rmse = [], []\n",
+    "for train, test in dkf.split(chicago):\n",
+    "    lr = LinearRegression().fit(X_feat[train], y[train])\n",
+    "    disp_rmse.append(root_mean_squared_error(y[test], lr.predict(X_feat[test])))\n",
+    "for train, test in rkf.split(chicago):\n",
+    "    lr = LinearRegression().fit(X_feat[train], y[train])\n",
+    "    rand_rmse.append(root_mean_squared_error(y[test], lr.predict(X_feat[test])))\n",
+    "\n",
+    "print(\n",
+    "    f\"HilbertKFold  RMSE per fold: {[f'{r:.2f}' for r in disp_rmse]}  mean={numpy.mean(disp_rmse):.2f}\"\n",
+    ")\n",
+    "print(\n",
+    "    f\"Random KFold     RMSE per fold: {[f'{r:.2f}' for r in rand_rmse]}  mean={numpy.mean(rand_rmse):.2f}\"\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cdb69004",
+   "metadata": {},
+   "source": [
+    "## Large example -- King County house sales (600 points)\n",
+    "\n",
+    "With a large point dataset the spatial structure of the folds becomes\n",
+    "even clearer.  We use 5 folds and compare `HilbertKFold` against\n",
+    "random k-fold on three metrics:\n",
+    "\n",
+    "1. **Fold map** -- each point coloured by fold assignment\n",
+    "2. **Within-fold nearest-neighbour distance** -- higher means each fold\n",
+    "   covers the whole county more uniformly\n",
+    "3. **Fold RMSE** -- predicting log(price) from structural features;\n",
+    "   lower fold-to-fold variance means more reliable CV estimates"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e209f9a0",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:42:34.199615Z",
+     "iopub.status.busy": "2026-05-24T16:42:34.199536Z",
+     "iopub.status.idle": "2026-05-24T16:42:34.365406Z",
+     "shell.execute_reply": "2026-05-24T16:42:34.364955Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "gdf_full = geopandas.read_file(geodatasets.get_path(\"geoda.home_sales\")).to_crs(\n",
+    "    \"EPSG:32610\"\n",
+    ")\n",
+    "gdf_full[\"log_price\"] = numpy.log(gdf_full[\"price\"])\n",
+    "gdf_full[\"decile\"] = (\n",
+    "    gdf_full[\"log_price\"].rank(pct=True).multiply(10).clip(upper=9.99).astype(int)\n",
+    ")\n",
+    "idx = (\n",
+    "    gdf_full.groupby(\"decile\")\n",
+    "    .apply(lambda g: g.sample(min(60, len(g)), random_state=42), include_groups=False)\n",
+    "    .index.get_level_values(1)\n",
+    ")\n",
+    "gdf = gdf_full.loc[idx].reset_index(drop=True)\n",
+    "print(\n",
+    "    f\"n = {len(gdf)} sales  |  price ${gdf.price.min():,.0f} - ${gdf.price.max():,.0f}\"\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a8f5aa32",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:42:34.366651Z",
+     "iopub.status.busy": "2026-05-24T16:42:34.366566Z",
+     "iopub.status.idle": "2026-05-24T16:42:34.376752Z",
+     "shell.execute_reply": "2026-05-24T16:42:34.376253Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "N_SPLITS5 = 5\n",
+    "y5 = numpy.log(gdf[\"price\"].values)\n",
+    "X_feat5 = gdf[[\"sqft_liv\", \"bedrooms\", \"bathrooms\", \"grade\"]].fillna(0).values\n",
+    "coords5 = numpy.column_stack([gdf.geometry.x, gdf.geometry.y])\n",
+    "\n",
+    "dkf5 = HilbertKFold(n_splits=N_SPLITS5, random_state=0)\n",
+    "rkf5 = KFold(n_splits=N_SPLITS5, shuffle=True, random_state=0)\n",
+    "\n",
+    "disp_labels5 = numpy.full(len(gdf), -1, dtype=int)\n",
+    "disp_splits5 = list(dkf5.split(gdf))\n",
+    "for fi, (_, test) in enumerate(disp_splits5):\n",
+    "    disp_labels5[test] = fi\n",
+    "\n",
+    "rand_splits5 = list(rkf5.split(X_feat5, y5))\n",
+    "rand_labels5 = numpy.full(len(gdf), -1, dtype=int)\n",
+    "for fi, (_, test) in enumerate(rand_splits5):\n",
+    "    rand_labels5[test] = fi\n",
+    "\n",
+    "gdf[\"disp_fold5\"] = disp_labels5\n",
+    "\n",
+    "\n",
+    "def fold_nn(splits, coords):\n",
+    "    means = []\n",
+    "    for _, test in splits:\n",
+    "        c = coords[test]\n",
+    "        D = cdist(c, c)\n",
+    "        numpy.fill_diagonal(D, numpy.inf)\n",
+    "        means.append(D.min(axis=1).mean())\n",
+    "    return means\n",
+    "\n",
+    "\n",
+    "spatial_nn5 = fold_nn(disp_splits5, coords5)\n",
+    "random_nn5 = fold_nn(rand_splits5, coords5)\n",
+    "\n",
+    "spatial_rmse5, random_rmse5 = [], []\n",
+    "for train, test in disp_splits5:\n",
+    "    lr = LinearRegression().fit(X_feat5[train], y5[train])\n",
+    "    spatial_rmse5.append(root_mean_squared_error(y5[test], lr.predict(X_feat5[test])))\n",
+    "for train, test in rand_splits5:\n",
+    "    lr = LinearRegression().fit(X_feat5[train], y5[train])\n",
+    "    random_rmse5.append(root_mean_squared_error(y5[test], lr.predict(X_feat5[test])))\n",
+    "\n",
+    "print(f\"HilbertKFold mean within-fold NN: {numpy.mean(spatial_nn5) / 1000:.2f} km\")\n",
+    "print(f\"Random KFold    mean within-fold NN: {numpy.mean(random_nn5) / 1000:.2f} km\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "03b51ccf",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:42:34.377901Z",
+     "iopub.status.busy": "2026-05-24T16:42:34.377822Z",
+     "iopub.status.idle": "2026-05-24T16:42:34.576223Z",
+     "shell.execute_reply": "2026-05-24T16:42:34.575791Z"
+    },
+    "tags": [
+     "hide-input"
+    ]
+   },
+   "outputs": [],
+   "source": [
+    "c_disp = cmap(0)\n",
+    "c_rand = cmap(1)\n",
+    "\n",
+    "fig, axes = plt.subplots(1, 3, figsize=(18, 6))\n",
+    "\n",
+    "# Panel 1 -- fold map\n",
+    "gdf.plot(\n",
+    "    column=\"disp_fold5\",\n",
+    "    cmap=cmap,\n",
+    "    categorical=True,\n",
+    "    markersize=10,\n",
+    "    alpha=0.6,\n",
+    "    legend=True,\n",
+    "    legend_kwds={\"title\": \"Fold\", \"markerscale\": 1, \"fontsize\": 8},\n",
+    "    ax=axes[0],\n",
+    ")\n",
+    "axes[0].set_xlabel(\"Easting (m)\")\n",
+    "axes[0].set_ylabel(\"Northing (m)\")\n",
+    "axes[0].set_title(\n",
+    "    \"HilbertKFold -- 5 folds\\n(each fold covers the whole county)\", fontsize=11\n",
+    ")\n",
+    "axes[0].set_aspect(\"equal\")\n",
+    "\n",
+    "# Panel 2 -- within-fold NN distance\n",
+    "x_pos = numpy.arange(N_SPLITS5)\n",
+    "w = 0.35\n",
+    "ax2 = axes[1]\n",
+    "ax2.bar(\n",
+    "    x_pos - w / 2,\n",
+    "    [d / 1000 for d in spatial_nn5],\n",
+    "    w,\n",
+    "    color=c_disp,\n",
+    "    label=f\"HilbertKFold  (mean {numpy.mean(spatial_nn5) / 1000:.2f} km)\",\n",
+    "    zorder=3,\n",
+    ")\n",
+    "ax2.bar(\n",
+    "    x_pos + w / 2,\n",
+    "    [d / 1000 for d in random_nn5],\n",
+    "    w,\n",
+    "    color=c_rand,\n",
+    "    label=f\"Random KFold  (mean {numpy.mean(random_nn5) / 1000:.2f} km)\",\n",
+    "    zorder=3,\n",
+    ")\n",
+    "ax2.axhline(numpy.mean(spatial_nn5) / 1000, color=c_disp, lw=1.5, ls=\"--\", alpha=0.7)\n",
+    "ax2.axhline(numpy.mean(random_nn5) / 1000, color=c_rand, lw=1.5, ls=\"--\", alpha=0.7)\n",
+    "ax2.set_xticks(x_pos)\n",
+    "ax2.set_xticklabels([f\"Fold {i + 1}\" for i in range(N_SPLITS5)])\n",
+    "ax2.set_ylabel(\"Mean within-fold NN distance (km)\")\n",
+    "ax2.set_title(\n",
+    "    \"Within-fold spatial spread\\n(higher = more uniform coverage)\", fontsize=11\n",
+    ")\n",
+    "ax2.legend(fontsize=9)\n",
+    "ax2.yaxis.grid(True, alpha=0.4)\n",
+    "ax2.set_axisbelow(True)\n",
+    "\n",
+    "# Panel 3 -- RMSE\n",
+    "ax3 = axes[2]\n",
+    "ax3.bar(\n",
+    "    x_pos - w / 2,\n",
+    "    spatial_rmse5,\n",
+    "    w,\n",
+    "    color=c_disp,\n",
+    "    label=f\"HilbertKFold  (mean {numpy.mean(spatial_rmse5):.3f})\",\n",
+    "    zorder=3,\n",
+    ")\n",
+    "ax3.bar(\n",
+    "    x_pos + w / 2,\n",
+    "    random_rmse5,\n",
+    "    w,\n",
+    "    color=c_rand,\n",
+    "    label=f\"Random KFold  (mean {numpy.mean(random_rmse5):.3f})\",\n",
+    "    zorder=3,\n",
+    ")\n",
+    "ax3.axhline(numpy.mean(spatial_rmse5), color=c_disp, lw=1.5, ls=\"--\", alpha=0.7)\n",
+    "ax3.axhline(numpy.mean(random_rmse5), color=c_rand, lw=1.5, ls=\"--\", alpha=0.7)\n",
+    "ax3.set_xticks(x_pos)\n",
+    "ax3.set_xticklabels([f\"Fold {i + 1}\" for i in range(N_SPLITS5)])\n",
+    "ax3.set_ylabel(\"RMSE  (log price)\")\n",
+    "ax3.set_title(\n",
+    "    \"Fold RMSE  (log price ~ sqft + beds + baths + grade)\\n\"\n",
+    "    \"(lower variance = more reliable estimate)\",\n",
+    "    fontsize=11,\n",
+    ")\n",
+    "ax3.legend(fontsize=9)\n",
+    "ax3.yaxis.grid(True, alpha=0.4)\n",
+    "ax3.set_axisbelow(True)\n",
+    "\n",
+    "fig.suptitle(\"HilbertKFold -- King County house sales (UTM 10N)\", fontsize=13)\n",
+    "fig.tight_layout()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "default",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.14.6"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

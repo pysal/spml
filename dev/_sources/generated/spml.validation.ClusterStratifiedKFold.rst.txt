@@ -1,0 +1,20 @@
+﻿spml.validation.ClusterStratifiedKFold
+======================================
+
+.. currentmodule:: spml.validation
+
+.. autoclass:: ClusterStratifiedKFold
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ClusterStratifiedKFold.__init__
+      ~ClusterStratifiedKFold.get_metadata_routing
+      ~ClusterStratifiedKFold.get_n_splits
+      ~ClusterStratifiedKFold.split
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

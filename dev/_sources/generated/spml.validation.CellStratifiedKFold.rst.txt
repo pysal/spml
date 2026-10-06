@@ -1,0 +1,20 @@
+﻿spml.validation.CellStratifiedKFold
+===================================
+
+.. currentmodule:: spml.validation
+
+.. autoclass:: CellStratifiedKFold
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CellStratifiedKFold.__init__
+      ~CellStratifiedKFold.get_metadata_routing
+      ~CellStratifiedKFold.get_n_splits
+      ~CellStratifiedKFold.split
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

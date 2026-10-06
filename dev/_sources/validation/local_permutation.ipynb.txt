@@ -1,0 +1,265 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "25571a65",
+   "metadata": {},
+   "source": [
+    "# Locally-weighted permutation\n",
+    "\n",
+    "`LocalPermutation` shuffles the rows of an n-site dataset so that each row moves **at most** `threshold` distance units — a spatially constrained permutation.  Unlike `LocalBootstrap`, each row appears **exactly once** (no replacement).  Optionally enforced as a **derangement**: no row may stay at its original site.\n",
+    "\n",
+    "The algorithm to do this works in three steps. First, the universe of valid moves is populated. Second, the inital permutation is solved. Finally, the initial permutation is further mixed to generate new permutations. \n",
+    "\n",
+    "## Algorithm\n",
+    "\n",
+    "1. **Build adjacency** — A[i,j] = True iff site j is within `threshold` of site i (diagonal blocked for derangements).  A `libpysal.graph.Graph` can be used instead, optionally combined with `threshold` to filter edges by weight.\n",
+    "\n",
+    "2. **Initial permutation — Hungarian algorithm** — solve the *linear assignment problem*: find a complete matching between sites and values using only feasible pairs. Random costs in [0, 1] are assigned to feasible pairs for random tie-breaking, then `scipy.optimize.linear_sum_assignment` solves in O(n³).\n",
+    "\n",
+    "3. **Markov chain mixing** — propose swapping `perm[i]` and `perm[j]` with frequency proportional to their weight; accept iff both moves stay within A and no fixed point is created. Run `n_burn` steps (default `10 * n`) between each yielded permutation."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "73c211c1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import geodatasets\n",
+    "import geopandas\n",
+    "import matplotlib.pyplot as plt\n",
+    "import numpy\n",
+    "\n",
+    "from spml.validation import LocalPermutation"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7e49e641",
+   "metadata": {},
+   "source": [
+    "## Simple example — Chicago community areas\n",
+    "\n",
+    "With 77 community areas we can clearly see how the derangement works. `bandwidth = 8 km` gives every area at least 3 swap partners.\n",
+    "\n",
+    "The right panel shows **one permuted realisation**: each area displays the income of a nearby area that swapped with it.  \n",
+    "No area keeps its own value (derangement), and every value still appears exactly once.\n",
+    "Compare with `LocalBootstrap` where values can repeat."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9fde4c08",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "chicago = geopandas.read_file(geodatasets.get_path(\"geoda.chicago_health\")).to_crs(\n",
+    "    \"EPSG:32616\"\n",
+    ")\n",
+    "chicago[\"income\"] = chicago[\"PerCInc14\"].fillna(chicago[\"PerCInc14\"].median())\n",
+    "print(f\"n = {len(chicago)} community areas\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e775d880",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y = chicago[\"income\"].values\n",
+    "\n",
+    "lp_simple = LocalPermutation(\n",
+    "    bandwidth=8_000, derangement=True, n_permutations=1, random_state=60666\n",
+    ")\n",
+    "lp_k5 = LocalPermutation(k=5, derangement=True, n_permutations=1, random_state=60605)\n",
+    "lp_global = LocalPermutation(\n",
+    "    bandwidth=100000, derangement=True, n_permutations=1, random_state=60666\n",
+    ")\n",
+    "perm_simple = next(lp_simple.sample(chicago))\n",
+    "perm_knn = next(lp_k5.sample(chicago))\n",
+    "perm_global = next(lp_global.sample(chicago))\n",
+    "y_perm_simple = y[perm_simple]\n",
+    "y_perm_k5 = y[perm_knn]\n",
+    "y_perm_global = y[perm_global]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b842e17f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "fig, axes = plt.subplots(1, 4, figsize=(13, 6))\n",
+    "\n",
+    "bw_poly = geopandas.GeoSeries(\n",
+    "    geopandas.points_from_xy(x=[425957], y=[4612218 + 5000]), crs=chicago.crs\n",
+    ").buffer(lp_simple.bandwidth)\n",
+    "\n",
+    "chicago.assign(_v=y).plot(column=\"_v\", ax=axes[0])\n",
+    "axes[0].set_title(\"Original\\nPer-capita income (USD)\", fontsize=11)\n",
+    "chicago.assign(_v=y_perm_simple).plot(column=\"_v\", ax=axes[1])\n",
+    "axes[1].set_title(\"Local (8km) Derangement\\n(no area keeps its own value)\", fontsize=11)\n",
+    "bw_poly.plot(ax=axes[1], color=\"lightgrey\", edgecolor=\"k\")\n",
+    "axes[1].text(\n",
+    "    x=425957 - 2000,\n",
+    "    y=4612218 + 5000,\n",
+    "    s=f\"{lp_simple.bandwidth / 1000:.1f}km\\nswap\\ndistance\",\n",
+    ")\n",
+    "\n",
+    "chicago.assign(_v=y_perm_k5).plot(column=\"_v\", ax=axes[2])\n",
+    "axes[2].set_title(\n",
+    "    \"Local (5-NN) Derangement\\n(no area keeps its own value)\", fontsize=11\n",
+    ")\n",
+    "\n",
+    "chicago.assign(_v=chicago.sample(frac=1, replace=False).income.values).plot(\n",
+    "    column=\"_v\", ax=axes[3]\n",
+    ")\n",
+    "axes[3].set_title(\n",
+    "    \"Global Derangement\\n(No observation keeps its own value)\", fontsize=11\n",
+    ")\n",
+    "for ax in axes.flat:\n",
+    "    ax.set_axis_off()\n",
+    "fig.suptitle(\n",
+    "    \"LocalPermutation — Chicago community areas  (threshold = 8 km, no replacement)\",\n",
+    "    fontsize=12,\n",
+    "    y=0,\n",
+    ")\n",
+    "fig.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4e21e16f",
+   "metadata": {},
+   "source": [
+    "Use local permutations instead of local bootstraps when the sample size is small. Otherwise, [local bootstraps](local_bootstrap.ipynb) are more performant, and will behave nearly identically to the outcomes discussed here, since the probability of replacement is proportional to the bootstrap. Both classes can admit arbitrary `libpysal.graph.Graph` objects, and the samples respect the weights in that graph. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "28adf3f1",
+   "metadata": {},
+   "source": [
+    "---\n",
+    "\n",
+    "## Application: time series\n",
+    "\n",
+    "These techniques do not need to only be used in spatial data; they can also be used in temporal data. Permutation here helps keep the original signal reasonable, since all values will occur eventually, jsut a few days after (or before) they were intended to occur! This is a bit clearer from a practical perspective. \n",
+    "\n",
+    "First, let's simulate an AR(3) process with strong autocorrelation."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ba83c08a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# --- simulate AR(3) ---------------------------------------------------\n",
+    "# phi chosen so sum ~ 0.95: strongly autocorrelated, random-walk-like\n",
+    "rng = numpy.random.default_rng(0)\n",
+    "T = 300\n",
+    "phi = [0.7, 0.2, 0.05]\n",
+    "\n",
+    "eps = rng.normal(0, 1, T)\n",
+    "y = numpy.zeros(T)\n",
+    "for t in range(3, T):\n",
+    "    y[t] = phi[0] * y[t - 1] + phi[1] * y[t - 2] + phi[2] * y[t - 3] + eps[t]\n",
+    "plt.plot(y)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "078b72dd",
+   "metadata": {},
+   "source": [
+    "We can see that the sequence is strongly autocorrelated. To use local permutation here, the `threshold` parameter identifies how far separated in time the observations might be if we want to allow swapping. Here, let's allow swaps between a varying number of units. As the number of units increases, the autocorrelation goes to zero. The top facet can only permute within 2 spaces, so all the values in the sequence must occur within 2 time periods of their original location. This strongly limits the variability of admissible sequences. The bottom facet, however, allows any permutation where observations can fall within 150 time periods of their original location---half of the time period in the sequence. This means that basically all dependence is broken. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "031bd7a0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "t = numpy.arange(T, dtype=float)\n",
+    "\n",
+    "fig, axes = plt.subplots(4, 2, figsize=(12, 9), sharex=False)\n",
+    "axes = axes.T\n",
+    "for ti, bandwidth_ in enumerate((2, 5, 25, 150)):\n",
+    "    lp = LocalPermutation(bandwidth=bandwidth_, n_permutations=50, random_state=85281)\n",
+    "    perms = list(lp.sample(t))\n",
+    "    perm = perms[0]\n",
+    "    y_perm = y[perm]\n",
+    "\n",
+    "    def acf(x, max_lag=40):\n",
+    "        x = x - x.mean()\n",
+    "        return numpy.array(\n",
+    "            [numpy.dot(x[k:], x[: T - k]) / numpy.dot(x, x) for k in range(max_lag + 1)]\n",
+    "        )\n",
+    "\n",
+    "    lags = numpy.arange(41)\n",
+    "    acf_orig = acf(y)\n",
+    "    acf_perm = acf(y_perm)\n",
+    "    # envelope across all 50 permutations\n",
+    "    acf_all = numpy.stack([acf(y[p]) for p in perms])\n",
+    "\n",
+    "    # Panel 1 -- time series\n",
+    "    axes[0, ti].plot(y, lw=0.9, label=\"AR(3) original\")\n",
+    "    axes[0, ti].plot(\n",
+    "        y_perm, lw=0.9, alpha=0.7, label=\"one local permutation (threshold=15)\"\n",
+    "    )\n",
+    "    axes[0, ti].set_xlabel(\"t\")\n",
+    "    axes[0, ti].set_ylabel(\"y\")\n",
+    "    axes[0, ti].set_title(f\"AR(3) series vs locally {bandwidth_}-permuted\")\n",
+    "    axes[0, ti].legend()\n",
+    "\n",
+    "    # Panel 2 -- ACF comparison\n",
+    "    w = 0.35\n",
+    "    axes[1, ti].bar(lags - w / 2, acf_orig, w, label=\"original\")\n",
+    "    axes[1, ti].bar(lags + w / 2, acf_perm, w, label=\"permuted\", alpha=0.8)\n",
+    "    axes[1, ti].fill_between(\n",
+    "        lags,\n",
+    "        acf_all.min(0),\n",
+    "        acf_all.max(0),\n",
+    "        alpha=0.2,\n",
+    "        label=\"permuted range (50 perms)\",\n",
+    "    )\n",
+    "    axes[1, ti].axhline(0, color=\"k\", lw=0.5)\n",
+    "    axes[1, ti].set_xlabel(\"lag\")\n",
+    "    axes[1, ti].set_ylabel(\"ACF\")\n",
+    "    axes[1, ti].legend(fontsize=9)\n",
+    "\n",
+    "plt.tight_layout()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "default",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.14.6"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

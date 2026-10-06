@@ -9,7 +9,7 @@ installation
 
 ```{toctree}
 :hidden:
-:caption: User Guide
+:caption: Geographically-weighted models
 introduction
 linear
 ensemble
@@ -20,6 +20,23 @@ network_graph
 sklearn_compatibility
 mgwr_comparison
 references
+```
+
+```{toctree}
+:hidden:
+:caption: Model validation
+validation/ball_kfold
+validation/cell_stratified_kfold
+validation/cluster_stratified_kfold
+validation/hilbert_kfold
+validation/leave_ball_out
+validation/leave_cell_out
+validation/leave_cluster_out
+validation/local_bootstrap
+validation/local_permutation
+validation/pointsamplers
+validation/poissonsampler
+validation/range_finding
 ```
 
 ```{toctree}

@@ -1,0 +1,21 @@
+﻿spml.validation.ConstantClassSampler
+====================================
+
+.. currentmodule:: spml.validation
+
+.. autoclass:: ConstantClassSampler
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ConstantClassSampler.__init__
+      ~ConstantClassSampler.get_metadata_routing
+      ~ConstantClassSampler.get_params
+      ~ConstantClassSampler.sample
+      ~ConstantClassSampler.set_params
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

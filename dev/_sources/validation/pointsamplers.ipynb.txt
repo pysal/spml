@@ -1,0 +1,790 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "7fd4a2d6",
+   "metadata": {},
+   "source": [
+    "# Point sampling\n",
+    "\n",
+    "The `spml` package supports performant spatial cross-validation, resampling/permutation inference methods, and spatial model criticism. This example shows how to use four point sampling strategies using the **NYC boroughs** (chicago) dataset from [geodatasets](https://geodatasets.readthedocs.io). \n",
+    "\n",
+    "Point sampling is a common task for validating space-filling *field prediction models*, which can generate unique predictions at any point in a study area. We often need to design structured cross-validation exercises on data in order to assess these models. Unfortunately, it's not always the best to sample randomly from a study area. Sometimes, we need to make sure that we sample evenly within given observation types, or sample evaluation points proportional to some weighted score/value. \n",
+    "\n",
+    "The samplers in `spml` work by re-sampling points in a random/structured manner from the study area. Four samplers are currently implemented:\n",
+    "\n",
+    "| Class | What it does |\n",
+    "|---|---|\n",
+    "| `PointSampler` | Uniform random points inside any Shapely geometry |\n",
+    "| `ConstantClassSampler` | Exactly *n* points from every class |\n",
+    "| `StratifiedClassSampler` | Fixed total allocated proportionally to a value column |\n",
+    "| `MultinomialSampler` | Multinomial allocation across label groups weighted by a per-geometry value |\n",
+    "| `PoissonSampler` | Poisson Point Process using a per-geometry/pixel intensity |\n",
+    "\n",
+    "All samplers (except the `PoissonSampler`) accommodate a `quasi_random=\"sobol\"`, `\"halton\"`, or `\"r2\"` option to replace the default uniform RNG with a low-discrepancy sequence. Quasi-random sequences have better space-filling properties than points sampled at random, meaning that they tend to be less \"clumpy\" than randomly-sampled points."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "04126875",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-20T16:53:09.382561Z",
+     "iopub.status.busy": "2026-05-20T16:53:09.382391Z",
+     "iopub.status.idle": "2026-05-20T16:53:11.357330Z",
+     "shell.execute_reply": "2026-05-20T16:53:11.356645Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import geodatasets\n",
+    "import geopandas\n",
+    "import matplotlib.pyplot as plt\n",
+    "import numpy as np\n",
+    "import pandas\n",
+    "from rasterio.features import rasterize\n",
+    "from rasterio.io import MemoryFile\n",
+    "from rasterio.transform import from_bounds\n",
+    "\n",
+    "from spml.validation import (\n",
+    "    ConstantClassSampler,\n",
+    "    MultinomialSampler,\n",
+    "    PointSampler,\n",
+    "    PoissonSampler,\n",
+    "    StratifiedClassSampler,\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "42821454",
+   "metadata": {},
+   "source": [
+    "We'll demonstrate the point sampler breadth of functionality across an example dataset for airbnbs in Chicago. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "57bdedc7",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-20T16:53:11.359473Z",
+     "iopub.status.busy": "2026-05-20T16:53:11.359143Z",
+     "iopub.status.idle": "2026-05-20T16:53:11.492707Z",
+     "shell.execute_reply": "2026-05-20T16:53:11.492153Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "chicago = geopandas.read_file(geodatasets.get_path(\"geoda.chicago_health\"))[\n",
+    "    [\"community\", \"Pop2014\", \"PerCInc14\", \"geometry\"]\n",
+    "]\n",
+    "chicago.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b3485a49",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-20T16:53:11.494011Z",
+     "iopub.status.busy": "2026-05-20T16:53:11.493895Z",
+     "iopub.status.idle": "2026-05-20T16:53:11.587181Z",
+     "shell.execute_reply": "2026-05-20T16:53:11.586673Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "ax = chicago.plot(\n",
+    "    scheme=\"greedy\",\n",
+    "    cmap=\"Pastel1\",\n",
+    "    figsize=(6, 6),\n",
+    "    edgecolor=\"k\",\n",
+    ")\n",
+    "ax.set_title(\"Chicago Community Areas\")\n",
+    "ax.axis(\"off\")\n",
+    "plt.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e42906d4",
+   "metadata": {},
+   "source": [
+    "## Single geometry — `PointSampler`\n",
+    "\n",
+    "`PointSampler` draws uniform random points inside any Shapely geometry using batch rejection sampling with Shapely 2 vectorised `contains` checks. This improves upon the past implementation in `pointpats`, which samples single points at a time. We'll sample directly from the O'Hare community area as an example, the sticky-outy round polygon on the northwest of Chicago. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0df41f30",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-20T16:53:11.588714Z",
+     "iopub.status.busy": "2026-05-20T16:53:11.588628Z",
+     "iopub.status.idle": "2026-05-20T16:53:11.597841Z",
+     "shell.execute_reply": "2026-05-20T16:53:11.597299Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "geom = chicago.loc[chicago.community == \"OHARE\"]\n",
+    "\n",
+    "pts = PointSampler(n_samples=200, random_state=60666).sample(geom)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8266136e",
+   "metadata": {},
+   "source": [
+    "Now, `pts` is a set of randomly-sampled points from within the O'Hare area boundary. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "bd30d62b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-20T16:53:11.599247Z",
+     "iopub.status.busy": "2026-05-20T16:53:11.599152Z",
+     "iopub.status.idle": "2026-05-20T16:53:11.653711Z",
+     "shell.execute_reply": "2026-05-20T16:53:11.653278Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "ax = geom.geometry.plot(color=\"#d8dee2\", edgecolor=\"#333\", linewidth=1.2)\n",
+    "pts.plot(ax=ax, markersize=5, color=\"#264653\", alpha=0.7, zorder=3)\n",
+    "ax.set_title(\"PointSampler — 600 random points in O'Hare\")\n",
+    "ax.axis(\"off\");"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f7191a20",
+   "metadata": {},
+   "source": [
+    "Note how the points are a bit clumpy---they tend to cluster together visually in a few places. We can smooth this out using the quasi-random sequences for sampling points. The `quasi_random=` keyword argument replaces the uniform RNG with a quasi-random sequence that is more effective for space-filling sampling; `sobol`, `halton`, and `r2` sequences are supported. \n",
+    "\n",
+    "The comparison below samples **300 points** from Staten Island three ways. Quasi-random sequences fill the space more evenly — notice fewer clusters and gaps compared to the random draw."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "276ed436",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-20T16:53:11.654989Z",
+     "iopub.status.busy": "2026-05-20T16:53:11.654885Z",
+     "iopub.status.idle": "2026-05-20T16:53:11.950215Z",
+     "shell.execute_reply": "2026-05-20T16:53:11.949733Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "configs = [\n",
+    "    (None, \"Random\"),\n",
+    "    (\"halton\", \"Halton Sequence\"),\n",
+    "    (\"sobol\", \"Sobol Sequence\"),\n",
+    "    (\"r2\", \"R2 Sequence\"),\n",
+    "]\n",
+    "\n",
+    "fig, axes = plt.subplots(2, 2, figsize=(9, 9))\n",
+    "for ax, (seq, title) in zip(axes.flat, configs, strict=False):\n",
+    "    geom.geometry.plot(ax=ax, color=\"#d8dee2\", edgecolor=\"#333\", linewidth=1)\n",
+    "    p = PointSampler(500, quasi_random=seq, random_state=85711).sample(geom)\n",
+    "    p.plot(ax=ax, markersize=5, color=\"#264653\", alpha=0.7, zorder=3)\n",
+    "    ax.set_title(title, fontsize=12)\n",
+    "    ax.axis(\"off\")\n",
+    "\n",
+    "plt.suptitle(\n",
+    "    \"PointSampler — 500 pts in O'Hare: random vs quasi-random\", fontsize=13, y=1.01\n",
+    ")\n",
+    "plt.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8ca2a8f4",
+   "metadata": {},
+   "source": [
+    "We can also sample across all of chicago easily: "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b3f48640",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "fig, ax = plt.subplots()\n",
+    "pts_all = PointSampler(n_samples=1000, random_state=60622).sample(chicago)\n",
+    "chicago.geometry.plot(ax=ax, color=\"#d8dee2\", edgecolor=\"#333\")\n",
+    "pts_all.plot(ax=ax, markersize=3, color=\"#264653\", alpha=0.7, zorder=3)\n",
+    "ax.set_title(\"PointSampler — 1000 random points in Chicago\")\n",
+    "ax.axis(\"off\")\n",
+    "plt.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cf8f97fd",
+   "metadata": {},
+   "source": [
+    "## GeoDataFrame — class-aware samplers\n",
+    "\n",
+    "Now, we will work in the class-aware sampling data. We'll use population as a sampling weight for now, and split the areas into income quantiles. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6c9c1ba9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from mapclassify import Quantiles"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0e979508",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-20T16:53:11.951487Z",
+     "iopub.status.busy": "2026-05-20T16:53:11.951395Z",
+     "iopub.status.idle": "2026-05-20T16:53:11.955927Z",
+     "shell.execute_reply": "2026-05-20T16:53:11.955525Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "chicago[\"income_quantile\"] = Quantiles(chicago.PerCInc14, k=5).yb"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "65b42748",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "fig, ax = plt.subplots(1, 3, figsize=(8, 4))\n",
+    "chicago.plot(\"Pop2014\", ax=ax[0], cmap=\"Oranges\")\n",
+    "chicago.plot(\"PerCInc14\", ax=ax[1], cmap=\"Greens\")\n",
+    "chicago.plot(\"income_quantile\", ax=ax[2])\n",
+    "for i, ax_ in enumerate(ax.flat):\n",
+    "    ax_.tick_params(left=False, labelleft=False, bottom=False, labelbottom=False)\n",
+    "    ax_.set_title([\"Population\", \"Per Capita Income\", \"Income Quantile\"][i])\n",
+    "plt.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3ca01c5f",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-20T16:53:11.957039Z",
+     "iopub.status.busy": "2026-05-20T16:53:11.956952Z",
+     "iopub.status.idle": "2026-05-20T16:53:12.103389Z",
+     "shell.execute_reply": "2026-05-20T16:53:12.103002Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# ConstantClassSampler: exactly 100 pts from every income quantile\n",
+    "pts_const = ConstantClassSampler(n_per_class=500 // 5, random_state=60226).sample(\n",
+    "    chicago.geometry, labels=chicago.income_quantile\n",
+    ")\n",
+    "ax = chicago.plot(\"income_quantile\", cmap=\"tab10\", alpha=0.5, categorical=True)\n",
+    "pts_const.plot(\"class_label\", cmap=\"tab10\", ax=ax, markersize=1, categorical=True)\n",
+    "ax.tick_params(labelleft=False, left=False, labelbottom=False, bottom=False)\n",
+    "ax.set_title(\"ConstantClassSampler\")\n",
+    "ax.set_xlabel(\"100 points in each group\")\n",
+    "print(\"ConstantClassSampler — points per label:\")\n",
+    "pts_const.groupby(\"class_label\").size().rename(\"n points\").reset_index()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "daf9ee14",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# StratifiedClassSampler: 500 total, allocated ∝ population\n",
+    "pts_strat = StratifiedClassSampler(n_samples=500, random_state=60226).sample(\n",
+    "    chicago.geometry, labels=chicago.income_quantile, weights=chicago.Pop2014\n",
+    ")\n",
+    "f, (pax, sax) = plt.subplots(1, 2)\n",
+    "chicago.plot(\"income_quantile\", cmap=\"tab10\", alpha=0.5, ax=sax, categorical=True)\n",
+    "pts_strat.plot(\"class_label\", cmap=\"tab10\", ax=sax, markersize=1, categorical=True)\n",
+    "chicago.plot(\"Pop2014\", cmap=\"Oranges\", ax=pax)\n",
+    "for ax in (pax, sax):\n",
+    "    ax.tick_params(labelleft=False, left=False, labelbottom=False, bottom=False)\n",
+    "pax.set_title(\"Population (2014)\\nweight used for sampling\")\n",
+    "sax.set_title(\"StratifiedClassSampler\")\n",
+    "sax.set_xlabel(\"500 points ∝ weight in group\")\n",
+    "\n",
+    "print(\"StratifiedClassSampler — points per area (∝ population):\")\n",
+    "pts_strat.groupby(\"class_label\").size().to_frame(\"n points\").join(\n",
+    "    chicago.groupby(\"income_quantile\")\n",
+    "    .Pop2014.sum()\n",
+    "    .to_frame(\"Pop2014\")\n",
+    "    .eval(\"weight = Pop2014/@chicago.Pop2014.sum()\")\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8f0a7b15",
+   "metadata": {},
+   "source": [
+    "We see that the `ConstantClassSampler` provides samples points *at random* within areas with the same income quantile *at a constant rate*: each group gets the same number of points. In contrast, the `StratifiedClassSampler` samples from the group proportional to the population-based weight of that group. In your application, you can make weights proportional to a raster band or dataframe column."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f9ab3396",
+   "metadata": {},
+   "source": [
+    "This also works with pseudo-random sequences"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "580097ad",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-20T16:53:12.551882Z",
+     "iopub.status.busy": "2026-05-20T16:53:12.551811Z",
+     "iopub.status.idle": "2026-05-20T16:53:13.146905Z",
+     "shell.execute_reply": "2026-05-20T16:53:13.146261Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "pts_const = ConstantClassSampler(\n",
+    "    n_per_class=100, random_state=60226, quasi_random=\"r2\"\n",
+    ").sample(chicago.geometry, chicago.income_quantile)\n",
+    "pts_strat = StratifiedClassSampler(\n",
+    "    n_samples=500, random_state=60226, quasi_random=\"r2\"\n",
+    ").sample(chicago.geometry, chicago.income_quantile, chicago.Pop2014)\n",
+    "\n",
+    "f, (constax, stratax) = plt.subplots(1, 2, figsize=(6, 5))\n",
+    "pts_const.plot(\"class_label\", cmap=\"tab10\", ax=constax, markersize=1, categorical=True)\n",
+    "pts_strat.plot(\"class_label\", cmap=\"tab10\", ax=stratax, markersize=1, categorical=True)\n",
+    "for ax in (constax, stratax):\n",
+    "    chicago.plot(\n",
+    "        \"income_quantile\", cmap=\"tab10\", ax=ax, zorder=-1, alpha=0.5, categorical=True\n",
+    "    )\n",
+    "    ax.tick_params(left=False, labelleft=False, bottom=False, labelbottom=False)\n",
+    "constax.set_title(\"ConstantClassSampler\")\n",
+    "stratax.set_title(\"StratifiedClassSampler\")\n",
+    "f.suptitle(\"R2 sequence\", y=0.1)\n",
+    "plt.tight_layout()\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6d4bc030",
+   "metadata": {},
+   "source": [
+    "### `MultinomialSampler` on a GeoDataFrame\n",
+    "\n",
+    "The `MultinomialSampler` works in two stages:\n",
+    "\n",
+    "1. Sum *weights* within each *labels* group to get a per-class total weight $W_k$. Draw class sample counts jointly from $(n_1, n_2, \\dots, n_k) \\sim \\text{Multinomial}(N, W_k / \\sum W_k)$ — counts always sum to exactly `n_samples` but vary stochastically across runs.\n",
+    "2. Sample $n_k$ points uniformly from within the union of class $k$'s geometries.\n",
+    "\n",
+    "This contrasts with `StratifiedClassSampler`, which allocates class counts *deterministically* using the largest-remainder (Hamilton) method. Here we'll use population again as the per-area weight, so larger areas attract proportionally more sample points — but group totals will now exhibit variation from run to run. This is most useful if you'd like to make sure that your subclass sampling counts to vary realistically from run to run, rather than being constrained to be exactly proportional to the weight. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e9ad291d",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-20T16:53:13.148167Z",
+     "iopub.status.busy": "2026-05-20T16:53:13.148071Z",
+     "iopub.status.idle": "2026-05-20T16:53:13.309861Z",
+     "shell.execute_reply": "2026-05-20T16:53:13.309536Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "fig, axes = plt.subplots(2, 2, figsize=(10, 11))\n",
+    "\n",
+    "sizes = []\n",
+    "for i in range(2):\n",
+    "    for j in range(2):\n",
+    "        s = MultinomialSampler(\n",
+    "            n_samples=500,\n",
+    "            quasi_random=\"r2\" if i else None,\n",
+    "            random_state=[60666, 60226, 60611, 60642][i + 2 * j],\n",
+    "        ).sample(\n",
+    "            chicago.geometry, labels=chicago.income_quantile, weights=chicago.Pop2014\n",
+    "        )\n",
+    "        title = f\"n points run {1 + i + 2 * j} - {'random' if i else 'r2'}\"\n",
+    "        sizes.append(s.groupby(\"class_label\").size().to_frame(title))\n",
+    "        chicago.plot(\n",
+    "            \"income_quantile\", cmap=\"tab10\", alpha=0.5, ax=axes[i, j], categorical=True\n",
+    "        )\n",
+    "        s.plot(\n",
+    "            \"class_label\", ax=axes[i, j], cmap=\"tab10\", markersize=2, categorical=True\n",
+    "        )\n",
+    "        axes[i, j].tick_params(\n",
+    "            left=False, labelleft=False, bottom=False, labelbottom=False\n",
+    "        )\n",
+    "        axes[i, j].set_title(title.replace(\" - \", \"\\n\") + \" sequence\")\n",
+    "f.tight_layout()\n",
+    "pandas.concat(sizes, axis=1)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d93ded61",
+   "metadata": {},
+   "source": [
+    "## `PoissonSampler` — continuously-varying intensity\n",
+    "\n",
+    "\n",
+    "The `PoissonSampler` works using a spatially-varying intensity function, either specified as a callable, a geometric dataset (such as a set of polygons or a raster), or an alternative point pattern representing intensities we'd like to re-sample. We use this to define an intensity surface, where higher values should see more points being sampled from realisation to realisation."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "59db7ba2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "f, ax = plt.subplots(2, 6, figsize=(10, 4))\n",
+    "ax = ax.T\n",
+    "for i in range(2):\n",
+    "    cm = \"Oranges\" if i else \"Greens\"\n",
+    "    col = \"Pop2014\" if i else \"PerCInc14\"\n",
+    "    chicago.plot(col, ax=ax[0, i], cmap=cm)\n",
+    "    ax[0, i].set_ylabel([\"Population\", \"Income\\nPer Capita\"][i])\n",
+    "    for j in range(5):\n",
+    "        pois = PoissonSampler(\n",
+    "            n_expected=200, random_state=[60666, 60226, 60611, 60605, 60642][j]\n",
+    "        ).sample(chicago.geometry, intensity=chicago[col])\n",
+    "        chicago.plot(col, ax=ax[j + 1, i], cmap=cm)\n",
+    "        pois.plot(ax=ax[j + 1, i], markersize=1, color=\"k\")\n",
+    "        if i:\n",
+    "            ax[j + 1, 1].set_xlabel(f\"Seed = {[60666, 60226, 60611, 60605, 60642][j]}\")\n",
+    "for ax_ in ax.flat:\n",
+    "    ax_.tick_params(left=False, labelleft=False, bottom=False, labelbottom=False)\n",
+    "f.tight_layout()\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "aa5e5fc1",
+   "metadata": {},
+   "source": [
+    "Notice for the population maps, the points concentrate fairly thoroughly in the center near the more populated areas. However, for the per capita income map, points cluster in the *richer* areas. \n",
+    "\n",
+    "This works as well allowing a callable intensity function, a raster, or supplying a point pattern that you'd like to imitate using a kernel density estimate. We'll show the first two here and show raster sampling across all classes in the next section. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9a222c1a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "f, ax = plt.subplots(1, 2, figsize=(14, 14))\n",
+    "xmin, ymin, xmax, ymax = chicago.total_bounds\n",
+    "chihull = chicago.union_all(\"coverage\")\n",
+    "\n",
+    "\n",
+    "def pattern_function(x, y):\n",
+    "    dx = x + 87.524137\n",
+    "    dy = y - 42.023\n",
+    "    a = 8 * (dy) ** 2 + np.sin((dx) / 0.41597 * np.pi * 2) + dx * dy * 2\n",
+    "    in_area = chihull.contains(\n",
+    "        geopandas.points_from_xy(x=x.flatten(), y=y.flatten())\n",
+    "    ).reshape(x.shape)\n",
+    "    a[~in_area] = np.nan\n",
+    "    return a\n",
+    "\n",
+    "\n",
+    "(x, y) = np.meshgrid(np.linspace(xmin, xmax, num=256), np.linspace(ymin, ymax, num=256))\n",
+    "\n",
+    "callable_pattern = PoissonSampler(n_expected=180, random_state=60666).sample(\n",
+    "    chicago.geometry, intensity=pattern_function\n",
+    ")\n",
+    "\n",
+    "mimic_pattern = PoissonSampler(n_expected=180, random_state=60666).sample(\n",
+    "    chicago.geometry,\n",
+    "    intensity=pois,  # from the last loop above\n",
+    ")\n",
+    "\n",
+    "for i in range(2):\n",
+    "    if not i:\n",
+    "        ax[i].imshow(\n",
+    "            pattern_function(x.flatten(), y.flatten()).reshape(256, 256)[::-1],\n",
+    "            extent=[xmin, xmax, ymin, ymax],\n",
+    "        )\n",
+    "        chicago.geometry.boundary.plot(ax=ax[i], color=\"k\", linewidth=0.5)\n",
+    "    else:\n",
+    "        chicago.geometry.boundary.plot(ax=ax[i], color=\"k\", linewidth=0.5)\n",
+    "        pois.plot(ax=ax[i], color=\"green\", markersize=1)\n",
+    "\n",
+    "    [callable_pattern, mimic_pattern][i].plot(ax=ax[i], markersize=1, color=\"red\")\n",
+    "    ax[i].tick_params(left=False, labelleft=False, bottom=False, labelbottom=False)\n",
+    "    # ax[i].set_facecolor(\"black\")\n",
+    "    ax[i].set_title(\n",
+    "        [\n",
+    "            \"User-specified\\nIntensity Function\",\n",
+    "            \"Intensity Estimated\\nfrom Green Points\",\n",
+    "        ][i]\n",
+    "    )"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f19a9267",
+   "metadata": {},
+   "source": [
+    "## Raster — rasterized chicago\n",
+    "\n",
+    "The functionality also works with raster. To show this, we rasterize the chicago GeoDataFrame into two in-memory GeoTIFFs:\n",
+    "\n",
+    "| Raster | Content | Sampler |\n",
+    "|--------|---------|---------|\n",
+    "| `class_mf` | Integer `BoroCode` (1–5) per pixel | `ConstantClassSampler` |\n",
+    "| `weight_mf` | `Shape_Area` of each borough's pixels | `StratifiedClassSampler`, `MultinomialSampler`, `PoissonSampler` |\n",
+    "\n",
+    "Sampling occurs over the dataset, while the weights/labels currnetly require arrays to be read into data. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "265e4234",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-20T16:53:13.311241Z",
+     "iopub.status.busy": "2026-05-20T16:53:13.311162Z",
+     "iopub.status.idle": "2026-05-20T16:53:13.461805Z",
+     "shell.execute_reply": "2026-05-20T16:53:13.461426Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "nrows, ncols = 256, 256\n",
+    "bounds = chicago.total_bounds  # (minx, miny, maxx, maxy) in EPSG:2263\n",
+    "transform = from_bounds(*bounds, ncols, nrows)\n",
+    "\n",
+    "\n",
+    "def _rasterize(shapes, dtype, fill=0):\n",
+    "    mf = MemoryFile()\n",
+    "    with mf.open(\n",
+    "        driver=\"GTiff\",\n",
+    "        height=nrows,\n",
+    "        width=ncols,\n",
+    "        count=1,\n",
+    "        dtype=dtype,\n",
+    "        transform=transform,\n",
+    "        crs=chicago.crs,\n",
+    "        nodata=fill,\n",
+    "    ) as ds:\n",
+    "        arr = rasterize(\n",
+    "            shapes,\n",
+    "            out_shape=(nrows, ncols),\n",
+    "            transform=transform,\n",
+    "            fill=fill,\n",
+    "            dtype=dtype,\n",
+    "        )\n",
+    "        ds.write(arr[np.newaxis])\n",
+    "    return mf\n",
+    "\n",
+    "\n",
+    "# Classification raster (BoroCode as integer class label)\n",
+    "class_mf = _rasterize(\n",
+    "    zip(chicago.geometry, chicago.income_quantile.astype(\"uint8\") + 1, strict=False),\n",
+    "    \"uint8\",\n",
+    "    fill=0,\n",
+    ")\n",
+    "\n",
+    "# Weight raster (population density)\n",
+    "norm_area = (\n",
+    "    chicago.Pop2014 / 1000 / chicago.to_crs(chicago.estimate_utm_crs()).geometry.area\n",
+    ").values\n",
+    "weight_mf = _rasterize(\n",
+    "    zip(chicago.geometry, norm_area.astype(\"float32\"), strict=False),\n",
+    "    \"float32\",\n",
+    "    fill=0.0,\n",
+    ")\n",
+    "\n",
+    "# Preview\n",
+    "fig, axes = plt.subplots(1, 2, figsize=(11, 5))\n",
+    "with class_mf.open() as ds:\n",
+    "    arr_c = ds.read(1)\n",
+    "with weight_mf.open() as ds:\n",
+    "    arr_w = ds.read(1)\n",
+    "\n",
+    "axes[0].imshow(arr_c, cmap=\"tab10\", vmin=0, vmax=5, origin=\"upper\")\n",
+    "axes[0].set_title(\"Classification raster (Quantile 1–5, 0 = water/outside)\")\n",
+    "axes[1].imshow(arr_w, cmap=\"Oranges\", origin=\"upper\")\n",
+    "axes[1].set_title(\"Weight raster (Population Density)\")\n",
+    "for ax in axes:\n",
+    "    ax.tick_params(left=False, labelleft=False, bottom=False, labelbottom=False)\n",
+    "    ax.set_aspect(1.342)\n",
+    "plt.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "fcc30638",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-20T16:53:13.463173Z",
+     "iopub.status.busy": "2026-05-20T16:53:13.463086Z",
+     "iopub.status.idle": "2026-05-20T16:53:13.484803Z",
+     "shell.execute_reply": "2026-05-20T16:53:13.484346Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "with class_mf.open() as ds:\n",
+    "    class_arr = ds.read(1)\n",
+    "    pts_const_r = ConstantClassSampler(n_per_class=100, random_state=60666).sample(\n",
+    "        ds, class_arr\n",
+    "    )\n",
+    "    pts_strat_r = StratifiedClassSampler(n_samples=500, random_state=60605).sample(\n",
+    "        ds,\n",
+    "        labels=class_arr,\n",
+    "        weights=class_arr > 0,\n",
+    "    )\n",
+    "    pts_multi_r = MultinomialSampler(n_samples=500, random_state=60642).sample(\n",
+    "        ds,\n",
+    "        labels=class_arr,\n",
+    "        weights=class_arr > 0,\n",
+    "    )\n",
+    "    with weight_mf.open() as wds:\n",
+    "        # to sample within chicago's polygon, we use the geometry\n",
+    "        pts_poiss_r = PoissonSampler(n_expected=500, random_state=60611).sample(\n",
+    "            chicago.geometry, intensity=wds\n",
+    "        )\n",
+    "        # to sample just directly from the raster, set geometry=None as the first argument.\n",
+    "\n",
+    "pix, cix = chicago.sindex.query(pts_poiss_r.geometry.values, predicate=\"within\")\n",
+    "pts_poiss_r[\"class_label\"] = chicago.income_quantile.iloc[cix].values + 1\n",
+    "\n",
+    "pandas.concat(\n",
+    "    (\n",
+    "        pts_const_r.groupby(\"class_label\").size().rename(\"Constant samples per class\"),\n",
+    "        pts_strat_r.groupby(\"class_label\")\n",
+    "        .size()\n",
+    "        .rename(\"Stratified samples per class\"),\n",
+    "        pts_multi_r.groupby(\"class_label\")\n",
+    "        .size()\n",
+    "        .rename(\"Multinomial samples per class\"),\n",
+    "        pts_poiss_r.groupby(\"class_label\").size().rename(\"Poisson samples per class\"),\n",
+    "    ),\n",
+    "    axis=1,\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "456747e8",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-20T16:53:13.486102Z",
+     "iopub.status.busy": "2026-05-20T16:53:13.486004Z",
+     "iopub.status.idle": "2026-05-20T16:53:13.628396Z",
+     "shell.execute_reply": "2026-05-20T16:53:13.627785Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "fig, axes = plt.subplots(2, 2, figsize=(14, 14))\n",
+    "for ax, pts, title in [\n",
+    "    (\n",
+    "        axes.flat[0],\n",
+    "        pts_const_r,\n",
+    "        \"ConstantClassSampler\\n100 pts/quartile from from raster\",\n",
+    "    ),\n",
+    "    (axes.flat[1], pts_strat_r, \"StratifiedClassSampler\\n300 pts ∝ area\"),\n",
+    "    (axes.flat[2], pts_multi_r, \"MultinomialSampler\\n300 pts ~ area\"),\n",
+    "    (\n",
+    "        axes.flat[3],\n",
+    "        pts_poiss_r,\n",
+    "        f\"PoissonSampler\\n{len(pts_poiss_r)} ~ Poisson(population density)\",\n",
+    "    ),\n",
+    "]:\n",
+    "    if not title.startswith(\"P\"):\n",
+    "        c = (arr_c + 1).copy().astype(float)\n",
+    "        c[arr_c == 0] = np.nan\n",
+    "        ax.imshow(\n",
+    "            c,\n",
+    "            cmap=\"tab10\",\n",
+    "            origin=\"upper\",\n",
+    "            extent=[xmin, xmax, ymin, ymax],\n",
+    "            alpha=0.35,\n",
+    "        )\n",
+    "        pts.plot(\"class_label\", ax=ax, cmap=\"tab10\", markersize=10)\n",
+    "    else:\n",
+    "        w = (arr_w / arr_w.max()).copy()\n",
+    "        w[arr_c == 0] = np.nan\n",
+    "        ax.imshow(\n",
+    "            w,\n",
+    "            cmap=\"tab10\",\n",
+    "            origin=\"upper\",\n",
+    "            extent=[xmin, xmax, ymin, ymax],\n",
+    "            alpha=0.35,\n",
+    "        )\n",
+    "        pts.plot(ax=ax, color=\"black\", markersize=10)\n",
+    "    ax.set_title(title, fontsize=12)\n",
+    "    ax.set_aspect(\"equal\")\n",
+    "    ax.axis(\"off\")\n",
+    "plt.tight_layout()\n",
+    "plt.show()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "default",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.14.6"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

@@ -1,0 +1,21 @@
+﻿spml.validation.StratifiedClassSampler
+======================================
+
+.. currentmodule:: spml.validation
+
+.. autoclass:: StratifiedClassSampler
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~StratifiedClassSampler.__init__
+      ~StratifiedClassSampler.get_metadata_routing
+      ~StratifiedClassSampler.get_params
+      ~StratifiedClassSampler.sample
+      ~StratifiedClassSampler.set_params
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

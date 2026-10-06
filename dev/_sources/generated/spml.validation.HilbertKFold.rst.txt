@@ -1,0 +1,20 @@
+﻿spml.validation.HilbertKFold
+============================
+
+.. currentmodule:: spml.validation
+
+.. autoclass:: HilbertKFold
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~HilbertKFold.__init__
+      ~HilbertKFold.get_metadata_routing
+      ~HilbertKFold.get_n_splits
+      ~HilbertKFold.split
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

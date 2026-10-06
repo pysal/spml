@@ -1,0 +1,21 @@
+﻿spml.validation.MultinomialSampler
+==================================
+
+.. currentmodule:: spml.validation
+
+.. autoclass:: MultinomialSampler
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MultinomialSampler.__init__
+      ~MultinomialSampler.get_metadata_routing
+      ~MultinomialSampler.get_params
+      ~MultinomialSampler.sample
+      ~MultinomialSampler.set_params
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

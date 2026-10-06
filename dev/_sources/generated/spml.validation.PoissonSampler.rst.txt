@@ -1,0 +1,21 @@
+﻿spml.validation.PoissonSampler
+==============================
+
+.. currentmodule:: spml.validation
+
+.. autoclass:: PoissonSampler
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PoissonSampler.__init__
+      ~PoissonSampler.get_metadata_routing
+      ~PoissonSampler.get_params
+      ~PoissonSampler.sample
+      ~PoissonSampler.set_params
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

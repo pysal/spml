@@ -1,0 +1,20 @@
+﻿spml.validation.BallKFold
+=========================
+
+.. currentmodule:: spml.validation
+
+.. autoclass:: BallKFold
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BallKFold.__init__
+      ~BallKFold.get_metadata_routing
+      ~BallKFold.get_n_splits
+      ~BallKFold.split
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

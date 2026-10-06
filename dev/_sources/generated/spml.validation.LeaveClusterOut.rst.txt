@@ -1,0 +1,20 @@
+﻿spml.validation.LeaveClusterOut
+===============================
+
+.. currentmodule:: spml.validation
+
+.. autoclass:: LeaveClusterOut
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LeaveClusterOut.__init__
+      ~LeaveClusterOut.get_metadata_routing
+      ~LeaveClusterOut.get_n_splits
+      ~LeaveClusterOut.split
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

@@ -1,0 +1,21 @@
+﻿spml.validation.PointSampler
+============================
+
+.. currentmodule:: spml.validation
+
+.. autoclass:: PointSampler
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PointSampler.__init__
+      ~PointSampler.get_metadata_routing
+      ~PointSampler.get_params
+      ~PointSampler.sample
+      ~PointSampler.set_params
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

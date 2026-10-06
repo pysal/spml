@@ -1,0 +1,663 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "31732876",
+   "metadata": {},
+   "source": [
+    "# Automatic bandwidth selection\n",
+    "\n",
+    "`LocalBootstrap` and `LocalPermutation` both require the user to supply a\n",
+    "*bandwidth* or *threshold* that controls how local the resampling is.  Choosing\n",
+    "this value by hand is awkward.\n",
+    "\n",
+    "`spml` provides two helper functions that estimate the **range of spatial\n",
+    "autocorrelation** — the distance (or neighbour order) beyond which observations\n",
+    "are no longer correlated — and return it as a ready-to-use bandwidth.\n",
+    "\n",
+    "| Function | Returns | Use as |\n",
+    "|---|---|---|\n",
+    "| `correlogram_range` | distance (float) | `LocalBootstrap(bandwidth=...)`, `LocalPermutation(threshold=...)` |\n",
+    "| `knn_range` | neighbour order (int) | build a KNN graph, pass as `LocalBootstrap(graph=...)` |"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b50e2081",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-22T22:28:25.389124Z",
+     "iopub.status.busy": "2026-05-22T22:28:25.388866Z",
+     "iopub.status.idle": "2026-05-22T22:28:27.034081Z",
+     "shell.execute_reply": "2026-05-22T22:28:27.033604Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import geodatasets\n",
+    "import geopandas\n",
+    "import matplotlib.pyplot as plt\n",
+    "import numpy\n",
+    "from libpysal.graph import Graph\n",
+    "from scipy.spatial.distance import pdist\n",
+    "\n",
+    "from spml.validation import (\n",
+    "    LocalBootstrap,\n",
+    "    LocalPermutation,\n",
+    "    correlogram_range,\n",
+    "    knn_range,\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "86b23c86",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "chicago = geopandas.read_file(geodatasets.get_path(\"geoda.chicago_health\")).to_crs(\n",
+    "    \"EPSG:32616\"\n",
+    ")\n",
+    "chicago[\"income\"] = chicago[\"PerCInc14\"].fillna(chicago[\"PerCInc14\"].median())\n",
+    "\n",
+    "y = chicago[\"income\"].to_numpy()\n",
+    "print(f\"{len(chicago)} community areas\")\n",
+    "print(f\"income range: ${y.min():,.0f} – ${y.max():,.0f}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "12c7736f",
+   "metadata": {},
+   "source": [
+    "## 1  Visualising spatial autocorrelation\n",
+    "\n",
+    "Before estimating the range, it helps to see the variable mapped — a strongly\n",
+    "clustered pattern suggests high spatial autocorrelation and a larger range."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9ed83597",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-22T22:28:27.035310Z",
+     "iopub.status.busy": "2026-05-22T22:28:27.035198Z",
+     "iopub.status.idle": "2026-05-22T22:28:27.151617Z",
+     "shell.execute_reply": "2026-05-22T22:28:27.151162Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "fig, ax = plt.subplots(figsize=(6, 7))\n",
+    "chicago.plot(\n",
+    "    column=\"income\",\n",
+    "    cmap=\"Greens\",\n",
+    "    legend=True,\n",
+    "    legend_kwds={\"label\": \"Per-capita income ($)\", \"shrink\": 0.6},\n",
+    "    ax=ax,\n",
+    ")\n",
+    "ax.set_axis_off()\n",
+    "ax.set_title(\"Chicago community areas — per-capita income\", pad=8)\n",
+    "fig.tight_layout()\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "16bca120",
+   "metadata": {},
+   "source": [
+    "## 2  Distance correlogram  (`correlogram_range`)\n",
+    "\n",
+    "The **spatial correlogram** is the average normalised cross-product\n",
+    "$(y_i - \\bar y)(y_j - \\bar y)/\\sigma^2$ between all pairs of observations\n",
+    "at each distance lag.  It starts near 1 for very close pairs and decays toward\n",
+    "0 (or below) as distance increases.\n",
+    "\n",
+    "`correlogram_range` bins all pairwise distances, computes the mean correlation\n",
+    "in each bin, then interpolates the **first zero crossing**.  That crossing is\n",
+    "the estimated range — the bandwidth at which nearby observations stop being\n",
+    "more similar than average."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "515883e2",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-22T22:28:27.152760Z",
+     "iopub.status.busy": "2026-05-22T22:28:27.152667Z",
+     "iopub.status.idle": "2026-05-22T22:28:27.202875Z",
+     "shell.execute_reply": "2026-05-22T22:28:27.202549Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# ── Re-implement the binning so we can plot it ────────────────────────────────\n",
+    "\n",
+    "coords = chicago.centroid.get_coordinates()\n",
+    "y_z = (y - y.mean()) / y.std()\n",
+    "\n",
+    "dists = pdist(coords)\n",
+    "n = len(coords)\n",
+    "iu = numpy.triu_indices(n, k=1)\n",
+    "prods = numpy.outer(y_z, y_z)[iu]\n",
+    "\n",
+    "MAX_DIST = dists.max() / 2\n",
+    "N_BINS = 15\n",
+    "bins = numpy.linspace(0, MAX_DIST, N_BINS + 1)\n",
+    "bin_centers = 0.5 * (bins[:-1] + bins[1:])\n",
+    "bin_corrs = numpy.full(N_BINS, numpy.nan)\n",
+    "\n",
+    "for k, (lo, hi) in enumerate(zip(bins[:-1], bins[1:], strict=False)):\n",
+    "    mask = (dists >= lo) & (dists < hi)\n",
+    "    if mask.sum() >= 2:\n",
+    "        bin_corrs[k] = float(prods[mask].mean())\n",
+    "\n",
+    "# ── Estimate range ────────────────────────────────────────────────────────────\n",
+    "d_range = correlogram_range(chicago, y, random_state=0)\n",
+    "print(f\"Estimated range: {d_range / 1000:.2f} km\")\n",
+    "\n",
+    "# ── Plot ──────────────────────────────────────────────────────────────────────\n",
+    "fig, ax = plt.subplots(figsize=(8, 4))\n",
+    "ax.bar(\n",
+    "    bin_centers / 1000,\n",
+    "    bin_corrs,\n",
+    "    width=(MAX_DIST / N_BINS / 1000) * 0.85,\n",
+    "    color=\"#4878cf\",\n",
+    "    alpha=0.7,\n",
+    "    label=\"mean correlation per bin\",\n",
+    ")\n",
+    "ax.axhline(0, color=\"black\", lw=1)\n",
+    "ax.axvline(\n",
+    "    d_range / 1000,\n",
+    "    color=\"#d65f5f\",\n",
+    "    lw=2,\n",
+    "    ls=\"--\",\n",
+    "    label=f\"zero crossing = {d_range / 1000:.1f} km\",\n",
+    ")\n",
+    "ax.set_xlabel(\"Distance (km)\")\n",
+    "ax.set_ylabel(\"Spatial correlation\")\n",
+    "ax.set_title(\"Spatial correlogram — per-capita income, Chicago\")\n",
+    "ax.legend()\n",
+    "fig.tight_layout()\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d6a17063",
+   "metadata": {},
+   "source": [
+    "## 3  KNN lag correlation  (`knn_range`)\n",
+    "\n",
+    "Instead of binning by distance, `knn_range` steps through neighbour orders\n",
+    "$k = 1, 2, \\ldots$ and at each step computes the Pearson correlation between\n",
+    "$y$ and its $k$-nearest-neighbour spatial lag\n",
+    "$\\bar y_i^{(k)} = \\frac{1}{k}\\sum_{j \\in \\text{kNN}(i)} y_j$.\n",
+    "\n",
+    "It returns the last $k$ for which this correlation is still positive — the\n",
+    "number of neighbours to include before information becomes irrelevant."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cd757580",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-22T22:28:27.204189Z",
+     "iopub.status.busy": "2026-05-22T22:28:27.204108Z",
+     "iopub.status.idle": "2026-05-22T22:28:27.255740Z",
+     "shell.execute_reply": "2026-05-22T22:28:27.255305Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from scipy.spatial import cKDTree\n",
+    "\n",
+    "tree = cKDTree(coords)\n",
+    "MAX_K = len(chicago) - 1\n",
+    "_, all_idx = tree.query(coords, k=MAX_K + 1)\n",
+    "all_idx = all_idx[:, 1:]  # drop self\n",
+    "\n",
+    "ks = list(range(1, MAX_K + 1))\n",
+    "lag_corrs = []\n",
+    "for k in ks:\n",
+    "    lag = y_z[all_idx[:, :k]].mean(axis=1)\n",
+    "    lag_corrs.append(float(numpy.corrcoef(y_z, lag)[0, 1]))\n",
+    "\n",
+    "k_range = knn_range(chicago, y, max_k=MAX_K)\n",
+    "if k_range == MAX_K:\n",
+    "    print(\"Note: correlation did not cross zero — using max_k as upper bound.\")\n",
+    "print(f\"Estimated k range: {k_range} nearest neighbours\")\n",
+    "\n",
+    "fig, ax = plt.subplots(figsize=(8, 4))\n",
+    "ax.plot(ks, lag_corrs, \"o-\", color=\"#4878cf\", ms=6, label=\"k-NN lag correlation\")\n",
+    "ax.axhline(0, color=\"black\", lw=1)\n",
+    "ax.axvline(\n",
+    "    k_range, color=\"#d65f5f\", lw=2, ls=\"--\", label=f\"zero crossing at k = {k_range}\"\n",
+    ")\n",
+    "ax.set_xlabel(\"k  (number of nearest neighbours)\")\n",
+    "ax.set_ylabel(\"Pearson r  (y vs k-NN lag)\")\n",
+    "ax.set_title(\"KNN lag-correlation profile — per-capita income, Chicago\")\n",
+    "ax.legend()\n",
+    "fig.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "54710e3f",
+   "metadata": {},
+   "source": [
+    "## 4  Using the range in `LocalBootstrap`\n",
+    "\n",
+    "Pass `d_range` directly as `bandwidth`.  The bootstrap will draw each\n",
+    "replacement observation from within the autocorrelation range, so the\n",
+    "resampled dataset has the same spatial structure as the original."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "382095c5",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-22T22:28:27.256886Z",
+     "iopub.status.busy": "2026-05-22T22:28:27.256818Z",
+     "iopub.status.idle": "2026-05-22T22:28:27.418311Z",
+     "shell.execute_reply": "2026-05-22T22:28:27.417859Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "lb = LocalBootstrap(\n",
+    "    bandwidth=d_range,\n",
+    "    kernel=\"bisquare\",\n",
+    "    n_bootstraps=200,\n",
+    "    random_state=0,\n",
+    ")\n",
+    "\n",
+    "# Collect bootstrap distributions of the income mean and std\n",
+    "boot_means = []\n",
+    "boot_stds = []\n",
+    "for idx in lb.sample(chicago):\n",
+    "    boot_means.append(chicago.loc[idx, \"income\"].mean())\n",
+    "    boot_stds.append(chicago.loc[idx, \"income\"].std())\n",
+    "\n",
+    "\n",
+    "fig, axes = plt.subplots(1, 2, figsize=(11, 4))\n",
+    "\n",
+    "for ax, vals, stat in zip(\n",
+    "    axes,\n",
+    "    [boot_means, boot_stds],\n",
+    "    [\"mean income ($)\", \"std of income ($)\"],\n",
+    "    strict=False,\n",
+    "):\n",
+    "    ax.hist(vals, bins=25, color=\"#4878cf\", alpha=0.7, edgecolor=\"white\")\n",
+    "    ax.axvline(\n",
+    "        numpy.mean(vals),\n",
+    "        color=\"#d65f5f\",\n",
+    "        lw=2,\n",
+    "        label=f\"bootstrap mean = ${numpy.mean(vals):,.0f}\",\n",
+    "    )\n",
+    "    ax.set_xlabel(stat)\n",
+    "    ax.set_ylabel(\"bootstrap replicates\")\n",
+    "    ax.legend(fontsize=9)\n",
+    "\n",
+    "fig.suptitle(\n",
+    "    f\"LocalBootstrap  (bandwidth = {d_range / 1000:.1f} km,  200 resamples)\",\n",
+    "    fontsize=12,\n",
+    ")\n",
+    "fig.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b5e7d06c",
+   "metadata": {},
+   "source": [
+    "## 5  Using the range in `LocalPermutation`\n",
+    "\n",
+    "`d_range` is equally valid as the `threshold` for `LocalPermutation`.\n",
+    "Each observation is swapped only with observations within the autocorrelation\n",
+    "range, preserving large-scale spatial structure while shuffling local patterns.\n",
+    "\n",
+    "To show the permutation is local, we plot the **displacement** of each\n",
+    "community area (how far its assigned source is from its original location)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "bacf7a91",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-22T22:28:27.419456Z",
+     "iopub.status.busy": "2026-05-22T22:28:27.419374Z",
+     "iopub.status.idle": "2026-05-22T22:28:27.533090Z",
+     "shell.execute_reply": "2026-05-22T22:28:27.532666Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "lp = LocalPermutation(\n",
+    "    bandwidth=d_range,\n",
+    "    n_permutations=1,\n",
+    "    random_state=0,\n",
+    ")\n",
+    "perm_idx = next(lp.sample(chicago))\n",
+    "\n",
+    "# Displacement = distance from each area to its source area\n",
+    "centroids = chicago.centroid.get_coordinates().values\n",
+    "pos_map = {label: i for i, label in enumerate(chicago.index)}\n",
+    "src_pos = numpy.array([pos_map[label] for label in perm_idx])\n",
+    "displacements = (\n",
+    "    numpy.sqrt(((centroids - centroids[src_pos]) ** 2).sum(axis=1)) / 1000\n",
+    ")  # km\n",
+    "\n",
+    "chicago_disp = chicago.copy()\n",
+    "chicago_disp[\"displacement_km\"] = displacements\n",
+    "\n",
+    "fig, axes = plt.subplots(1, 2, figsize=(12, 6))\n",
+    "\n",
+    "chicago_disp.plot(\n",
+    "    column=\"displacement_km\",\n",
+    "    cmap=\"Oranges\",\n",
+    "    legend=True,\n",
+    "    legend_kwds={\"label\": \"Displacement (km)\", \"shrink\": 0.6},\n",
+    "    ax=axes[0],\n",
+    ")\n",
+    "axes[0].set_axis_off()\n",
+    "axes[0].set_title(f\"Permutation displacement  (threshold = {d_range / 1000:.1f} km)\")\n",
+    "\n",
+    "axes[1].hist(displacements, bins=20, color=\"#4878cf\", alpha=0.7, edgecolor=\"white\")\n",
+    "axes[1].axvline(\n",
+    "    d_range / 1000,\n",
+    "    color=\"#d65f5f\",\n",
+    "    lw=2,\n",
+    "    ls=\"--\",\n",
+    "    label=f\"range = {d_range / 1000:.1f} km\",\n",
+    ")\n",
+    "axes[1].set_xlabel(\"Displacement (km)\")\n",
+    "axes[1].set_ylabel(\"community areas\")\n",
+    "axes[1].set_title(\"Distribution of displacements\")\n",
+    "axes[1].legend()\n",
+    "\n",
+    "fig.tight_layout()\n",
+    "\n",
+    "print(f\"Max displacement: {displacements.max():.1f} km\")\n",
+    "print(f\"Mean displacement: {displacements.mean():.1f} km\")\n",
+    "print(f\"Range threshold: {d_range / 1000:.1f} km\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2513d8c2",
+   "metadata": {},
+   "source": [
+    "You can see that as the permutation gets \"larger\", the autocorrelation of the synthetic dataset goes down. Thus, more \"realistic\" random datasets are obtained with small shuffles. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f921acfa",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-22T22:28:27.534141Z",
+     "iopub.status.busy": "2026-05-22T22:28:27.534075Z",
+     "iopub.status.idle": "2026-05-22T22:28:30.299342Z",
+     "shell.execute_reply": "2026-05-22T22:28:30.298829Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from esda import Moran\n",
+    "\n",
+    "# build_knn requires Point geometry\n",
+    "chicago_pts = chicago.copy()\n",
+    "chicago_pts[\"geometry\"] = chicago.geometry.centroid\n",
+    "\n",
+    "base_graph = Graph.build_knn(chicago_pts, k=5)\n",
+    "real_moran_knn = Moran(\n",
+    "    chicago.income,\n",
+    "    base_graph,\n",
+    ")\n",
+    "\n",
+    "lps = numpy.empty((4, 99))\n",
+    "\n",
+    "for i, k in enumerate((5, 15, 50)):\n",
+    "    lp = LocalPermutation(\n",
+    "        graph=Graph.build_knn(chicago_pts, k=k),\n",
+    "        derangement=False,\n",
+    "        n_permutations=99,\n",
+    "        n_burn=10,\n",
+    "    )\n",
+    "    for p, perm_idxs in enumerate(lp.sample(chicago)):\n",
+    "        chicago_ = chicago.copy()\n",
+    "        chicago_[\"income\"] = chicago.loc[perm_idxs, \"income\"].values\n",
+    "        lps[i, p] = Moran(chicago_.income, w=base_graph).I\n",
+    "        if i == 1:\n",
+    "            chicago_pts_ = chicago_pts.sample(frac=1, replace=False)\n",
+    "            chicago_pts_.index = chicago_pts.index\n",
+    "            lps[-1, p] = Moran(\n",
+    "                chicago_.income,\n",
+    "                Graph.build_knn(chicago_pts_, k=5),\n",
+    "                permutations=0,\n",
+    "            ).I"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4528095a",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-22T22:28:30.300607Z",
+     "iopub.status.busy": "2026-05-22T22:28:30.300535Z",
+     "iopub.status.idle": "2026-05-22T22:28:30.444199Z",
+     "shell.execute_reply": "2026-05-22T22:28:30.443859Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "f, ax = plt.subplots(4, 1, figsize=(12, 3), sharey=True, sharex=True)\n",
+    "for i, m in enumerate(lps.mean(axis=1)):\n",
+    "    ax[i].hist(lps[i, :], fill=True, edgecolor=\"k\")\n",
+    "    ax[i].axvline(\n",
+    "        m,\n",
+    "        color=\"red\",\n",
+    "        linewidth=2,\n",
+    "        linestyle=\"--\",\n",
+    "        alpha=0.7,\n",
+    "    )\n",
+    "    ax[i].tick_params(left=False, labelleft=False)\n",
+    "    ax[i].axvline(\n",
+    "        real_moran_knn.I,\n",
+    "        color=\"k\",\n",
+    "        alpha=1,\n",
+    "        linewidth=2,\n",
+    "        linestyle=\"--\",\n",
+    "        label=f\"real = {real_moran_knn.I:.2f}\",\n",
+    "    )\n",
+    "    ax[i].set_ylabel([\"$p_k=5$\", \"$p_k=15$\", \"$p_k=50$\", r\"$p_k=\\infty$\"][i])\n",
+    "    ax[i].spines[\"right\"].set_visible(False)\n",
+    "    ax[i].spines[\"top\"].set_visible(False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "17bbd00d",
+   "metadata": {},
+   "source": [
+    "## 6  Automatic bandwidth selection with `bandwidth='auto'`\n",
+    "\n",
+    "Rather than computing the range manually and passing it in, both\n",
+    "`LocalBootstrap` and `LocalPermutation` accept `bandwidth='auto'`\n",
+    "(or `k='auto'`).  When set to `'auto'`, you must call `fit(X, y)`\n",
+    "first -- this runs `correlogram_range` (for bandwidth) or `knn_range`\n",
+    "(for k) internally and stores the result as `bandwidth_` or `k_`.\n",
+    "Calling `sample()` without `fit()` when using `'auto'` raises a\n",
+    "`NotFittedError`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "78fc84f6",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-22T22:28:30.445552Z",
+     "iopub.status.busy": "2026-05-22T22:28:30.445467Z",
+     "iopub.status.idle": "2026-05-22T22:28:30.447676Z",
+     "shell.execute_reply": "2026-05-22T22:28:30.447255Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from sklearn.exceptions import NotFittedError\n",
+    "\n",
+    "from spml.validation import LocalBootstrap, LocalPermutation\n",
+    "\n",
+    "# bandwidth='auto' raises NotFittedError if sample() is called without fit()\n",
+    "try:\n",
+    "    list(LocalBootstrap(bandwidth=\"auto\", n_bootstraps=1).sample(chicago))\n",
+    "except NotFittedError as e:\n",
+    "    print(\"NotFittedError:\", e)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ecdf0900",
+   "metadata": {},
+   "source": [
+    "### `LocalBootstrap` with `bandwidth='auto'`\n",
+    "\n",
+    "`fit(X, y)` runs `correlogram_range` and stores the result as\n",
+    "`bandwidth_`.  `sample()` then uses that bandwidth without any extra\n",
+    "arguments.  The two steps can be chained."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d6ef4474",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-22T22:28:30.448691Z",
+     "iopub.status.busy": "2026-05-22T22:28:30.448613Z",
+     "iopub.status.idle": "2026-05-22T22:28:30.604284Z",
+     "shell.execute_reply": "2026-05-22T22:28:30.603964Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "lb_auto = LocalBootstrap(\n",
+    "    bandwidth=\"auto\",\n",
+    "    kernel=\"bisquare\",\n",
+    "    n_bootstraps=200,\n",
+    "    random_state=0,\n",
+    ")\n",
+    "lb_auto.fit(chicago, chicago.income.values)\n",
+    "print(f\"Auto-selected bandwidth: {lb_auto.bandwidth_:.0f} m\")\n",
+    "\n",
+    "boot_mean = numpy.zeros(len(chicago))\n",
+    "for indices in lb_auto.sample(chicago):\n",
+    "    boot_mean += chicago.income.values[chicago.index.get_indexer(indices)]\n",
+    "boot_mean /= lb_auto.n_bootstraps\n",
+    "\n",
+    "fig, ax = plt.subplots(figsize=(6, 7))\n",
+    "chicago.assign(_v=boot_mean).plot(\n",
+    "    column=\"_v\",\n",
+    "    # cmap=colormaps.safe,\n",
+    "    legend=True,\n",
+    "    ax=ax,\n",
+    "    edgecolor=\"#555\",\n",
+    "    linewidth=0.5,\n",
+    ")\n",
+    "ax.set_title(\n",
+    "    f\"LocalBootstrap bootstrap mean (bandwidth=auto -> {lb_auto.bandwidth_:.0f} m, bisquare)\",\n",
+    "    fontsize=11,\n",
+    ")\n",
+    "ax.axis(\"off\")\n",
+    "plt.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "181badab",
+   "metadata": {},
+   "source": [
+    "### `LocalPermutation` with `k='auto'`\n",
+    "\n",
+    "`k='auto'` calls `knn_range` in `fit()` and stores the result as\n",
+    "`k_`.  The chained form `lp.fit(chicago, y).sample(chicago)` is the\n",
+    "most concise way to use it."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a0653a3a",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-22T22:28:30.605613Z",
+     "iopub.status.busy": "2026-05-22T22:28:30.605532Z",
+     "iopub.status.idle": "2026-05-22T22:28:30.723583Z",
+     "shell.execute_reply": "2026-05-22T22:28:30.723102Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "lp_auto = LocalPermutation(\n",
+    "    k=\"auto\",\n",
+    "    kernel=\"bisquare\",\n",
+    "    n_permutations=1,\n",
+    "    random_state=42,\n",
+    ")\n",
+    "lp_auto.fit(chicago, chicago.income.values)\n",
+    "print(f\"Auto-selected k: {lp_auto.k_}\")\n",
+    "\n",
+    "perm = next(lp_auto.sample(chicago))\n",
+    "y_perm = chicago.income.values[chicago.index.get_indexer(perm)]\n",
+    "\n",
+    "fig, axes = plt.subplots(1, 2, figsize=(13, 6))\n",
+    "kw = dict(edgecolor=\"#333\", linewidth=0.5, legend=False)\n",
+    "chicago.assign(_v=chicago.income.values).plot(column=\"_v\", ax=axes[0], **kw)\n",
+    "axes[0].set_title(\"Original income\", fontsize=11)\n",
+    "axes[0].axis(\"off\")\n",
+    "chicago.assign(_v=y_perm).plot(column=\"_v\", ax=axes[1], **kw)\n",
+    "axes[1].set_title(f\"One local permutation (k=auto -> {lp_auto.k_})\", fontsize=11)\n",
+    "axes[1].axis(\"off\")\n",
+    "plt.tight_layout()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "default",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.14.6"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

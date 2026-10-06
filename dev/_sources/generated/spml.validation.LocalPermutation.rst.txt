@@ -1,0 +1,22 @@
+﻿spml.validation.LocalPermutation
+================================
+
+.. currentmodule:: spml.validation
+
+.. autoclass:: LocalPermutation
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LocalPermutation.__init__
+      ~LocalPermutation.fit
+      ~LocalPermutation.get_metadata_routing
+      ~LocalPermutation.get_params
+      ~LocalPermutation.sample
+      ~LocalPermutation.set_params
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

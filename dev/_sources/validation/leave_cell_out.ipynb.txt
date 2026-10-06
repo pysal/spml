@@ -1,0 +1,504 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "a1b2c3d4",
+   "metadata": {},
+   "source": [
+    "# Leave Cell Out\n",
+    "\n",
+    "`LeaveCellOut` implements spatial block cross-validation using a discrete\n",
+    "global grid system (DGGS). Each fold holds out one grid cell as the test set;\n",
+    "the training set is all observations in every other cell.\n",
+    "\n",
+    "This is the leave-one-block-out analogue of `CellStratifiedKFold`, which\n",
+    "distributes each cell's observations across all folds instead of holding them\n",
+    "out whole. Use `LeaveCellOut` when you want to evaluate how well a model\n",
+    "generalises to an entirely unseen geographic region."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b2c3d4e5",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-31T19:04:07.068910Z",
+     "iopub.status.busy": "2026-05-31T19:04:07.068655Z",
+     "iopub.status.idle": "2026-05-31T19:04:08.798898Z",
+     "shell.execute_reply": "2026-05-31T19:04:08.798181Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import geodatasets\n",
+    "import geopandas as gpd\n",
+    "import matplotlib.patches as mpatches\n",
+    "import matplotlib.pyplot as plt\n",
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "\n",
+    "from spml.validation import LeaveCellOut"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c3d4e5f6",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-31T19:04:08.800492Z",
+     "iopub.status.busy": "2026-05-31T19:04:08.800316Z",
+     "iopub.status.idle": "2026-05-31T19:04:08.836048Z",
+     "shell.execute_reply": "2026-05-31T19:04:08.835688Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "gdf = gpd.read_file(geodatasets.get_path(\"geoda.home_sales\")).to_crs(\"EPSG:32610\")\n",
+    "\n",
+    "print(\n",
+    "    f\"n = {len(gdf)} sales  |  price ${gdf.price.min():,.0f} – ${gdf.price.max():,.0f}\"\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d4e5f6a7",
+   "metadata": {},
+   "source": [
+    "## H3 grid\n",
+    "\n",
+    "H3 resolution 4 yields 7 occupied cells over King County. Increase\n",
+    "the resolution for finer-grained blocks (resolution 5 gives ~26 cells\n",
+    "over this dataset). Use `min_test_size` to exclude cells with very few\n",
+    "observations from serving as test folds."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e5f6a7b8",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-31T19:04:08.837444Z",
+     "iopub.status.busy": "2026-05-31T19:04:08.837348Z",
+     "iopub.status.idle": "2026-05-31T19:04:08.991253Z",
+     "shell.execute_reply": "2026-05-31T19:04:08.990739Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "cv = LeaveCellOut(grid=\"h3\", resolution=4)\n",
+    "splits = list(cv.split(gdf))\n",
+    "print(\"Resolution :\", cv.resolution_)\n",
+    "print(\"Test folds :\", cv.n_cells_, \"(one per occupied cell)\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f6a7b8c9",
+   "metadata": {},
+   "source": [
+    "### Cell assignments"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a7b8c9d0",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-31T19:04:08.992897Z",
+     "iopub.status.busy": "2026-05-31T19:04:08.992731Z",
+     "iopub.status.idle": "2026-05-31T19:04:09.161164Z",
+     "shell.execute_reply": "2026-05-31T19:04:09.160595Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "fig, ax = plt.subplots(figsize=(7, 8))\n",
+    "unique_cells, cell_int = np.unique(cv.cell_ids_, return_inverse=True)\n",
+    "\n",
+    "gdf.plot(ax=ax, column=cell_int, categorical=True, markersize=1)\n",
+    "ax.legend(labels=[\"cell \" + str(i) for i in range(len(unique_cells))], title=\"H3 cell\")\n",
+    "ax.set_title(\n",
+    "    \"H3 cell assignments -- resolution \"\n",
+    "    + str(cv.resolution_)\n",
+    "    + \", \"\n",
+    "    + str(cv.n_cells_)\n",
+    "    + \" cells\"\n",
+    ");"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b8c9d0e1",
+   "metadata": {},
+   "source": [
+    "### Fold sizes"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c9d0e1f2",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-31T19:04:09.162773Z",
+     "iopub.status.busy": "2026-05-31T19:04:09.162687Z",
+     "iopub.status.idle": "2026-05-31T19:04:09.168277Z",
+     "shell.execute_reply": "2026-05-31T19:04:09.167818Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "pd.DataFrame(\n",
+    "    [\n",
+    "        {\"fold\": i, \"test size\": len(te), \"train size\": len(tr)}\n",
+    "        for i, (tr, te) in enumerate(splits)\n",
+    "    ]\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d0e1f2a3",
+   "metadata": {},
+   "source": [
+    "### All folds"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e1f2a3b4",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-31T19:04:09.169605Z",
+     "iopub.status.busy": "2026-05-31T19:04:09.169496Z",
+     "iopub.status.idle": "2026-05-31T19:04:09.410749Z",
+     "shell.execute_reply": "2026-05-31T19:04:09.409981Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "ncols = 4\n",
+    "nrows = int(np.ceil(cv.n_cells_ / ncols))\n",
+    "fig, axes = plt.subplots(nrows, ncols, figsize=(4 * ncols, 4 * nrows))\n",
+    "axes = axes.flat\n",
+    "\n",
+    "for i, (train, test) in enumerate(splits):\n",
+    "    ax = axes[i]\n",
+    "    gdf.iloc[train].plot(\n",
+    "        ax=ax,\n",
+    "        color=\"steelblue\",\n",
+    "        markersize=0.3,\n",
+    "        alpha=0.4,\n",
+    "    )\n",
+    "    gdf.iloc[test].plot(\n",
+    "        ax=ax,\n",
+    "        color=\"firebrick\",\n",
+    "        markersize=2,\n",
+    "        alpha=0.4,\n",
+    "    )\n",
+    "    ax.set_title(\"Fold \" + str(i) + \"  (test n=\" + str(len(test)) + \")\", fontsize=9)\n",
+    "    ax.set_axis_off()\n",
+    "\n",
+    "for ax in list(axes)[cv.n_cells_ :]:\n",
+    "    ax.set_visible(False)\n",
+    "\n",
+    "fig.legend(\n",
+    "    handles=[\n",
+    "        mpatches.Patch(color=\"steelblue\", label=\"train\"),\n",
+    "        mpatches.Patch(color=\"firebrick\", label=\"test\"),\n",
+    "    ],\n",
+    "    loc=\"lower right\",\n",
+    ")\n",
+    "fig.suptitle(\"LeaveCellOut -- all folds\", fontsize=13)\n",
+    "plt.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fc9df145",
+   "metadata": {},
+   "source": [
+    "## A5 grid\n",
+    "\n",
+    "The A5 (Icosahedral Snyder Equal Area) grid partitions the globe into equal-area\n",
+    "pentagonal cells. Resolutions 0–30 progress from coarsest to finest.\n",
+    "Resolution 7 yields 6 occupied cells over King County, comparable to H3 resolution 4."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3ba4c507",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-31T19:04:09.412162Z",
+     "iopub.status.busy": "2026-05-31T19:04:09.412076Z",
+     "iopub.status.idle": "2026-05-31T19:04:11.118077Z",
+     "shell.execute_reply": "2026-05-31T19:04:11.117583Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "cv_a5 = LeaveCellOut(grid=\"a5\", resolution=7)\n",
+    "splits_a5 = list(cv_a5.split(gdf))\n",
+    "print(\"Resolution :\", cv_a5.resolution_)\n",
+    "print(\"Test folds :\", cv_a5.n_cells_, \"(one per occupied cell)\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "aeb2e1fe",
+   "metadata": {},
+   "source": [
+    "### Cell assignments"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d593536b",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-31T19:04:11.119420Z",
+     "iopub.status.busy": "2026-05-31T19:04:11.119337Z",
+     "iopub.status.idle": "2026-05-31T19:04:11.249515Z",
+     "shell.execute_reply": "2026-05-31T19:04:11.248908Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "fig, ax = plt.subplots(figsize=(7, 8))\n",
+    "unique_cells, cell_int = np.unique(cv_a5.cell_ids_, return_inverse=True)\n",
+    "\n",
+    "gdf.plot(ax=ax, column=cell_int, categorical=True, markersize=1)\n",
+    "ax.legend(labels=[\"cell \" + str(i) for i in range(len(unique_cells))], title=\"A5 cell\")\n",
+    "\n",
+    "ax.set_title(\n",
+    "    \"A5 cell assignments -- resolution \"\n",
+    "    + str(cv_a5.resolution_)\n",
+    "    + \", \"\n",
+    "    + str(cv_a5.n_cells_)\n",
+    "    + \" cells\"\n",
+    ")\n",
+    "plt.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4382c0af",
+   "metadata": {},
+   "source": [
+    "### All folds"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "683b5126",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-31T19:04:11.250940Z",
+     "iopub.status.busy": "2026-05-31T19:04:11.250826Z",
+     "iopub.status.idle": "2026-05-31T19:04:11.459033Z",
+     "shell.execute_reply": "2026-05-31T19:04:11.458563Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "ncols = 4\n",
+    "nrows = int(np.ceil(cv_a5.n_cells_ / ncols))\n",
+    "fig, axes = plt.subplots(nrows, ncols, figsize=(4 * ncols, 4 * nrows))\n",
+    "axes = axes.flat\n",
+    "\n",
+    "for i, (train, test) in enumerate(splits_a5):\n",
+    "    ax = axes[i]\n",
+    "    gdf.iloc[train].plot(\n",
+    "        ax=ax,\n",
+    "        color=\"steelblue\",\n",
+    "        markersize=0.3,\n",
+    "        alpha=0.4,\n",
+    "    )\n",
+    "    gdf.iloc[test].plot(\n",
+    "        ax=ax,\n",
+    "        color=\"firebrick\",\n",
+    "        markersize=2,\n",
+    "        alpha=0.4,\n",
+    "    )\n",
+    "    ax.set_title(\"Fold \" + str(i) + \"  (test n=\" + str(len(test)) + \")\", fontsize=9)\n",
+    "    ax.set_axis_off()\n",
+    "\n",
+    "for ax in list(axes)[cv_a5.n_cells_ :]:\n",
+    "    ax.set_visible(False)\n",
+    "\n",
+    "fig.legend(\n",
+    "    handles=[\n",
+    "        mpatches.Patch(color=\"steelblue\", label=\"train\"),\n",
+    "        mpatches.Patch(color=\"firebrick\", label=\"test\"),\n",
+    "    ],\n",
+    "    loc=\"lower right\",\n",
+    "    fontsize=10,\n",
+    ")\n",
+    "fig.suptitle(\"LeaveCellOut (A5) -- all folds\", fontsize=13)\n",
+    "plt.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b21ced30",
+   "metadata": {},
+   "source": [
+    "## HEALPix grid\n",
+    "\n",
+    "HEALPix (Hierarchical Equal Area isoLatitude Pixelization) divides the sphere\n",
+    "into equal-area pixels arranged in rings of constant latitude. The `resolution`\n",
+    "parameter is log₂(nside), so resolution 7 = nside 128.\n",
+    "At this resolution, 7 cells cover King County — matching H3 resolution 4."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6451dba2",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-31T19:04:11.460611Z",
+     "iopub.status.busy": "2026-05-31T19:04:11.460511Z",
+     "iopub.status.idle": "2026-05-31T19:04:11.771941Z",
+     "shell.execute_reply": "2026-05-31T19:04:11.771220Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "cv_hp = LeaveCellOut(grid=\"healpix\", resolution=7)\n",
+    "splits_hp = list(cv_hp.split(gdf))\n",
+    "print(\"Resolution :\", cv_hp.resolution_, f\"(nside={1 << cv_hp.resolution_})\")\n",
+    "print(\"Test folds :\", cv_hp.n_cells_, \"(one per occupied cell)\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "54ff5b20",
+   "metadata": {},
+   "source": [
+    "### Cell assignments"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9d13012e",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-31T19:04:11.773320Z",
+     "iopub.status.busy": "2026-05-31T19:04:11.773197Z",
+     "iopub.status.idle": "2026-05-31T19:04:11.906886Z",
+     "shell.execute_reply": "2026-05-31T19:04:11.906430Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "fig, ax = plt.subplots(figsize=(7, 8))\n",
+    "unique_cells, cell_int = np.unique(cv_hp.cell_ids_, return_inverse=True)\n",
+    "gdf.plot(ax=ax, column=cell_int, categorical=True, markersize=1)\n",
+    "ax.legend(\n",
+    "    labels=[\"cell \" + str(i) for i in range(len(unique_cells))], title=\"HEALPix cell\"\n",
+    ")\n",
+    "\n",
+    "ax.set_title(\n",
+    "    \"HEALPix cell assignments -- resolution \"\n",
+    "    + str(cv_hp.resolution_)\n",
+    "    + f\" (nside={1 << cv_hp.resolution_}), \"\n",
+    "    + str(cv_hp.n_cells_)\n",
+    "    + \" cells\"\n",
+    ")\n",
+    "plt.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "298179b2",
+   "metadata": {},
+   "source": [
+    "### All folds"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6fb3bb29",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-31T19:04:11.908382Z",
+     "iopub.status.busy": "2026-05-31T19:04:11.908284Z",
+     "iopub.status.idle": "2026-05-31T19:04:12.170709Z",
+     "shell.execute_reply": "2026-05-31T19:04:12.170079Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "ncols = 4\n",
+    "nrows = int(np.ceil(cv_hp.n_cells_ / ncols))\n",
+    "fig, axes = plt.subplots(nrows, ncols, figsize=(4 * ncols, 4 * nrows))\n",
+    "axes = axes.flat\n",
+    "\n",
+    "for i, (train, test) in enumerate(splits_hp):\n",
+    "    ax = axes[i]\n",
+    "    gdf.iloc[train].plot(\n",
+    "        ax=ax,\n",
+    "        color=\"steelblue\",\n",
+    "        markersize=0.3,\n",
+    "        alpha=0.4,\n",
+    "    )\n",
+    "    gdf.iloc[test].plot(\n",
+    "        ax=ax,\n",
+    "        color=\"firebrick\",\n",
+    "        markersize=2,\n",
+    "        alpha=0.4,\n",
+    "    )\n",
+    "    ax.set_title(\"Fold \" + str(i) + \"  (test n=\" + str(len(test)) + \")\", fontsize=9)\n",
+    "    ax.set_axis_off()\n",
+    "\n",
+    "for ax in list(axes)[cv_hp.n_cells_ :]:\n",
+    "    ax.set_visible(False)\n",
+    "\n",
+    "fig.legend(\n",
+    "    handles=[\n",
+    "        mpatches.Patch(color=\"steelblue\", label=\"train\"),\n",
+    "        mpatches.Patch(color=\"firebrick\", label=\"test\"),\n",
+    "    ],\n",
+    "    loc=\"lower right\",\n",
+    "    fontsize=10,\n",
+    ")\n",
+    "fig.suptitle(\"LeaveCellOut (HEALPix) -- all folds\", fontsize=13)\n",
+    "plt.tight_layout()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "default",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.14.6"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

@@ -1,0 +1,359 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "cell-0",
+   "metadata": {},
+   "source": [
+    "# Cluster-stratified K-Fold\n",
+    "\n",
+    "`ClusterStratifiedKFold` fits a user-supplied clusterer (HDBSCAN, OPTICS, KMeans, ...)\n",
+    "to the input locations, then partitions each cluster's members into `n_splits` parts.\n",
+    "Every test fold draws proportionally from every cluster, so each fold spans all clusters\n",
+    "rather than holding out a single region.\n",
+    "\n",
+    "This is the spatial analogue of `StratifiedKFold` where the strata are spatial clusters\n",
+    "discovered at fit time."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-1",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-30T21:15:44.423057Z",
+     "iopub.status.busy": "2026-05-30T21:15:44.422653Z",
+     "iopub.status.idle": "2026-05-30T21:15:45.847469Z",
+     "shell.execute_reply": "2026-05-30T21:15:45.846971Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import geodatasets\n",
+    "import geopandas\n",
+    "import matplotlib.pyplot as plt\n",
+    "import numpy\n",
+    "from matplotlib import colormaps\n",
+    "from sklearn.cluster import HDBSCAN\n",
+    "from sklearn.linear_model import LinearRegression\n",
+    "from sklearn.metrics import root_mean_squared_error\n",
+    "\n",
+    "from spml.validation import ClusterStratifiedKFold"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-1b",
+   "metadata": {},
+   "source": [
+    "## Data — King County house sales\n",
+    "\n",
+    "We use a random subsample of 2 000 sales from the full King County dataset,\n",
+    "projected to UTM 10N (metres) so that HDBSCAN operates on meaningful distance units."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-2",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-30T21:15:45.849272Z",
+     "iopub.status.busy": "2026-05-30T21:15:45.849107Z",
+     "iopub.status.idle": "2026-05-30T21:15:50.833035Z",
+     "shell.execute_reply": "2026-05-30T21:15:50.832556Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "gdf_full = geopandas.read_file(geodatasets.get_path(\"geoda.home_sales\")).to_crs(\n",
+    "    \"EPSG:32610\"\n",
+    ")\n",
+    "gdf_full[\"log_price\"] = numpy.log(gdf_full[\"price\"])\n",
+    "\n",
+    "rng = numpy.random.default_rng(42)\n",
+    "idx = rng.choice(len(gdf_full), 2000, replace=False)\n",
+    "gdf = gdf_full.iloc[idx].reset_index(drop=True)\n",
+    "\n",
+    "print(\n",
+    "    f\"n = {len(gdf)} sales  |  price ${gdf.price.min():,.0f} – ${gdf.price.max():,.0f}\"\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-2b",
+   "metadata": {},
+   "source": [
+    "## Basic usage\n",
+    "\n",
+    "Pass any sklearn-compatible clusterer. `ClusterStratifiedKFold` clones it internally,\n",
+    "fits to the input coordinates, then stratifies each cluster across folds.\n",
+    "\n",
+    "`HDBSCAN(min_cluster_size=30)` finds the dense sub-regions of King County\n",
+    "(Seattle core, Bellevue/Eastside, suburban corridors) and labels sparse rural\n",
+    "points as noise (`label = -1`)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-3",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-30T21:15:50.834311Z",
+     "iopub.status.busy": "2026-05-30T21:15:50.834194Z",
+     "iopub.status.idle": "2026-05-30T21:15:50.854275Z",
+     "shell.execute_reply": "2026-05-30T21:15:50.853922Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "ckf = ClusterStratifiedKFold(\n",
+    "    HDBSCAN(min_cluster_size=30, copy=True),\n",
+    "    n_splits=5,\n",
+    "    random_state=0,\n",
+    ")\n",
+    "splits = list(ckf.split(gdf))\n",
+    "\n",
+    "clusters = sorted(set(ckf.labels_) - {-1})\n",
+    "n_noise = int((ckf.labels_ == -1).sum())\n",
+    "print(\n",
+    "    f\"discovered {ckf.n_clusters_} clusters  |  noise points: {n_noise} ({n_noise / len(gdf):.0%})\"\n",
+    ")\n",
+    "print(\n",
+    "    f\"cluster sizes: {sorted([(ckf.labels_ == c).sum() for c in clusters], reverse=True)}\"\n",
+    ")\n",
+    "print(f\"fold sizes:    {[len(te) for _, te in splits]}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-3b",
+   "metadata": {},
+   "source": [
+    "### Visualize clusters and one example fold\n",
+    "\n",
+    "Left: HDBSCAN clusters (noise in grey). Right: train vs test assignment for fold 0.\n",
+    "Notice that the test points (orange) are spread across all clusters — not concentrated\n",
+    "in a single geographic region."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-4",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-30T21:15:50.855524Z",
+     "iopub.status.busy": "2026-05-30T21:15:50.855443Z",
+     "iopub.status.idle": "2026-05-30T21:15:51.286921Z",
+     "shell.execute_reply": "2026-05-30T21:15:51.286454Z"
+    },
+    "tags": [
+     "hide-input"
+    ]
+   },
+   "outputs": [],
+   "source": [
+    "gdf[\"cluster\"] = ckf.labels_\n",
+    "\n",
+    "fold0_train, fold0_test = splits[0]\n",
+    "role = numpy.full(len(gdf), \"train\", dtype=object)\n",
+    "role[fold0_test] = \"test\"\n",
+    "gdf[\"fold0_role\"] = role\n",
+    "\n",
+    "fig, axes = plt.subplots(1, 2, figsize=(14, 6))\n",
+    "\n",
+    "# Panel 1: cluster map\n",
+    "ax = axes[0]\n",
+    "gdf[gdf.cluster == -1].plot(ax=ax, color=\"#ccc\", markersize=2, alpha=0.5, label=\"noise\")\n",
+    "for fi, c in enumerate(clusters):\n",
+    "    sub = gdf[gdf.cluster == c]\n",
+    "    sub.plot(\n",
+    "        ax=ax,\n",
+    "        color=colormaps.get_cmap(\"tab10\")(fi / max(len(clusters) - 1, 1)),\n",
+    "        markersize=4,\n",
+    "        alpha=0.8,\n",
+    "        label=f\"cluster {c}  (n={len(sub)})\",\n",
+    "    )\n",
+    "ax.set_title(\"HDBSCAN clusters\", fontsize=11)\n",
+    "ax.set_xlabel(\"Easting (m)\")\n",
+    "ax.set_ylabel(\"Northing (m)\")\n",
+    "ax.set_aspect(\"equal\")\n",
+    "ax.legend(fontsize=8, markerscale=2, loc=\"upper left\")\n",
+    "\n",
+    "# Panel 2: fold 0 train / test\n",
+    "ax2 = axes[1]\n",
+    "gdf[gdf.fold0_role == \"train\"].plot(\n",
+    "    ax=ax2, color=colormaps.get_cmap(\"tab10\")(0), markersize=2, alpha=0.5, label=\"train\"\n",
+    ")\n",
+    "gdf[gdf.fold0_role == \"test\"].plot(\n",
+    "    ax=ax2,\n",
+    "    color=colormaps.get_cmap(\"tab10\")(1),\n",
+    "    markersize=6,\n",
+    "    alpha=0.9,\n",
+    "    label=f\"test  (n={len(fold0_test)})\",\n",
+    ")\n",
+    "ax2.set_title(\"Fold 0: train vs test\", fontsize=11)\n",
+    "ax2.set_xlabel(\"Easting (m)\")\n",
+    "ax2.set_aspect(\"equal\")\n",
+    "ax2.legend(fontsize=9, markerscale=2)\n",
+    "\n",
+    "fig.suptitle(\"ClusterStratifiedKFold — King County house sales (UTM 10N)\", fontsize=13)\n",
+    "fig.tight_layout()\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-5",
+   "metadata": {},
+   "source": [
+    "## Noise handling\n",
+    "\n",
+    "Density-based clusterers (HDBSCAN, OPTICS) label outlier points with `-1`.\n",
+    "`ClusterStratifiedKFold` exposes four policies:\n",
+    "\n",
+    "- `noise='stratify'` (default): distribute noise across folds like any other cluster.\n",
+    "- `noise='drop'`: exclude noise from both train and test.\n",
+    "- `noise='train_only'`: noise is in every train set, never in any test set.\n",
+    "- `noise='nearest'`: each noise point is reassigned to the cluster of its nearest\n",
+    "  non-noise neighbour and then participates in that cluster's fold-assignment pool\n",
+    "  as a regular member."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-6",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-30T21:15:51.288393Z",
+     "iopub.status.busy": "2026-05-30T21:15:51.288308Z",
+     "iopub.status.idle": "2026-05-30T21:15:51.358129Z",
+     "shell.execute_reply": "2026-05-30T21:15:51.357681Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "noise_idx = numpy.flatnonzero(ckf.labels_ == -1)\n",
+    "\n",
+    "for mode in (\"stratify\", \"drop\", \"train_only\", \"nearest\"):\n",
+    "    ckf_m = ClusterStratifiedKFold(\n",
+    "        HDBSCAN(min_cluster_size=30, copy=True),\n",
+    "        n_splits=5,\n",
+    "        noise=mode,\n",
+    "        random_state=0,\n",
+    "    )\n",
+    "    splits_m = list(ckf_m.split(gdf))\n",
+    "    train0, test0 = splits_m[0]\n",
+    "    train_noise = int(numpy.isin(noise_idx, train0).sum())\n",
+    "    test_noise = int(numpy.isin(noise_idx, test0).sum())\n",
+    "    fold_sizes = [len(te) for _, te in splits_m]\n",
+    "    print(\n",
+    "        f\"noise={mode:11s}  \"\n",
+    "        f\"fold0 train noise={train_noise:3d}, test noise={test_noise:3d}  \"\n",
+    "        f\"fold sizes={fold_sizes}\"\n",
+    "    )"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-7",
+   "metadata": {},
+   "source": [
+    "## Pre-fitted clusterer\n",
+    "\n",
+    "If you have already fit a clusterer (e.g. to inspect it, tune it, or share it across\n",
+    "folds and other code), pass it in directly: `ClusterStratifiedKFold` will detect the\n",
+    "`labels_` attribute and skip refitting."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-8",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-30T21:15:51.359666Z",
+     "iopub.status.busy": "2026-05-30T21:15:51.359583Z",
+     "iopub.status.idle": "2026-05-30T21:15:51.378764Z",
+     "shell.execute_reply": "2026-05-30T21:15:51.378445Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "fitted = HDBSCAN(min_cluster_size=30, copy=True).fit(gdf.get_coordinates())\n",
+    "print(f\"pre-fit found {len(set(fitted.labels_) - {-1})} clusters\")\n",
+    "\n",
+    "ckf_pre = ClusterStratifiedKFold(fitted, n_splits=5, random_state=0)\n",
+    "splits_pre = list(ckf_pre.split(gdf))\n",
+    "\n",
+    "assert ckf_pre.clusterer_ is fitted, \"pre-fitted clusterer should be used as-is\"\n",
+    "print(f\"fold sizes: {[len(te) for _, te in splits_pre]}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cell-9",
+   "metadata": {},
+   "source": [
+    "## Cross-validation example\n",
+    "\n",
+    "Predict log(price) from structural features.  Because each fold's test set spans\n",
+    "all geographic clusters, fold-to-fold RMSE variance reflects model generalisation\n",
+    "rather than spatial coverage differences."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cell-10",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-30T21:15:51.380109Z",
+     "iopub.status.busy": "2026-05-30T21:15:51.380014Z",
+     "iopub.status.idle": "2026-05-30T21:15:51.395528Z",
+     "shell.execute_reply": "2026-05-30T21:15:51.395183Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "feat_cols = [\"sqft_liv\", \"bedrooms\", \"bathrooms\", \"grade\"]\n",
+    "y = gdf[\"log_price\"].values\n",
+    "X = gdf[feat_cols].fillna(0).values\n",
+    "\n",
+    "rmse_per_fold = []\n",
+    "for train, test in splits:\n",
+    "    lr = LinearRegression().fit(X[train], y[train])\n",
+    "    rmse_per_fold.append(root_mean_squared_error(y[test], lr.predict(X[test])))\n",
+    "\n",
+    "print(f\"RMSE per fold: {[f'{r:.3f}' for r in rmse_per_fold]}\")\n",
+    "print(f\"mean RMSE: {numpy.mean(rmse_per_fold):.3f}  ±  {numpy.std(rmse_per_fold):.3f}\")"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "default",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.14.6"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

@@ -1,0 +1,524 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "49c7fe84",
+   "metadata": {},
+   "source": [
+    "# Leave Ball Out\n",
+    "\n",
+    "`LeaveBallOut` is a **buffered leave-one-out** cross-validator.  For each test\n",
+    "point *i* it excludes all training candidates within a buffer of radius *r*,\n",
+    "then trains on every point outside that buffer.\n",
+    "\n",
+    "This guards against **spatial leakage**: nearby points share spatial structure\n",
+    "(autocorrelation, measurement artefacts), so including them in training inflates\n",
+    "apparent skill.  The buffer removes the 'neighbourhood effect' so that the\n",
+    "model must generalise across space to predict *i*.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "afe9b055",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-25T18:25:28.626347Z",
+     "iopub.status.busy": "2026-05-25T18:25:28.626140Z",
+     "iopub.status.idle": "2026-05-25T18:25:30.897251Z",
+     "shell.execute_reply": "2026-05-25T18:25:30.896811Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import geodatasets\n",
+    "import geopandas\n",
+    "import matplotlib.patches as mpatches\n",
+    "import matplotlib.pyplot as plt\n",
+    "import numpy\n",
+    "from sklearn.linear_model import LinearRegression\n",
+    "from sklearn.metrics import root_mean_squared_error\n",
+    "from sklearn.model_selection import LeaveOneOut\n",
+    "\n",
+    "from spml.validation import LeaveBallOut"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d32a4177",
+   "metadata": {},
+   "source": [
+    "## Small example — Chicago community areas\n",
+    "\n",
+    "We start with Chicago's 77 community areas (UTM 16N, metres).\n",
+    "The small n makes the exclusion mechanism easy to visualise.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "dc0c790f",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-25T18:25:30.898756Z",
+     "iopub.status.busy": "2026-05-25T18:25:30.898619Z",
+     "iopub.status.idle": "2026-05-25T18:25:31.001537Z",
+     "shell.execute_reply": "2026-05-25T18:25:31.001147Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "chicago = geopandas.read_file(geodatasets.get_path(\"geoda.chicago_health\")).to_crs(\n",
+    "    \"EPSG:32616\"\n",
+    ")\n",
+    "print(f\"n = {len(chicago)} community areas\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a9d42315",
+   "metadata": {},
+   "source": [
+    "### The exclusion buffer\n",
+    "\n",
+    "For a single test point the diagram below shows which observations fall\n",
+    "inside the 5 km exclusion buffer (excluded from training — grey) and which\n",
+    "remain as valid training points (blue).\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4546106d",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-25T18:25:31.003049Z",
+     "iopub.status.busy": "2026-05-25T18:25:31.002908Z",
+     "iopub.status.idle": "2026-05-25T18:25:31.125985Z",
+     "shell.execute_reply": "2026-05-25T18:25:31.125553Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "RADIUS_CHI = 5_000  # 5 km\n",
+    "\n",
+    "# Pick a central community area as the demo test point\n",
+    "cx_all = chicago.geometry.centroid.x\n",
+    "cy_all = chicago.geometry.centroid.y\n",
+    "center_x = float(cx_all.mean())\n",
+    "center_y = float(cy_all.mean())\n",
+    "dists_to_center = numpy.hypot(cx_all - center_x, cy_all - center_y)\n",
+    "focal_idx = int(dists_to_center.idxmin())\n",
+    "\n",
+    "focal_xy = chicago.centroid[focal_idx].coords[0]\n",
+    "dists_from_focal = numpy.linalg.norm(\n",
+    "    chicago.centroid.get_coordinates().to_numpy() - numpy.asarray(focal_xy).reshape(-1),\n",
+    "    axis=1,\n",
+    ")\n",
+    "in_buffer = (dists_from_focal <= RADIUS_CHI) & (numpy.arange(len(chicago)) != focal_idx)\n",
+    "\n",
+    "fig, ax = plt.subplots(figsize=(7, 8))\n",
+    "chicago.plot(ax=ax, color=\"#d4e9f7\", edgecolor=\"#888\", linewidth=0.5)\n",
+    "\n",
+    "# Training points (outside buffer)\n",
+    "outside = ~in_buffer & (numpy.arange(len(chicago)) != focal_idx)\n",
+    "\n",
+    "chicago.centroid.iloc[outside].plot(\n",
+    "    ax=ax,\n",
+    "    color=\"#d76659\",\n",
+    "    markersize=30,\n",
+    "    zorder=4,\n",
+    "    label=\"Training\",\n",
+    ")\n",
+    "# Excluded points (inside buffer)\n",
+    "chicago.centroid.iloc[in_buffer].plot(\n",
+    "    ax=ax,\n",
+    "    color=\"#aaa\",\n",
+    "    markersize=30,\n",
+    "    zorder=4,\n",
+    "    label=\"Excluded (within buffer)\",\n",
+    ")\n",
+    "\n",
+    "# Test point\n",
+    "ax.scatter(*focal_xy, color=\"#c0392b\", s=120, zorder=6, marker=\"*\", label=\"Test point\")\n",
+    "\n",
+    "# Buffer circle\n",
+    "circle = mpatches.Circle(\n",
+    "    tuple(focal_xy),\n",
+    "    RADIUS_CHI,\n",
+    "    fill=False,\n",
+    "    edgecolor=\"#c0392b\",\n",
+    "    lw=1.5,\n",
+    "    ls=\"--\",\n",
+    "    zorder=5,\n",
+    ")\n",
+    "ax.add_patch(circle)\n",
+    "\n",
+    "ax.legend(fontsize=9)\n",
+    "ax.set_title(\n",
+    "    f\"LeaveBallOut — exclusion buffer ({RADIUS_CHI / 1000:.0f} km radius)\\n\"\n",
+    "    f\"{int(in_buffer.sum())} areas excluded, {int(outside.sum())} available for training\",\n",
+    "    fontsize=11,\n",
+    ")\n",
+    "ax.set_aspect(\"equal\")\n",
+    "ax.axis(\"off\")\n",
+    "fig.tight_layout()\n",
+    "print(f\"Excluded: {in_buffer.sum()} areas   Training: {outside.sum()} areas\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "71d00cdf",
+   "metadata": {},
+   "source": [
+    "### Training set size varies by test point\n",
+    "\n",
+    "Because community areas are irregularly distributed, the number of valid\n",
+    "training points differs for each test point — edge areas exclude fewer\n",
+    "neighbours than central ones.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7fc1df15",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-25T18:25:31.127159Z",
+     "iopub.status.busy": "2026-05-25T18:25:31.127080Z",
+     "iopub.status.idle": "2026-05-25T18:25:31.264508Z",
+     "shell.execute_reply": "2026-05-25T18:25:31.264051Z"
+    },
+    "tags": [
+     "hide-input"
+    ]
+   },
+   "outputs": [],
+   "source": [
+    "lbo_chi = LeaveBallOut(radius=RADIUS_CHI)\n",
+    "\n",
+    "train_sizes = []\n",
+    "for train, test in lbo_chi.split(chicago):  # noqa: B007\n",
+    "    train_sizes.append(len(train))\n",
+    "\n",
+    "chicago[\"lbo_train_n\"] = train_sizes\n",
+    "\n",
+    "fig, axes = plt.subplots(1, 2, figsize=(13, 6))\n",
+    "\n",
+    "# Map of training set size per test point\n",
+    "chicago.plot(\n",
+    "    column=\"lbo_train_n\",\n",
+    "    cmap=\"RdYlGn\",\n",
+    "    legend=True,\n",
+    "    legend_kwds={\"label\": \"Training observations\"},\n",
+    "    ax=axes[0],\n",
+    "    edgecolor=\"#555\",\n",
+    "    linewidth=0.4,\n",
+    ")\n",
+    "axes[0].set_title(\n",
+    "    f\"Training set size per test point\\n(radius = {RADIUS_CHI / 1000:.0f} km)\",\n",
+    "    fontsize=11,\n",
+    ")\n",
+    "axes[0].axis(\"off\")\n",
+    "\n",
+    "# Distribution\n",
+    "axes[1].hist(train_sizes, bins=15, edgecolor=\"white\")\n",
+    "axes[1].axvline(\n",
+    "    numpy.median(train_sizes),\n",
+    "    color=\"#c0392b\",\n",
+    "    lw=1.5,\n",
+    "    ls=\"--\",\n",
+    "    label=f\"Median = {numpy.median(train_sizes):.0f}\",\n",
+    ")\n",
+    "axes[1].set_xlabel(\"Training set size\")\n",
+    "axes[1].set_ylabel(\"Number of test points\")\n",
+    "axes[1].set_title(\"Distribution of training set sizes\", fontsize=11)\n",
+    "axes[1].legend()\n",
+    "\n",
+    "fig.suptitle(\"LeaveBallOut — Chicago community areas\", fontsize=13)\n",
+    "fig.tight_layout()\n",
+    "print(\n",
+    "    f\"Training sizes: min={min(train_sizes)}, median={numpy.median(train_sizes):.0f}, max={max(train_sizes)}\"\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b757945e",
+   "metadata": {},
+   "source": [
+    "## Large example — King County house sales (600 points)\n",
+    "\n",
+    "With a point dataset the spatial leakage problem is sharper: nearby sales\n",
+    "share neighbourhood effects (school district, local amenities) that random\n",
+    "CV cannot separate from genuine model skill.\n",
+    "\n",
+    "We use a stratified subsample of 600 sales (60 per log-price decile,\n",
+    "UTM 10N, metres) and compare `LeaveBallOut` against random leave-one-out\n",
+    "(i.e. standard LOO with no exclusion buffer).\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8e567590",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-25T18:25:31.265673Z",
+     "iopub.status.busy": "2026-05-25T18:25:31.265592Z",
+     "iopub.status.idle": "2026-05-25T18:25:31.457537Z",
+     "shell.execute_reply": "2026-05-25T18:25:31.457150Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "gdf_full = geopandas.read_file(geodatasets.get_path(\"geoda.home_sales\")).to_crs(\n",
+    "    \"EPSG:32610\"\n",
+    ")\n",
+    "gdf_full[\"log_price\"] = numpy.log(gdf_full[\"price\"])\n",
+    "gdf_full[\"decile\"] = (\n",
+    "    gdf_full[\"log_price\"].rank(pct=True).multiply(10).clip(upper=9.99).astype(int)\n",
+    ")\n",
+    "idx = (\n",
+    "    gdf_full.groupby(\"decile\")\n",
+    "    .apply(lambda g: g.sample(min(60, len(g)), random_state=42), include_groups=False)\n",
+    "    .index.get_level_values(1)\n",
+    ")\n",
+    "gdf = gdf_full.loc[idx].reset_index(drop=True)\n",
+    "print(\n",
+    "    f\"n = {len(gdf)} sales  |  price ${gdf.price.min():,.0f} -- ${gdf.price.max():,.0f}\"\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5abfcd48",
+   "metadata": {},
+   "source": [
+    "### Effect of buffer radius on training set size\n",
+    "\n",
+    "Larger radii exclude more nearby sales, leaving fewer training points per\n",
+    "fold.  The plot shows the median and IQR of training set size across all\n",
+    "600 test points as a function of radius.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9ba2ec1f",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-25T18:25:31.458684Z",
+     "iopub.status.busy": "2026-05-25T18:25:31.458614Z",
+     "iopub.status.idle": "2026-05-25T18:25:31.594993Z",
+     "shell.execute_reply": "2026-05-25T18:25:31.594574Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "coords = numpy.column_stack([gdf.geometry.x, gdf.geometry.y])\n",
+    "\n",
+    "radii_km = numpy.arange(0.5, 10.5, 0.5)\n",
+    "medians, q25s, q75s = [], [], []\n",
+    "\n",
+    "for r_km in radii_km:\n",
+    "    sizes = []\n",
+    "    lbo = LeaveBallOut(radius=r_km * 1000)\n",
+    "    for train, test in lbo.split(gdf):  # noqa: B007\n",
+    "        sizes.append(len(train))\n",
+    "    medians.append(numpy.median(sizes))\n",
+    "    q25s.append(numpy.percentile(sizes, 25))\n",
+    "    q75s.append(numpy.percentile(sizes, 75))\n",
+    "\n",
+    "fig, ax = plt.subplots(figsize=(8, 4))\n",
+    "ax.plot(radii_km, medians, \"o-\", lw=2, label=\"Median\")\n",
+    "ax.fill_between(radii_km, q25s, q75s, alpha=0.25, label=\"IQR\")\n",
+    "ax.set_xlabel(\"Exclusion radius (km)\")\n",
+    "ax.set_ylabel(\"Training set size\")\n",
+    "ax.set_title(\n",
+    "    \"Training set size vs buffer radius\\n(King County, 600 sales)\", fontsize=11\n",
+    ")\n",
+    "ax.axhline(len(gdf) - 1, color=\"k\", lw=0.8, ls=\":\", label=\"LOO without buffer\")\n",
+    "ax.legend()\n",
+    "fig.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2b540f90",
+   "metadata": {},
+   "source": [
+    "### Cross-validation comparison\n",
+    "\n",
+    "We compare three CV strategies predicting log(price) from structural features\n",
+    "(sq ft, beds, baths, grade):\n",
+    "\n",
+    "1. **LeaveBallOut (5 km)** — excludes nearby sales from training\n",
+    "2. **LOO without buffer** — standard leave-one-out, no spatial exclusion\n",
+    "\n",
+    "With no buffer, the model can 'cheat' by memorising neighbourhood trends;\n",
+    "`LeaveBallOut` forces it to generalise across space.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e6e6a57e",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-25T18:25:31.596226Z",
+     "iopub.status.busy": "2026-05-25T18:25:31.596153Z",
+     "iopub.status.idle": "2026-05-25T18:25:31.862641Z",
+     "shell.execute_reply": "2026-05-25T18:25:31.862263Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "RADIUS_M = 5_000\n",
+    "feat_cols = [\"sqft_liv\", \"bedrooms\", \"bathrooms\", \"grade\"]\n",
+    "y = numpy.log(gdf[\"price\"].values)\n",
+    "X_feat = gdf[feat_cols].fillna(0).values\n",
+    "\n",
+    "# LeaveBallOut CV\n",
+    "lbo = LeaveBallOut(radius=RADIUS_M)\n",
+    "lbo_preds = numpy.full(len(gdf), numpy.nan)\n",
+    "lbo_train_n = []\n",
+    "for train, test in lbo.split(gdf):\n",
+    "    if len(train) < 5:\n",
+    "        continue\n",
+    "    lr = LinearRegression().fit(X_feat[train], y[train])\n",
+    "    lbo_preds[test] = lr.predict(X_feat[test])\n",
+    "    lbo_train_n.append(len(train))\n",
+    "\n",
+    "# Standard LOO (no buffer)\n",
+    "loo_preds = numpy.full(len(gdf), numpy.nan)\n",
+    "for train, test in LeaveOneOut().split(X_feat):\n",
+    "    lr = LinearRegression().fit(X_feat[train], y[train])\n",
+    "    loo_preds[test] = lr.predict(X_feat[test])\n",
+    "\n",
+    "valid = ~numpy.isnan(lbo_preds)\n",
+    "lbo_rmse = root_mean_squared_error(y[valid], lbo_preds[valid])\n",
+    "loo_rmse = root_mean_squared_error(y, loo_preds)\n",
+    "\n",
+    "lbo_resid = lbo_preds[valid] - y[valid]\n",
+    "loo_resid = loo_preds - y\n",
+    "\n",
+    "print(\n",
+    "    f\"LeaveBallOut (r={RADIUS_M / 1000:.0f} km)  RMSE: {lbo_rmse:.4f}  (n={valid.sum()} predictions)\"\n",
+    ")\n",
+    "print(\n",
+    "    f\"LOO (no buffer)                RMSE: {loo_rmse:.4f}  (n={len(gdf)} predictions)\"\n",
+    ")\n",
+    "print(\n",
+    "    f\"Buffered exclusion adds {lbo_rmse - loo_rmse:+.4f} log-price RMSE -- spatial leakage effect\"\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4e4de369",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-25T18:25:31.863772Z",
+     "iopub.status.busy": "2026-05-25T18:25:31.863699Z",
+     "iopub.status.idle": "2026-05-25T18:25:32.134054Z",
+     "shell.execute_reply": "2026-05-25T18:25:32.133712Z"
+    },
+    "tags": [
+     "hide-input"
+    ]
+   },
+   "outputs": [],
+   "source": [
+    "fig, axes = plt.subplots(1, 3, figsize=(18, 5))\n",
+    "\n",
+    "# Panel 1 -- residual distributions\n",
+    "ax = axes[0]\n",
+    "bins = numpy.linspace(-1.5, 1.5, 40)\n",
+    "ax.hist(\n",
+    "    lbo_resid,\n",
+    "    bins=bins,\n",
+    "    alpha=0.7,\n",
+    "    label=f\"LeaveBallOut (RMSE={lbo_rmse:.3f})\",\n",
+    ")\n",
+    "ax.hist(\n",
+    "    loo_resid,\n",
+    "    bins=bins,\n",
+    "    alpha=0.7,\n",
+    "    label=f\"LOO no buffer (RMSE={loo_rmse:.3f})\",\n",
+    ")\n",
+    "ax.axvline(0, color=\"k\", lw=0.8, ls=\":\")\n",
+    "ax.set_xlabel(\"Residual (log price)\")\n",
+    "ax.set_ylabel(\"Count\")\n",
+    "ax.set_title(\"Residual distribution\", fontsize=11)\n",
+    "ax.legend(fontsize=8)\n",
+    "\n",
+    "# Panel 2 -- LBO residual map\n",
+    "ax = axes[1]\n",
+    "gdf_valid = gdf[valid].copy()\n",
+    "gdf_valid[\"resid\"] = lbo_resid\n",
+    "gdf_valid.plot(\n",
+    "    column=\"resid\",\n",
+    "    cmap=\"RdBu\",\n",
+    "    vmin=-0.8,\n",
+    "    vmax=0.8,\n",
+    "    markersize=8,\n",
+    "    ax=ax,\n",
+    "    legend=True,\n",
+    "    legend_kwds={\"label\": \"Residual (log price)\", \"shrink\": 0.7},\n",
+    ")\n",
+    "ax.set_title(f\"LeaveBallOut residuals\\n(r = {RADIUS_M / 1000:.0f} km)\", fontsize=11)\n",
+    "ax.set_aspect(\"equal\")\n",
+    "ax.set_xlabel(\"Easting (m)\")\n",
+    "ax.set_ylabel(\"Northing (m)\")\n",
+    "\n",
+    "# Panel 3 -- LOO (no buffer) residual map\n",
+    "ax = axes[2]\n",
+    "gdf_loo = gdf.copy()\n",
+    "gdf_loo[\"resid\"] = loo_resid\n",
+    "gdf_loo.plot(\n",
+    "    column=\"resid\",\n",
+    "    cmap=\"RdBu\",\n",
+    "    vmin=-0.8,\n",
+    "    vmax=0.8,\n",
+    "    markersize=8,\n",
+    "    ax=ax,\n",
+    "    legend=True,\n",
+    "    legend_kwds={\"label\": \"Residual (log price)\", \"shrink\": 0.7},\n",
+    ")\n",
+    "ax.set_title(\"LOO (no buffer) residuals\", fontsize=11)\n",
+    "ax.set_aspect(\"equal\")\n",
+    "ax.set_xlabel(\"Easting (m)\")\n",
+    "\n",
+    "fig.suptitle(\n",
+    "    \"LeaveBallOut vs standard LOO -- King County house sales\\n\"\n",
+    "    \"(model: log price ~ sqft + beds + baths + grade)\",\n",
+    "    fontsize=13,\n",
+    ")\n",
+    "fig.tight_layout()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "default",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.14.6"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

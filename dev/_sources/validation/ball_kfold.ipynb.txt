@@ -1,0 +1,454 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "a1b2c3d4",
+   "metadata": {},
+   "source": [
+    "# Ball K-Fold\n",
+    "\n",
+    "`BallKFold` assigns observations to folds such that **no two test points in the same fold are within radius *r* of each other** — each test set is a *spatial independent set* in a conflict graph whose edges connect pairs within *r*.\n",
+    "\n",
+    "This prevents spatial autocorrelation leakage within test folds: a model cannot \"cheat\" by interpolating between spatially adjacent test points, because none exist.\n",
+    "\n",
+    "## How it works\n",
+    "\n",
+    "1. Build a conflict graph: add an edge between every pair of points within *r*.\n",
+    "2. Greedily colour the graph (largest-degree-first): each colour class becomes one fold's test set.\n",
+    "3. For each fold, train on all points *not* in that fold; evaluate on the fold.\n",
+    "\n",
+    "## Two modes\n",
+    "\n",
+    "- **`radius=r`** — explicit exclusion radius in coordinate units.\n",
+    "- **`n_splits=k`** — target number of folds; the implied radius is the minimum *k*-th nearest-neighbour distance across all points (guaranteeing max degree ≤ k − 1 in the conflict graph, so greedy colouring uses ≤ k colours).\n",
+    "\n",
+    "## Contrast with `HilbertKFold`\n",
+    "\n",
+    "| | `HilbertKFold` | `BallKFold` |\n",
+    "|---|---|---|\n",
+    "| **Test-set property** | each fold covers the whole study area | each fold's points are ≥ r apart |\n",
+    "| **Guard against** | spatially biased train/test splits | intra-fold autocorrelation leakage |\n",
+    "| **Fold count** | fixed by `n_splits` | determined by graph colouring |\n",
+    "| **Fold sizes** | approximately equal | first fold largest; decreasing |"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b2c3d4e5",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:28:33.882728Z",
+     "iopub.status.busy": "2026-05-24T16:28:33.882546Z",
+     "iopub.status.idle": "2026-05-24T16:28:35.959347Z",
+     "shell.execute_reply": "2026-05-24T16:28:35.958827Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import geodatasets\n",
+    "import geopandas\n",
+    "import matplotlib.pyplot as plt\n",
+    "import numpy\n",
+    "from matplotlib import colormaps\n",
+    "from scipy.spatial.distance import cdist\n",
+    "from sklearn.linear_model import LinearRegression\n",
+    "from sklearn.metrics import root_mean_squared_error\n",
+    "from sklearn.model_selection import KFold\n",
+    "\n",
+    "from spml.validation import BallKFold"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c3d4e5f6",
+   "metadata": {},
+   "source": [
+    "## Data — King County house sales\n",
+    "\n",
+    "We work with a stratified subsample of 600 sales projected to UTM 10N (metres).\n",
+    "Stratifying by log-price decile keeps the price distribution representative."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d4e5f6a7",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:28:35.960897Z",
+     "iopub.status.busy": "2026-05-24T16:28:35.960765Z",
+     "iopub.status.idle": "2026-05-24T16:28:36.249066Z",
+     "shell.execute_reply": "2026-05-24T16:28:36.248579Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "gdf_full = geopandas.read_file(geodatasets.get_path(\"geoda.home_sales\")).to_crs(\n",
+    "    \"EPSG:32610\"\n",
+    ")\n",
+    "gdf_full[\"log_price\"] = numpy.log(gdf_full[\"price\"])\n",
+    "gdf_full[\"decile\"] = (\n",
+    "    gdf_full[\"log_price\"].rank(pct=True).multiply(10).clip(upper=9.99).astype(int)\n",
+    ")\n",
+    "idx = (\n",
+    "    gdf_full.groupby(\"decile\")\n",
+    "    .apply(lambda g: g.sample(min(60, len(g)), random_state=42), include_groups=False)\n",
+    "    .index.get_level_values(1)\n",
+    ")\n",
+    "gdf = gdf_full.loc[idx].reset_index(drop=True)\n",
+    "\n",
+    "print(\n",
+    "    f\"n = {len(gdf)} sales  |  price ${gdf.price.min():,.0f} – ${gdf.price.max():,.0f}\"\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e5f6a7b8",
+   "metadata": {},
+   "source": [
+    "## `n_splits` mode\n",
+    "\n",
+    "With `n_splits=k`, the exclusion radius is set to the minimum *k*-th nearest-neighbour\n",
+    "distance across all points — stored as `radius_` after the first `split()` call.\n",
+    "The actual number of folds produced can be *less* than *k* if the conflict graph turns\n",
+    "out to be sparse enough to colour with fewer colours."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f6a7b8c9",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:28:36.250277Z",
+     "iopub.status.busy": "2026-05-24T16:28:36.250158Z",
+     "iopub.status.idle": "2026-05-24T16:28:36.366385Z",
+     "shell.execute_reply": "2026-05-24T16:28:36.365971Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "bkf_nf = BallKFold(n_splits=5)\n",
+    "splits_nf = list(bkf_nf.split(gdf))\n",
+    "\n",
+    "print(f\"n_splits=5  →  actual folds: {bkf_nf.n_splits_}\")\n",
+    "print(f\"implied radius:             {bkf_nf.radius_ / 1000:.2f} km\")\n",
+    "print(\n",
+    "    f\"fold sizes:                 {sorted([len(t) for _, t in splits_nf], reverse=True)}\"\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a7b8c9d0",
+   "metadata": {},
+   "source": [
+    "## `radius` mode\n",
+    "\n",
+    "Supplying an explicit radius gives direct control over the exclusion distance.\n",
+    "A 2 km radius produces folds of broadly similar size that are each a clean\n",
+    "spatially independent test set."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b8c9d0e1",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:28:36.367639Z",
+     "iopub.status.busy": "2026-05-24T16:28:36.367500Z",
+     "iopub.status.idle": "2026-05-24T16:28:36.373705Z",
+     "shell.execute_reply": "2026-05-24T16:28:36.373114Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "RADIUS_M = 2_000  # 2 km\n",
+    "\n",
+    "bkf = BallKFold(radius=RADIUS_M)\n",
+    "splits = list(bkf.split(gdf))\n",
+    "\n",
+    "print(f\"radius=2 km  →  {bkf.n_splits_} folds\")\n",
+    "sizes = sorted([len(t) for _, t in splits], reverse=True)\n",
+    "print(f\"fold sizes (sorted): {sizes}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c9d0e1f2",
+   "metadata": {},
+   "source": [
+    "## Fold maps\n",
+    "\n",
+    "The first six folds from `BallKFold(radius=2 km)` are shown on the left; a random\n",
+    "`KFold` with the same number of splits is shown on the right for comparison.\n",
+    "\n",
+    "In the `BallKFold` panel, each colour is a test set — no two same-coloured points\n",
+    "are closer than 2 km.  The random `KFold` has no such guarantee."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d0e1f2a3",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:28:36.376428Z",
+     "iopub.status.busy": "2026-05-24T16:28:36.376139Z",
+     "iopub.status.idle": "2026-05-24T16:28:36.941828Z",
+     "shell.execute_reply": "2026-05-24T16:28:36.941399Z"
+    },
+    "tags": [
+     "hide-input"
+    ]
+   },
+   "outputs": [],
+   "source": [
+    "N_SHOW = 6  # only plot first N_SHOW folds for readability\n",
+    "\n",
+    "ball_labels = numpy.full(len(gdf), -1, dtype=int)\n",
+    "for fi, (_, test) in enumerate(splits):\n",
+    "    ball_labels[test] = fi\n",
+    "\n",
+    "rkf = KFold(n_splits=bkf.n_splits_, shuffle=True, random_state=0)\n",
+    "rand_labels = numpy.full(len(gdf), -1, dtype=int)\n",
+    "for fi, (_, test) in enumerate(rkf.split(gdf)):\n",
+    "    rand_labels[test] = fi\n",
+    "\n",
+    "gdf[\"ball_fold\"] = ball_labels\n",
+    "gdf[\"rand_fold\"] = rand_labels\n",
+    "\n",
+    "# keep only the first N_SHOW colours for the map; grey out the rest\n",
+    "ball_show = numpy.where(ball_labels < N_SHOW, ball_labels, -1)\n",
+    "rand_show = numpy.where(rand_labels < N_SHOW, rand_labels, -1)\n",
+    "gdf[\"ball_show\"] = ball_show\n",
+    "gdf[\"rand_show\"] = rand_show\n",
+    "\n",
+    "cmap = colormaps.get_cmap(\"tab10\")\n",
+    "fold_colors = [cmap(i) for i in range(N_SHOW)]\n",
+    "\n",
+    "fig, axes = plt.subplots(1, 2, figsize=(16, 7))\n",
+    "\n",
+    "for ax, col, title in [\n",
+    "    (\n",
+    "        axes[0],\n",
+    "        \"ball_show\",\n",
+    "        f\"BallKFold (r = 2 km) — first {N_SHOW} of {bkf.n_splits_} folds\",\n",
+    "    ),\n",
+    "    (\n",
+    "        axes[1],\n",
+    "        \"rand_show\",\n",
+    "        f\"Random KFold ({bkf.n_splits_} splits) — first {N_SHOW} shown\",\n",
+    "    ),\n",
+    "]:\n",
+    "    # grey background: points not in the first N_SHOW folds\n",
+    "    gdf[gdf[col] == -1].plot(ax=ax, color=\"#ccc\", markersize=2, alpha=0.5)\n",
+    "    for fi in range(N_SHOW):\n",
+    "        sub = gdf[gdf[col] == fi]\n",
+    "        sub.plot(\n",
+    "            ax=ax,\n",
+    "            color=fold_colors[fi],\n",
+    "            markersize=6,\n",
+    "            alpha=0.8,\n",
+    "            label=f\"fold {fi}  (n={len(sub)})\",\n",
+    "        )\n",
+    "    ax.set_title(title, fontsize=11)\n",
+    "    ax.legend(fontsize=8, markerscale=2, loc=\"lower right\")\n",
+    "\n",
+    "fig.suptitle(\n",
+    "    \"BallKFold vs Random KFold — King County house sales (UTM 10N)\", fontsize=13\n",
+    ")\n",
+    "fig.tight_layout()\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e1f2a3b4",
+   "metadata": {},
+   "source": [
+    "## The exclusion guarantee\n",
+    "\n",
+    "For every fold, the minimum pairwise distance among test points must be ≥ *r*.\n",
+    "This is a hard structural guarantee from the graph colouring."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f2a3b4c5",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:28:36.943015Z",
+     "iopub.status.busy": "2026-05-24T16:28:36.942924Z",
+     "iopub.status.idle": "2026-05-24T16:28:36.946869Z",
+     "shell.execute_reply": "2026-05-24T16:28:36.946435Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "r = float(RADIUS_M)\n",
+    "print(f\"Exclusion radius: {r / 1000:.1f} km\\n\")\n",
+    "print(f\"{'Fold':>5}  {'n_test':>7}  {'min dist (km)':>15}  {'≥ r':>5}\")\n",
+    "print(\"-\" * 40)\n",
+    "for fi, (_, test) in enumerate(splits):\n",
+    "    c = gdf.iloc[test].get_coordinates()\n",
+    "    if len(c) == 1:\n",
+    "        print(f\"{fi:>5}  {len(test):>7}  {'(singleton)':>15}  {'✓':>5}\")\n",
+    "        continue\n",
+    "    D = cdist(c, c)\n",
+    "    numpy.fill_diagonal(D, numpy.inf)\n",
+    "    min_d = D.min()\n",
+    "    ok = \"✓\" if min_d + 1e-6 >= r else \"✗\"\n",
+    "    print(f\"{fi:>5}  {len(test):>7}  {min_d / 1000:>15.3f}  {ok:>5}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a3b4c5d6",
+   "metadata": {},
+   "source": [
+    "## Cross-validation example\n",
+    "\n",
+    "`BallKFold.split()` follows the standard sklearn cross-validator protocol.\n",
+    "We predict log(price) from structural features and compare RMSE per fold\n",
+    "against a random `KFold` with the same number of splits."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b4c5d6e7",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:28:36.948267Z",
+     "iopub.status.busy": "2026-05-24T16:28:36.948197Z",
+     "iopub.status.idle": "2026-05-24T16:28:36.969172Z",
+     "shell.execute_reply": "2026-05-24T16:28:36.968670Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "feat_cols = [\"sqft_liv\", \"bedrooms\", \"bathrooms\", \"grade\"]\n",
+    "y = numpy.log(gdf[\"price\"].values)\n",
+    "X = gdf[feat_cols].fillna(0).values\n",
+    "\n",
+    "ball_rmse, rand_rmse = [], []\n",
+    "for train, test in splits:\n",
+    "    lr = LinearRegression().fit(X[train], y[train])\n",
+    "    ball_rmse.append(root_mean_squared_error(y[test], lr.predict(X[test])))\n",
+    "for train, test in rkf.split(X, y):\n",
+    "    lr = LinearRegression().fit(X[train], y[train])\n",
+    "    rand_rmse.append(root_mean_squared_error(y[test], lr.predict(X[test])))\n",
+    "\n",
+    "print(\n",
+    "    f\"BallKFold  — {len(ball_rmse)} folds, RMSE mean={numpy.mean(ball_rmse):.3f}  std={numpy.std(ball_rmse):.3f}\"\n",
+    ")\n",
+    "print(\n",
+    "    f\"Random KFold — {len(rand_rmse)} folds, RMSE mean={numpy.mean(rand_rmse):.3f}  std={numpy.std(rand_rmse):.3f}\"\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c5d6e7f8",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-05-24T16:28:36.970565Z",
+     "iopub.status.busy": "2026-05-24T16:28:36.970474Z",
+     "iopub.status.idle": "2026-05-24T16:28:37.081628Z",
+     "shell.execute_reply": "2026-05-24T16:28:37.081155Z"
+    },
+    "tags": [
+     "hide-input"
+    ]
+   },
+   "outputs": [],
+   "source": [
+    "tab10 = colormaps.get_cmap(\"tab10\")\n",
+    "c_ball = tab10(0)\n",
+    "c_rand = tab10(1)\n",
+    "\n",
+    "fig, axes = plt.subplots(1, 2, figsize=(16, 5))\n",
+    "\n",
+    "# RMSE per fold\n",
+    "ax = axes[0]\n",
+    "ax.plot(\n",
+    "    ball_rmse,\n",
+    "    \"o-\",\n",
+    "    color=c_ball,\n",
+    "    label=f\"BallKFold  (mean {numpy.mean(ball_rmse):.3f})\",\n",
+    "    zorder=3,\n",
+    ")\n",
+    "ax.plot(\n",
+    "    rand_rmse,\n",
+    "    \"s--\",\n",
+    "    color=c_rand,\n",
+    "    label=f\"Random KFold (mean {numpy.mean(rand_rmse):.3f})\",\n",
+    "    zorder=3,\n",
+    ")\n",
+    "ax.axhline(numpy.mean(ball_rmse), color=c_ball, lw=1, ls=\":\", alpha=0.7)\n",
+    "ax.axhline(numpy.mean(rand_rmse), color=c_rand, lw=1, ls=\":\", alpha=0.7)\n",
+    "ax.set_xlabel(\"Fold index\")\n",
+    "ax.set_ylabel(\"RMSE  (log price)\")\n",
+    "ax.set_title(\"Per-fold RMSE\")\n",
+    "ax.legend(fontsize=9)\n",
+    "ax.yaxis.grid(True, alpha=0.4)\n",
+    "ax.set_axisbelow(True)\n",
+    "\n",
+    "# fold sizes\n",
+    "ax2 = axes[1]\n",
+    "ax2.plot(\n",
+    "    [len(t) for _, t in splits],\n",
+    "    \"o-\",\n",
+    "    color=c_ball,\n",
+    "    label=\"BallKFold  (r = 2 km)\",\n",
+    "    zorder=3,\n",
+    ")\n",
+    "ax2.plot(\n",
+    "    [len(t) for _, t in rkf.split(X, y)],\n",
+    "    \"s--\",\n",
+    "    color=c_rand,\n",
+    "    label=\"Random KFold\",\n",
+    "    zorder=3,\n",
+    ")\n",
+    "ax2.set_xlabel(\"Fold index\")\n",
+    "ax2.set_ylabel(\"Test-set size\")\n",
+    "ax2.set_title(\"Test-set size per fold\")\n",
+    "ax2.legend(fontsize=9)\n",
+    "ax2.yaxis.grid(True, alpha=0.4)\n",
+    "ax2.set_axisbelow(True)\n",
+    "\n",
+    "fig.suptitle(\n",
+    "    \"BallKFold vs Random KFold — log(price) ~ sqft + beds + baths + grade\", fontsize=12\n",
+    ")\n",
+    "fig.tight_layout()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "default",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.14.6"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

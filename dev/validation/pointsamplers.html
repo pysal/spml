@@ -1,0 +1,2304 @@
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="local_permutation.html">
+      
+      
+        <link rel="next" href="poissonsampler.html">
+      
+      
+      <link rel="icon" href="../_static/pysal_favicon.ico">
+    
+    
+      
+        <title>Point sampling - spml</title>
+      
+    
+    
+      
+        
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="../_static/sphinx_immaterial_theme.6efbe22605a23fcd6.min.css?v=b2ceb110" />
+        <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+        <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+        <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=d127c87d" />
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#single-geometry-pointsampler" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="spml" class="md-header__button md-logo" aria-label="spml" data-md-component="logo">
+      <img src="../_static/pysal_logo.svg" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            spml
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Point sampling
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="red"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="red"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/pysal/spml/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pysal/spml
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="spml" class="md-nav__button md-logo" aria-label="spml" data-md-component="logo">
+      <img src="../_static/pysal_logo.svg" alt="logo">
+    </a>
+    spml
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/pysal/spml/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    pysal/spml
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Home</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Installation</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    <span>Geographically-<wbr>weighted models</span>
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            <span>Geographically-<wbr>weighted models</span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../introduction.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Agnostic model framework</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../linear.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Linear models</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ensemble.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Ensemble models</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../predict.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Prediction</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../imbalance.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Class imbalance</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bandwidth_search.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Bandwidth search</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network_graph.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Using custom graphs</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sklearn_compatibility.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Scikit-<wbr>learn compatibility</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mgwr_comparison.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Comparison with MGWR</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../references.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>References</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    <span>Model validation</span>
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            <span>Model validation</span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="ball_kfold.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Ball K-<wbr>Fold</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cell_stratified_kfold.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Cell-<wbr>stratified K-<wbr>Fold</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cluster_stratified_kfold.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Cluster-<wbr>stratified K-<wbr>Fold</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hilbert_kfold.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Hilbert K-<wbr>Fold</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leave_ball_out.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Leave Ball Out</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leave_cell_out.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Leave Cell Out</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="leave_cluster_out.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Leave Cluster Out</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="local_bootstrap.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Locally-<wbr>weighted bootstrap</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="local_permutation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Locally-<wbr>weighted permutation</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    <span>Point sampling</span>
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Point sampling</span>
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#single-geometry-pointsampler" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Single geometry — Point<wbr>Sampler</span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geodataframe-class-aware-samplers" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Geo<wbr>Data<wbr>Frame — class-<wbr>aware samplers</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GeoDataFrame — class-aware samplers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multinomialsampler-on-a-geodataframe" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Multinomial<wbr>Sampler on a Geo<wbr>Data<wbr>Frame</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#poissonsampler-continuously-varying-intensity" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Poisson<wbr>Sampler — continuously-<wbr>varying intensity</span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#raster-rasterized-chicago" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Raster — rasterized chicago</span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="poissonsampler.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Poisson point process sampling</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="range_finding.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Automatic bandwidth selection</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    <span>API</span>
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            <span>API</span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>API reference</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    <span>For contributors</span>
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            <span>For contributors</span>
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Contributing to spatial ML</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/pysal/spml" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Git<wbr>Hub</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/pysal/spml/releases" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <span>Changelog</span>
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#single-geometry-pointsampler" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Single geometry — Point<wbr>Sampler</span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geodataframe-class-aware-samplers" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Geo<wbr>Data<wbr>Frame — class-<wbr>aware samplers</span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GeoDataFrame — class-aware samplers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multinomialsampler-on-a-geodataframe" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Multinomial<wbr>Sampler on a Geo<wbr>Data<wbr>Frame</span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#poissonsampler-continuously-varying-intensity" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Poisson<wbr>Sampler — continuously-<wbr>varying intensity</span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#raster-rasterized-chicago" class="md-nav__link">
+    
+    <span class="md-ellipsis">
+      <span>Raster — rasterized chicago</span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                
+                
+                  
+
+
+  
+    <a href="https://github.com/pysal/spml/blob/main/docs/source/validation/pointsamplers.ipynb" title="Edit this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 9h5.5L13 3.5zM6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4c0-1.11.89-2 2-2m.12 13.5 3.74 3.74 1.42-1.41-2.33-2.33 2.33-2.33-1.42-1.41zm11.16 0-3.74-3.74-1.42 1.41 2.33 2.33-2.33 2.33 1.42 1.41z"/></svg>
+    </a>
+  
+  
+
+<h1 id="point-sampling">Point sampling<a class="headerlink" href="#point-sampling" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">spml</span></code> package supports performant spatial cross-validation, resampling/permutation inference methods, and spatial model criticism. This example shows how to use four point sampling strategies using the <strong>NYC boroughs</strong> (chicago) dataset from <a class="reference external" href="https://geodatasets.readthedocs.io">geodatasets</a>.</p>
+<p>Point sampling is a common task for validating space-filling <em>field prediction models</em>, which can generate unique predictions at any point in a study area. We often need to design structured cross-validation exercises on data in order to assess these models. Unfortunately, it’s not always the best to sample randomly from a study area. Sometimes, we need to make sure that we sample evenly within given observation types, or sample evaluation points proportional to some weighted score/value.</p>
+<p>The samplers in <code class="docutils literal notranslate"><span class="pre">spml</span></code> work by re-sampling points in a random/structured manner from the study area. Four samplers are currently implemented:</p>
+<table class="docutils data align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Class</p></th>
+<th class="head"><p>What it does</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PointSampler</span></code></p></td>
+<td><p>Uniform random points inside any Shapely geometry</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ConstantClassSampler</span></code></p></td>
+<td><p>Exactly <em>n</em> points from every class</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">StratifiedClassSampler</span></code></p></td>
+<td><p>Fixed total allocated proportionally to a value column</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MultinomialSampler</span></code></p></td>
+<td><p>Multinomial allocation across label groups weighted by a per-geometry value</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PoissonSampler</span></code></p></td>
+<td><p>Poisson Point Process using a per-geometry/pixel intensity</p></td>
+</tr>
+</tbody>
+</table>
+<p>All samplers (except the <code class="docutils literal notranslate"><span class="pre">PoissonSampler</span></code>) accommodate a <code class="docutils literal notranslate"><span class="pre">quasi_random=&quot;sobol&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;halton&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;r2&quot;</span></code> option to replace the default uniform RNG with a low-discrepancy sequence. Quasi-random sequences have better space-filling properties than points sampled at random, meaning that they tend to be less “clumpy” than randomly-sampled points.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">geodatasets</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">rasterize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">MemoryFile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.transform</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_bounds</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">spml.validation</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ConstantClassSampler</span><span class="p">,</span>
+    <span class="n">MultinomialSampler</span><span class="p">,</span>
+    <span class="n">PointSampler</span><span class="p">,</span>
+    <span class="n">PoissonSampler</span><span class="p">,</span>
+    <span class="n">StratifiedClassSampler</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>We’ll demonstrate the point sampler breadth of functionality across an example dataset for airbnbs in Chicago.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">chicago</span> <span class="o">=</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">geodatasets</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="s2">"geoda.chicago_health"</span><span class="p">))[</span>
+    <span class="p">[</span><span class="s2">"community"</span><span class="p">,</span> <span class="s2">"Pop2014"</span><span class="p">,</span> <span class="s2">"PerCInc14"</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">]</span>
+<span class="p">]</span>
+<span class="n">chicago</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>community</th>
+      <th>Pop2014</th>
+      <th>PerCInc14</th>
+      <th>geometry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>DOUGLAS</td>
+      <td>19430</td>
+      <td>215254</td>
+      <td>POLYGON ((-87.60914 41.84469, -87.60915 41.844...</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>OAKLAND</td>
+      <td>6473</td>
+      <td>54204</td>
+      <td>POLYGON ((-87.59215 41.81693, -87.59231 41.816...</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>FULLER PARK</td>
+      <td>2543</td>
+      <td>32828</td>
+      <td>POLYGON ((-87.6288 41.80189, -87.62879 41.8017...</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>GRAND BOULEVARD</td>
+      <td>22531</td>
+      <td>293535</td>
+      <td>POLYGON ((-87.60671 41.81681, -87.6067 41.8165...</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>KENWOOD</td>
+      <td>18217</td>
+      <td>261582</td>
+      <td>POLYGON ((-87.59215 41.81693, -87.59215 41.816...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">ax</span> <span class="o">=</span> <span class="n">chicago</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">scheme</span><span class="o">=</span><span class="s2">"greedy"</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">"Pastel1"</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">"k"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Chicago Community Areas"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">"off"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/c8788ff32f4ee917aa9a3db7e09129678a9552342480036f47553371c6067b61.png" src="../_images/c8788ff32f4ee917aa9a3db7e09129678a9552342480036f47553371c6067b61.png" />
+</div>
+</div>
+<h2 id="single-geometry-pointsampler">Single geometry — <code class="docutils literal notranslate"><span class="pre">PointSampler</span></code><a class="headerlink" href="#single-geometry-pointsampler" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">PointSampler</span></code> draws uniform random points inside any Shapely geometry using batch rejection sampling with Shapely 2 vectorised <code class="docutils literal notranslate"><span class="pre">contains</span></code> checks. This improves upon the past implementation in <code class="docutils literal notranslate"><span class="pre">pointpats</span></code>, which samples single points at a time. We’ll sample directly from the O’Hare community area as an example, the sticky-outy round polygon on the northwest of Chicago.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">geom</span> <span class="o">=</span> <span class="n">chicago</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">chicago</span><span class="o">.</span><span class="n">community</span> <span class="o">==</span> <span class="s2">"OHARE"</span><span class="p">]</span>
+
+<span class="n">pts</span> <span class="o">=</span> <span class="n">PointSampler</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">60666</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Now, <code class="docutils literal notranslate"><span class="pre">pts</span></code> is a set of randomly-sampled points from within the O’Hare area boundary.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">ax</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">"#d8dee2"</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">"#333"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+<span class="n">pts</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#264653"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"PointSampler — 600 random points in O'Hare"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">"off"</span><span class="p">);</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/4ef8d3a1d332024ecc42678dd75a5f43541471f1795be6dc009df13b81b2ddfb.png" src="../_images/4ef8d3a1d332024ecc42678dd75a5f43541471f1795be6dc009df13b81b2ddfb.png" />
+</div>
+</div>
+<p>Note how the points are a bit clumpy—they tend to cluster together visually in a few places. We can smooth this out using the quasi-random sequences for sampling points. The <code class="docutils literal notranslate"><span class="pre">quasi_random=</span></code> keyword argument replaces the uniform RNG with a quasi-random sequence that is more effective for space-filling sampling; <code class="docutils literal notranslate"><span class="pre">sobol</span></code>, <code class="docutils literal notranslate"><span class="pre">halton</span></code>, and <code class="docutils literal notranslate"><span class="pre">r2</span></code> sequences are supported.</p>
+<p>The comparison below samples <strong>300 points</strong> from Staten Island three ways. Quasi-random sequences fill the space more evenly — notice fewer clusters and gaps compared to the random draw.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">configs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">"Random"</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"halton"</span><span class="p">,</span> <span class="s2">"Halton Sequence"</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"sobol"</span><span class="p">,</span> <span class="s2">"Sobol Sequence"</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">"r2"</span><span class="p">,</span> <span class="s2">"R2 Sequence"</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">flat</span><span class="p">,</span> <span class="n">configs</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">geom</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#d8dee2"</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">"#333"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">PointSampler</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="n">quasi_random</span><span class="o">=</span><span class="n">seq</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">85711</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#264653"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">"off"</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span>
+    <span class="s2">"PointSampler — 500 pts in O'Hare: random vs quasi-random"</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.01</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/f9e317b10c644c589db2bac6ae180d7d6d9e4ad2aa2ad419c9a802252e55bd3e.png" src="../_images/f9e317b10c644c589db2bac6ae180d7d6d9e4ad2aa2ad419c9a802252e55bd3e.png" />
+</div>
+</div>
+<p>We can also sample across all of chicago easily:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">pts_all</span> <span class="o">=</span> <span class="n">PointSampler</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">60622</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">chicago</span><span class="p">)</span>
+<span class="n">chicago</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#d8dee2"</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">"#333"</span><span class="p">)</span>
+<span class="n">pts_all</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#264653"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"PointSampler — 1000 random points in Chicago"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">"off"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/e5924fc55c4ad49e5346e23ae8eb4ad185f056f4565b9be073495458e9c7bb67.png" src="../_images/e5924fc55c4ad49e5346e23ae8eb4ad185f056f4565b9be073495458e9c7bb67.png" />
+</div>
+</div>
+<h2 id="geodataframe-class-aware-samplers">GeoDataFrame — class-aware samplers<a class="headerlink" href="#geodataframe-class-aware-samplers" title="Link to this heading">¶</a></h2>
+<p>Now, we will work in the class-aware sampling data. We’ll use population as a sampling weight for now, and split the areas into income quantiles.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">mapclassify</span><span class="w"> </span><span class="kn">import</span> <span class="n">Quantiles</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">chicago</span><span class="p">[</span><span class="s2">"income_quantile"</span><span class="p">]</span> <span class="o">=</span> <span class="n">Quantiles</span><span class="p">(</span><span class="n">chicago</span><span class="o">.</span><span class="n">PerCInc14</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">yb</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">chicago</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s2">"Pop2014"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"Oranges"</span><span class="p">)</span>
+<span class="n">chicago</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s2">"PerCInc14"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"Greens"</span><span class="p">)</span>
+<span class="n">chicago</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s2">"income_quantile"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ax_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">flat</span><span class="p">):</span>
+    <span class="n">ax_</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">ax_</span><span class="o">.</span><span class="n">set_title</span><span class="p">([</span><span class="s2">"Population"</span><span class="p">,</span> <span class="s2">"Per Capita Income"</span><span class="p">,</span> <span class="s2">"Income Quantile"</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/639edd9e7f35274366e6cb5f4325cbd44876f70109529816823a82c70b64af3e.png" src="../_images/639edd9e7f35274366e6cb5f4325cbd44876f70109529816823a82c70b64af3e.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="c1"># ConstantClassSampler: exactly 100 pts from every income quantile</span>
+<span class="n">pts_const</span> <span class="o">=</span> <span class="n">ConstantClassSampler</span><span class="p">(</span><span class="n">n_per_class</span><span class="o">=</span><span class="mi">500</span> <span class="o">//</span> <span class="mi">5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">60226</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="n">chicago</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">chicago</span><span class="o">.</span><span class="n">income_quantile</span>
+<span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">chicago</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s2">"income_quantile"</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"tab10"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pts_const</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s2">"class_label"</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"tab10"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelleft</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"ConstantClassSampler"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"100 points in each group"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"ConstantClassSampler — points per label:"</span><span class="p">)</span>
+<span class="n">pts_const</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"class_label"</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">"n points"</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>ConstantClassSampler — points per label:
+</code></pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>class_label</th>
+      <th>n points</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>100</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4</td>
+      <td>100</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><img alt="../_images/001e7b33a8676a9cd35860a9549aa9f4c12d790713df09c51e055a677e7beff8.png" src="../_images/001e7b33a8676a9cd35860a9549aa9f4c12d790713df09c51e055a677e7beff8.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="c1"># StratifiedClassSampler: 500 total, allocated ∝ population</span>
+<span class="n">pts_strat</span> <span class="o">=</span> <span class="n">StratifiedClassSampler</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">60226</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="n">chicago</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">chicago</span><span class="o">.</span><span class="n">income_quantile</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">chicago</span><span class="o">.</span><span class="n">Pop2014</span>
+<span class="p">)</span>
+<span class="n">f</span><span class="p">,</span> <span class="p">(</span><span class="n">pax</span><span class="p">,</span> <span class="n">sax</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">chicago</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s2">"income_quantile"</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"tab10"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">sax</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pts_strat</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s2">"class_label"</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"tab10"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">sax</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">chicago</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s2">"Pop2014"</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"Oranges"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">pax</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="p">(</span><span class="n">pax</span><span class="p">,</span> <span class="n">sax</span><span class="p">):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelleft</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">pax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Population (2014)</span><span class="se">\n</span><span class="s2">weight used for sampling"</span><span class="p">)</span>
+<span class="n">sax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"StratifiedClassSampler"</span><span class="p">)</span>
+<span class="n">sax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"500 points ∝ weight in group"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"StratifiedClassSampler — points per area (∝ population):"</span><span class="p">)</span>
+<span class="n">pts_strat</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"class_label"</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="s2">"n points"</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">chicago</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"income_quantile"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">Pop2014</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="s2">"Pop2014"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s2">"weight = Pop2014/@chicago.Pop2014.sum()"</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>StratifiedClassSampler — points per area (∝ population):
+</code></pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>n points</th>
+      <th>Pop2014</th>
+      <th>weight</th>
+    </tr>
+    <tr>
+      <th>class_label</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>39</td>
+      <td>213966</td>
+      <td>0.078266</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>72</td>
+      <td>394002</td>
+      <td>0.144121</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>91</td>
+      <td>497456</td>
+      <td>0.181963</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>115</td>
+      <td>628220</td>
+      <td>0.229794</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>183</td>
+      <td>1000191</td>
+      <td>0.365856</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><img alt="../_images/dd72ebc214f4b2653b5929d71fcfc119871ed9638772b5064d395bf40f6725d6.png" src="../_images/dd72ebc214f4b2653b5929d71fcfc119871ed9638772b5064d395bf40f6725d6.png" />
+</div>
+</div>
+<p>We see that the <code class="docutils literal notranslate"><span class="pre">ConstantClassSampler</span></code> provides samples points <em>at random</em> within areas with the same income quantile <em>at a constant rate</em>: each group gets the same number of points. In contrast, the <code class="docutils literal notranslate"><span class="pre">StratifiedClassSampler</span></code> samples from the group proportional to the population-based weight of that group. In your application, you can make weights proportional to a raster band or dataframe column.</p>
+<p>This also works with pseudo-random sequences</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">pts_const</span> <span class="o">=</span> <span class="n">ConstantClassSampler</span><span class="p">(</span>
+    <span class="n">n_per_class</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">60226</span><span class="p">,</span> <span class="n">quasi_random</span><span class="o">=</span><span class="s2">"r2"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">chicago</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">chicago</span><span class="o">.</span><span class="n">income_quantile</span><span class="p">)</span>
+<span class="n">pts_strat</span> <span class="o">=</span> <span class="n">StratifiedClassSampler</span><span class="p">(</span>
+    <span class="n">n_samples</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">60226</span><span class="p">,</span> <span class="n">quasi_random</span><span class="o">=</span><span class="s2">"r2"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">chicago</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">chicago</span><span class="o">.</span><span class="n">income_quantile</span><span class="p">,</span> <span class="n">chicago</span><span class="o">.</span><span class="n">Pop2014</span><span class="p">)</span>
+
+<span class="n">f</span><span class="p">,</span> <span class="p">(</span><span class="n">constax</span><span class="p">,</span> <span class="n">stratax</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">pts_const</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s2">"class_label"</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"tab10"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">constax</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">pts_strat</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s2">"class_label"</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"tab10"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">stratax</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="p">(</span><span class="n">constax</span><span class="p">,</span> <span class="n">stratax</span><span class="p">):</span>
+    <span class="n">chicago</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="s2">"income_quantile"</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"tab10"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">constax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"ConstantClassSampler"</span><span class="p">)</span>
+<span class="n">stratax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"StratifiedClassSampler"</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">"R2 sequence"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/82146bf6c38deaa7bcca9e8e8a9e9353500306b726bd2bad13ac8e37c13bb589.png" src="../_images/82146bf6c38deaa7bcca9e8e8a9e9353500306b726bd2bad13ac8e37c13bb589.png" />
+</div>
+</div>
+<h3 id="multinomialsampler-on-a-geodataframe"><code class="docutils literal notranslate"><span class="pre">MultinomialSampler</span></code> on a GeoDataFrame<a class="headerlink" href="#multinomialsampler-on-a-geodataframe" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">MultinomialSampler</span></code> works in two stages:</p>
+<ol class="arabic simple">
+<li><p>Sum <em>weights</em> within each <em>labels</em> group to get a per-class total weight $W_k$. Draw class sample counts jointly from $(n_1, n_2, \dots, n_k) \sim \text{Multinomial}(N, W_k / \sum W_k)$ — counts always sum to exactly <code class="docutils literal notranslate"><span class="pre">n_samples</span></code> but vary stochastically across runs.</p></li>
+<li><p>Sample $n_k$ points uniformly from within the union of class $k$’s geometries.</p></li>
+</ol>
+<p>This contrasts with <code class="docutils literal notranslate"><span class="pre">StratifiedClassSampler</span></code>, which allocates class counts <em>deterministically</em> using the largest-remainder (Hamilton) method. Here we’ll use population again as the per-area weight, so larger areas attract proportionally more sample points — but group totals will now exhibit variation from run to run. This is most useful if you’d like to make sure that your subclass sampling counts to vary realistically from run to run, rather than being constrained to be exactly proportional to the weight.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">))</span>
+
+<span class="n">sizes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">MultinomialSampler</span><span class="p">(</span>
+            <span class="n">n_samples</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+            <span class="n">quasi_random</span><span class="o">=</span><span class="s2">"r2"</span> <span class="k">if</span> <span class="n">i</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="p">[</span><span class="mi">60666</span><span class="p">,</span> <span class="mi">60226</span><span class="p">,</span> <span class="mi">60611</span><span class="p">,</span> <span class="mi">60642</span><span class="p">][</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">j</span><span class="p">],</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+            <span class="n">chicago</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">chicago</span><span class="o">.</span><span class="n">income_quantile</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">chicago</span><span class="o">.</span><span class="n">Pop2014</span>
+        <span class="p">)</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"n points run </span><span class="si">{</span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">j</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="s1">'random'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'r2'</span><span class="si">}</span><span class="s2">"</span>
+        <span class="n">sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"class_label"</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="n">title</span><span class="p">))</span>
+        <span class="n">chicago</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="s2">"income_quantile"</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"tab10"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">categorical</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="s2">"class_label"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"tab10"</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span>
+            <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" - "</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" sequence"</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">pandas</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">sizes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>n points run 1 - r2</th>
+      <th>n points run 3 - r2</th>
+      <th>n points run 2 - random</th>
+      <th>n points run 4 - random</th>
+    </tr>
+    <tr>
+      <th>class_label</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>42</td>
+      <td>41</td>
+      <td>41</td>
+      <td>34</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>64</td>
+      <td>72</td>
+      <td>81</td>
+      <td>76</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>85</td>
+      <td>102</td>
+      <td>92</td>
+      <td>97</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>104</td>
+      <td>107</td>
+      <td>115</td>
+      <td>115</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>205</td>
+      <td>178</td>
+      <td>171</td>
+      <td>178</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><img alt="../_images/86b1dcafd096caaedcd95e94b2fd71d96cec062854615a16de119364ca939e9d.png" src="../_images/86b1dcafd096caaedcd95e94b2fd71d96cec062854615a16de119364ca939e9d.png" />
+</div>
+</div>
+<h2 id="poissonsampler-continuously-varying-intensity"><code class="docutils literal notranslate"><span class="pre">PoissonSampler</span></code> — continuously-varying intensity<a class="headerlink" href="#poissonsampler-continuously-varying-intensity" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">PoissonSampler</span></code> works using a spatially-varying intensity function, either specified as a callable, a geometric dataset (such as a set of polygons or a raster), or an alternative point pattern representing intensities we’d like to re-sample. We use this to define an intensity surface, where higher values should see more points being sampled from realisation to realisation.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">T</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+    <span class="n">cm</span> <span class="o">=</span> <span class="s2">"Oranges"</span> <span class="k">if</span> <span class="n">i</span> <span class="k">else</span> <span class="s2">"Greens"</span>
+    <span class="n">col</span> <span class="o">=</span> <span class="s2">"Pop2014"</span> <span class="k">if</span> <span class="n">i</span> <span class="k">else</span> <span class="s2">"PerCInc14"</span>
+    <span class="n">chicago</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">([</span><span class="s2">"Population"</span><span class="p">,</span> <span class="s2">"Income</span><span class="se">\n</span><span class="s2">Per Capita"</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">pois</span> <span class="o">=</span> <span class="n">PoissonSampler</span><span class="p">(</span>
+            <span class="n">n_expected</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="p">[</span><span class="mi">60666</span><span class="p">,</span> <span class="mi">60226</span><span class="p">,</span> <span class="mi">60611</span><span class="p">,</span> <span class="mi">60605</span><span class="p">,</span> <span class="mi">60642</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">chicago</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">intensity</span><span class="o">=</span><span class="n">chicago</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
+        <span class="n">chicago</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cm</span><span class="p">)</span>
+        <span class="n">pois</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"k"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">ax</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Seed = </span><span class="si">{</span><span class="p">[</span><span class="mi">60666</span><span class="p">,</span><span class="w"> </span><span class="mi">60226</span><span class="p">,</span><span class="w"> </span><span class="mi">60611</span><span class="p">,</span><span class="w"> </span><span class="mi">60605</span><span class="p">,</span><span class="w"> </span><span class="mi">60642</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ax_</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">flat</span><span class="p">:</span>
+    <span class="n">ax_</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/fcf1cb5ee83388b846291a378fbf1e89acc2d335b8eb8bba09bc21d6df5f32c5.png" src="../_images/fcf1cb5ee83388b846291a378fbf1e89acc2d335b8eb8bba09bc21d6df5f32c5.png" />
+</div>
+</div>
+<p>Notice for the population maps, the points concentrate fairly thoroughly in the center near the more populated areas. However, for the per capita income map, points cluster in the <em>richer</em> areas.</p>
+<p>This works as well allowing a callable intensity function, a raster, or supplying a point pattern that you’d like to imitate using a kernel density estimate. We’ll show the first two here and show raster sampling across all classes in the next section.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">14</span><span class="p">))</span>
+<span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">chicago</span><span class="o">.</span><span class="n">total_bounds</span>
+<span class="n">chihull</span> <span class="o">=</span> <span class="n">chicago</span><span class="o">.</span><span class="n">union_all</span><span class="p">(</span><span class="s2">"coverage"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pattern_function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mf">87.524137</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="mf">42.023</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">*</span> <span class="p">(</span><span class="n">dy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">((</span><span class="n">dx</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.41597</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">dx</span> <span class="o">*</span> <span class="n">dy</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="n">in_area</span> <span class="o">=</span> <span class="n">chihull</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span>
+        <span class="n">geopandas</span><span class="o">.</span><span class="n">points_from_xy</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">[</span><span class="o">~</span><span class="n">in_area</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">return</span> <span class="n">a</span>
+
+
+<span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">256</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">256</span><span class="p">))</span>
+
+<span class="n">callable_pattern</span> <span class="o">=</span> <span class="n">PoissonSampler</span><span class="p">(</span><span class="n">n_expected</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">60666</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="n">chicago</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">intensity</span><span class="o">=</span><span class="n">pattern_function</span>
+<span class="p">)</span>
+
+<span class="n">mimic_pattern</span> <span class="o">=</span> <span class="n">PoissonSampler</span><span class="p">(</span><span class="n">n_expected</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">60666</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+    <span class="n">chicago</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span>
+    <span class="n">intensity</span><span class="o">=</span><span class="n">pois</span><span class="p">,</span>  <span class="c1"># from the last loop above</span>
+<span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">i</span><span class="p">:</span>
+        <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+            <span class="n">pattern_function</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">chicago</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"k"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">chicago</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"k"</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">pois</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"green"</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="p">[</span><span class="n">callable_pattern</span><span class="p">,</span> <span class="n">mimic_pattern</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"red"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># ax[i].set_facecolor("black")</span>
+    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="s2">"User-specified</span><span class="se">\n</span><span class="s2">Intensity Function"</span><span class="p">,</span>
+            <span class="s2">"Intensity Estimated</span><span class="se">\n</span><span class="s2">from Green Points"</span><span class="p">,</span>
+        <span class="p">][</span><span class="n">i</span><span class="p">]</span>
+    <span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/7b4e017124aa19f2cf7acc4a1881ba9b6daeb9fe8a9a32202ddbf957d64892f9.png" src="../_images/7b4e017124aa19f2cf7acc4a1881ba9b6daeb9fe8a9a32202ddbf957d64892f9.png" />
+</div>
+</div>
+<h2 id="raster-rasterized-chicago">Raster — rasterized chicago<a class="headerlink" href="#raster-rasterized-chicago" title="Link to this heading">¶</a></h2>
+<p>The functionality also works with raster. To show this, we rasterize the chicago GeoDataFrame into two in-memory GeoTIFFs:</p>
+<table class="docutils data align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Raster</p></th>
+<th class="head"><p>Content</p></th>
+<th class="head"><p>Sampler</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">class_mf</span></code></p></td>
+<td><p>Integer <code class="docutils literal notranslate"><span class="pre">BoroCode</span></code> (1–5) per pixel</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ConstantClassSampler</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">weight_mf</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Shape_Area</span></code> of each borough’s pixels</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">StratifiedClassSampler</span></code>, <code class="docutils literal notranslate"><span class="pre">MultinomialSampler</span></code>, <code class="docutils literal notranslate"><span class="pre">PoissonSampler</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Sampling occurs over the dataset, while the weights/labels currnetly require arrays to be read into data.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span>
+<span class="n">bounds</span> <span class="o">=</span> <span class="n">chicago</span><span class="o">.</span><span class="n">total_bounds</span>  <span class="c1"># (minx, miny, maxx, maxy) in EPSG:2263</span>
+<span class="n">transform</span> <span class="o">=</span> <span class="n">from_bounds</span><span class="p">(</span><span class="o">*</span><span class="n">bounds</span><span class="p">,</span> <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_rasterize</span><span class="p">(</span><span class="n">shapes</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">mf</span> <span class="o">=</span> <span class="n">MemoryFile</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">mf</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
+        <span class="n">driver</span><span class="o">=</span><span class="s2">"GTiff"</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="n">nrows</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">ncols</span><span class="p">,</span>
+        <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+        <span class="n">crs</span><span class="o">=</span><span class="n">chicago</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+        <span class="n">nodata</span><span class="o">=</span><span class="n">fill</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">rasterize</span><span class="p">(</span>
+            <span class="n">shapes</span><span class="p">,</span>
+            <span class="n">out_shape</span><span class="o">=</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">),</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+            <span class="n">fill</span><span class="o">=</span><span class="n">fill</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">mf</span>
+
+
+<span class="c1"># Classification raster (BoroCode as integer class label)</span>
+<span class="n">class_mf</span> <span class="o">=</span> <span class="n">_rasterize</span><span class="p">(</span>
+    <span class="nb">zip</span><span class="p">(</span><span class="n">chicago</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">chicago</span><span class="o">.</span><span class="n">income_quantile</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">"uint8"</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="s2">"uint8"</span><span class="p">,</span>
+    <span class="n">fill</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Weight raster (population density)</span>
+<span class="n">norm_area</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">chicago</span><span class="o">.</span><span class="n">Pop2014</span> <span class="o">/</span> <span class="mi">1000</span> <span class="o">/</span> <span class="n">chicago</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">chicago</span><span class="o">.</span><span class="n">estimate_utm_crs</span><span class="p">())</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">area</span>
+<span class="p">)</span><span class="o">.</span><span class="n">values</span>
+<span class="n">weight_mf</span> <span class="o">=</span> <span class="n">_rasterize</span><span class="p">(</span>
+    <span class="nb">zip</span><span class="p">(</span><span class="n">chicago</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">norm_area</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">"float32"</span><span class="p">),</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="s2">"float32"</span><span class="p">,</span>
+    <span class="n">fill</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Preview</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="k">with</span> <span class="n">class_mf</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+    <span class="n">arr_c</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">weight_mf</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+    <span class="n">arr_w</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">arr_c</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"tab10"</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s2">"upper"</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Classification raster (Quantile 1–5, 0 = water/outside)"</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">arr_w</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"Oranges"</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s2">"upper"</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Weight raster (Population Density)"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelbottom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="mf">1.342</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/1c7193dfa7961bb6f156638c94cc4f4bac2e3a40a5da3773e12bc991264f2951.png" src="../_images/1c7193dfa7961bb6f156638c94cc4f4bac2e3a40a5da3773e12bc991264f2951.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="k">with</span> <span class="n">class_mf</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">ds</span><span class="p">:</span>
+    <span class="n">class_arr</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">pts_const_r</span> <span class="o">=</span> <span class="n">ConstantClassSampler</span><span class="p">(</span><span class="n">n_per_class</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">60666</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+        <span class="n">ds</span><span class="p">,</span> <span class="n">class_arr</span>
+    <span class="p">)</span>
+    <span class="n">pts_strat_r</span> <span class="o">=</span> <span class="n">StratifiedClassSampler</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">60605</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+        <span class="n">ds</span><span class="p">,</span>
+        <span class="n">labels</span><span class="o">=</span><span class="n">class_arr</span><span class="p">,</span>
+        <span class="n">weights</span><span class="o">=</span><span class="n">class_arr</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">pts_multi_r</span> <span class="o">=</span> <span class="n">MultinomialSampler</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">60642</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+        <span class="n">ds</span><span class="p">,</span>
+        <span class="n">labels</span><span class="o">=</span><span class="n">class_arr</span><span class="p">,</span>
+        <span class="n">weights</span><span class="o">=</span><span class="n">class_arr</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">with</span> <span class="n">weight_mf</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">wds</span><span class="p">:</span>
+        <span class="c1"># to sample within chicago's polygon, we use the geometry</span>
+        <span class="n">pts_poiss_r</span> <span class="o">=</span> <span class="n">PoissonSampler</span><span class="p">(</span><span class="n">n_expected</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">60611</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+            <span class="n">chicago</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">intensity</span><span class="o">=</span><span class="n">wds</span>
+        <span class="p">)</span>
+        <span class="c1"># to sample just directly from the raster, set geometry=None as the first argument.</span>
+
+<span class="n">pix</span><span class="p">,</span> <span class="n">cix</span> <span class="o">=</span> <span class="n">chicago</span><span class="o">.</span><span class="n">sindex</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pts_poiss_r</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">"within"</span><span class="p">)</span>
+<span class="n">pts_poiss_r</span><span class="p">[</span><span class="s2">"class_label"</span><span class="p">]</span> <span class="o">=</span> <span class="n">chicago</span><span class="o">.</span><span class="n">income_quantile</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">cix</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">+</span> <span class="mi">1</span>
+
+<span class="n">pandas</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+    <span class="p">(</span>
+        <span class="n">pts_const_r</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"class_label"</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">"Constant samples per class"</span><span class="p">),</span>
+        <span class="n">pts_strat_r</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"class_label"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">"Stratified samples per class"</span><span class="p">),</span>
+        <span class="n">pts_multi_r</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"class_label"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">"Multinomial samples per class"</span><span class="p">),</span>
+        <span class="n">pts_poiss_r</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"class_label"</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">"Poisson samples per class"</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Constant samples per class</th>
+      <th>Stratified samples per class</th>
+      <th>Multinomial samples per class</th>
+      <th>Poisson samples per class</th>
+    </tr>
+    <tr>
+      <th>class_label</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>100</td>
+      <td>78</td>
+      <td>91</td>
+      <td>35</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>100</td>
+      <td>109</td>
+      <td>108</td>
+      <td>82</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>100</td>
+      <td>99</td>
+      <td>101</td>
+      <td>86</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>100</td>
+      <td>100</td>
+      <td>96</td>
+      <td>121</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>100</td>
+      <td>114</td>
+      <td>104</td>
+      <td>187</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><code><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">14</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">pts</span><span class="p">,</span> <span class="n">title</span> <span class="ow">in</span> <span class="p">[</span>
+    <span class="p">(</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="n">pts_const_r</span><span class="p">,</span>
+        <span class="s2">"ConstantClassSampler</span><span class="se">\n</span><span class="s2">100 pts/quartile from from raster"</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pts_strat_r</span><span class="p">,</span> <span class="s2">"StratifiedClassSampler</span><span class="se">\n</span><span class="s2">300 pts ∝ area"</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">pts_multi_r</span><span class="p">,</span> <span class="s2">"MultinomialSampler</span><span class="se">\n</span><span class="s2">300 pts ~ area"</span><span class="p">),</span>
+    <span class="p">(</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+        <span class="n">pts_poiss_r</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"PoissonSampler</span><span class="se">\n</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pts_poiss_r</span><span class="p">)</span><span class="si">}</span><span class="s2"> ~ Poisson(population density)"</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">]:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">title</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"P"</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">arr_c</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">c</span><span class="p">[</span><span class="n">arr_c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+            <span class="n">c</span><span class="p">,</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="s2">"tab10"</span><span class="p">,</span>
+            <span class="n">origin</span><span class="o">=</span><span class="s2">"upper"</span><span class="p">,</span>
+            <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">],</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.35</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">pts</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s2">"class_label"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"tab10"</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="p">(</span><span class="n">arr_w</span> <span class="o">/</span> <span class="n">arr_w</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">w</span><span class="p">[</span><span class="n">arr_c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+            <span class="n">w</span><span class="p">,</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="s2">"tab10"</span><span class="p">,</span>
+            <span class="n">origin</span><span class="o">=</span><span class="s2">"upper"</span><span class="p">,</span>
+            <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">],</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.35</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">pts</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"black"</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">"equal"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">"off"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/937ffd7f2fcf84d58c548979a9e7732176f50416237967e9176940149fb60d03.png" src="../_images/937ffd7f2fcf84d58c548979a9e7732176f50416237967e9176940149fb60d03.png" />
+</div>
+</div>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        &#169; Copyright 2025-, Martin Fleischmann &amp; PySAL Developers.
+        
+    </div>
+  
+    Created using
+    <a href="https://www.sphinx-doc.org/" target="_blank" rel="noopener">Sphinx</a>
+    8.2.3.
+     and
+    <a href="https://github.com/jbms/sphinx-immaterial/" target="_blank" rel="noopener">Sphinx-Immaterial</a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.top", "search.share", "search.suggest", "toc.follow", "toc.sticky", "content.code.copy", "content.action.edit"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "staticVersions": null, "versionPath": "https://pysal.org/spml/versions.json"}}</script>
+    
+      
+        <script src="../_static/sphinx_immaterial_theme.32136f45f91ae6956.min.js?v=a7a9472a"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
+    
+  </body>
+</html>

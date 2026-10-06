@@ -1,0 +1,20 @@
+﻿spml.validation.LeaveBallOut
+============================
+
+.. currentmodule:: spml.validation
+
+.. autoclass:: LeaveBallOut
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LeaveBallOut.__init__
+      ~LeaveBallOut.get_metadata_routing
+      ~LeaveBallOut.get_n_splits
+      ~LeaveBallOut.split
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

@@ -1,0 +1,22 @@
+﻿spml.validation.LocalBootstrap
+==============================
+
+.. currentmodule:: spml.validation
+
+.. autoclass:: LocalBootstrap
+
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LocalBootstrap.__init__
+      ~LocalBootstrap.fit
+      ~LocalBootstrap.get_metadata_routing
+      ~LocalBootstrap.get_params
+      ~LocalBootstrap.sample
+      ~LocalBootstrap.set_params
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+   

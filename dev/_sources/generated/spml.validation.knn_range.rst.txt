@@ -1,0 +1,6 @@
+﻿spml.validation.knn\_range
+==========================
+
+.. currentmodule:: spml.validation
+
+.. autofunction:: knn_range

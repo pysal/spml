@@ -1,0 +1,6 @@
+﻿spml.validation.correlogram\_range
+==================================
+
+.. currentmodule:: spml.validation
+
+.. autofunction:: correlogram_range
