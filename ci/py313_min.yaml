@@ -10,6 +10,7 @@ dependencies:
   - scipy
   - scikit-learn
   - joblib
+  - esda
   # testing
   - geodatasets
   - mgwr
