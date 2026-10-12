@@ -2290,12 +2290,12 @@ receives a proportional mix of observations from across the study area.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.CellStratifiedKFold-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.validation.CellStratifiedKFold-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.validation.CellStratifiedKFold.__init__.n_splits"><span class="sig-name descname">n_splits</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a>, default 5</span></span><a class="headerlink" href="#spml.validation.CellStratifiedKFold.__init__.n_splits" title="Permalink to this definition">¶</a></dt><dd><p>Number of folds.</p>
+<dt id="spml.validation.CellStratifiedKFold.__init__.n_splits"><span class="sig-name descname">n_splits</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, default 5</span></span><a class="headerlink" href="#spml.validation.CellStratifiedKFold.__init__.n_splits" title="Permalink to this definition">¶</a></dt><dd><p>Number of folds.</p>
 </dd>
 <dt id="spml.validation.CellStratifiedKFold.__init__.grid"><span class="sig-name descname">grid</span><span class="p"> : </span><span class="desctype"><span class="desctype">{&quot;h3&quot;, &quot;a5&quot;, &quot;healpix&quot;, &quot;s2&quot;}, default &quot;h3&quot;</span></span><a class="headerlink" href="#spml.validation.CellStratifiedKFold.__init__.grid" title="Permalink to this definition">¶</a></dt><dd><p>DGGS backend.  The corresponding package must be installed
 (<code class="docutils literal notranslate"><span class="pre">h3</span></code>, <code class="docutils literal notranslate"><span class="pre">pya5</span></code>, <code class="docutils literal notranslate"><span class="pre">healpy</span></code>, <code class="docutils literal notranslate"><span class="pre">s2sphere</span></code>).</p>
 </dd>
-<dt id="spml.validation.CellStratifiedKFold.__init__.resolution"><span class="sig-name descname">resolution</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a> or None, default None</span></span><a class="headerlink" href="#spml.validation.CellStratifiedKFold.__init__.resolution" title="Permalink to this definition">¶</a></dt><dd><p><p>Grid resolution.  Meaning varies by backend:</p>
+<dt id="spml.validation.CellStratifiedKFold.__init__.resolution"><span class="sig-name descname">resolution</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a> or None, default None</span></span><a class="headerlink" href="#spml.validation.CellStratifiedKFold.__init__.resolution" title="Permalink to this definition">¶</a></dt><dd><p><p>Grid resolution.  Meaning varies by backend:</p>
 <ul class="simple">
 <li><p><strong>h3</strong>: 0 (coarsest) – 15 (finest)</p></li>
 <li><p><strong>a5</strong>: 0 (coarsest) – 30 (finest)</p></li>
@@ -2307,9 +2307,9 @@ occupied cells is chosen automatically and stored as
 <code class="docutils literal notranslate"><span class="pre">resolution_</span></code> after calling <a class="reference internal" href="#spml.validation.CellStratifiedKFold.split" title="spml.validation.CellStratifiedKFold.split (Python method) — Yield (train_indices, test_indices) for each fold."><code class="xref py py-meth docutils literal notranslate"><span class="pre">split()</span></code></a>.</p>
 </p>
 </dd>
-<dt id="spml.validation.CellStratifiedKFold.__init__.shuffle"><span class="sig-name descname">shuffle</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a>, default False</span></span><a class="headerlink" href="#spml.validation.CellStratifiedKFold.__init__.shuffle" title="Permalink to this definition">¶</a></dt><dd><p></p>
+<dt id="spml.validation.CellStratifiedKFold.__init__.shuffle"><span class="sig-name descname">shuffle</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a>, default False</span></span><a class="headerlink" href="#spml.validation.CellStratifiedKFold.__init__.shuffle" title="Permalink to this definition">¶</a></dt><dd><p></p>
 </dd>
-<dt id="spml.validation.CellStratifiedKFold.__init__.random_state"><span class="sig-name descname">random_state</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a> or None, default None</span></span><a class="headerlink" href="#spml.validation.CellStratifiedKFold.__init__.random_state" title="Permalink to this definition">¶</a></dt><dd><p></p>
+<dt id="spml.validation.CellStratifiedKFold.__init__.random_state"><span class="sig-name descname">random_state</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a> or None, default None</span></span><a class="headerlink" href="#spml.validation.CellStratifiedKFold.__init__.random_state" title="Permalink to this definition">¶</a></dt><dd><p></p>
 </dd>
 </dl>
 </dd>
@@ -2320,7 +2320,7 @@ occupied cells is chosen automatically and stored as
 <dd><p>Resolution used (set after first <a class="reference internal" href="#spml.validation.CellStratifiedKFold.split" title="spml.validation.CellStratifiedKFold.split (Python method) — Yield (train_indices, test_indices) for each fold."><code class="xref py py-meth docutils literal notranslate"><span class="pre">split()</span></code></a> call).</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.CellStratifiedKFold.resolution_-type">Type<span class="colon">:</span><a class="headerlink" href="#spml.validation.CellStratifiedKFold.resolution_-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
 </dd>
 </dl>
 </dd></dl>

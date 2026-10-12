@@ -2564,18 +2564,18 @@ the absolute time lag).</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.LocalBootstrap-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.validation.LocalBootstrap-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.validation.LocalBootstrap.__init__.n_bootstraps"><span class="sig-name descname">n_bootstraps</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a>, default 100</span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.__init__.n_bootstraps" title="Permalink to this definition">¶</a></dt><dd><p>Number of bootstrap resamples to generate.</p>
+<dt id="spml.validation.LocalBootstrap.__init__.n_bootstraps"><span class="sig-name descname">n_bootstraps</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, default 100</span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.__init__.n_bootstraps" title="Permalink to this definition">¶</a></dt><dd><p>Number of bootstrap resamples to generate.</p>
 </dd>
-<dt id="spml.validation.LocalBootstrap.__init__.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a> or None</span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.__init__.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Kernel bandwidth in the same units as the input distances.  Required
+<dt id="spml.validation.LocalBootstrap.__init__.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a> or None</span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.__init__.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Kernel bandwidth in the same units as the input distances.  Required
 unless <em>graph</em> is provided.</p>
 </dd>
-<dt id="spml.validation.LocalBootstrap.__init__.kernel"><span class="sig-name descname">kernel</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, default 'gaussian'</span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.__init__.kernel" title="Permalink to this definition">¶</a></dt><dd><p>One of <code class="docutils literal notranslate"><span class="pre">'gaussian'</span></code>, <code class="docutils literal notranslate"><span class="pre">'exponential'</span></code>, <code class="docutils literal notranslate"><span class="pre">'bisquare'</span></code>,
+<dt id="spml.validation.LocalBootstrap.__init__.kernel"><span class="sig-name descname">kernel</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>, default 'gaussian'</span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.__init__.kernel" title="Permalink to this definition">¶</a></dt><dd><p>One of <code class="docutils literal notranslate"><span class="pre">'gaussian'</span></code>, <code class="docutils literal notranslate"><span class="pre">'exponential'</span></code>, <code class="docutils literal notranslate"><span class="pre">'bisquare'</span></code>,
 <code class="docutils literal notranslate"><span class="pre">'triangular'</span></code>, <code class="docutils literal notranslate"><span class="pre">'uniform'</span></code>, <code class="docutils literal notranslate"><span class="pre">'parabolic'</span></code>.</p>
 </dd>
 <dt id="spml.validation.LocalBootstrap.__init__.graph"><span class="sig-name descname">graph</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://pysal.org/libpysal/stable/generated/libpysal.graph.Graph.html#libpysal.graph.Graph" title="(in libpysal v4.15.0)">libpysal.graph.Graph</a> or None</span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.__init__.graph" title="Permalink to this definition">¶</a></dt><dd><p>Pre-built spatial weights (must expose <code class="docutils literal notranslate"><span class="pre">.sparse</span></code>).
 Overrides <em>bandwidth</em> / <em>kernel</em>.</p>
 </dd>
-<dt id="spml.validation.LocalBootstrap.__init__.coplanar"><span class="sig-name descname">coplanar</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a>, default 'raise'</span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.__init__.coplanar" title="Permalink to this definition">¶</a></dt><dd><p>How to handle coincident (duplicate-location) points when <em>k</em> is
+<dt id="spml.validation.LocalBootstrap.__init__.coplanar"><span class="sig-name descname">coplanar</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>, default 'raise'</span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.__init__.coplanar" title="Permalink to this definition">¶</a></dt><dd><p>How to handle coincident (duplicate-location) points when <em>k</em> is
 given, passed straight through to
 <code class="docutils literal notranslate"><span class="pre">libpysal.graph.Graph.build_kernel</span></code>.  One of <code class="docutils literal notranslate"><span class="pre">'raise'</span></code> (error
 on any duplicate location), <code class="docutils literal notranslate"><span class="pre">'jitter'</span></code> (randomly perturb
@@ -2583,7 +2583,7 @@ duplicates before the k-NN search), or <code class="docutils literal notranslate
 same-location points to each other).  Ignored when only
 <em>bandwidth</em> is given (no k-NN search is performed).</p>
 </dd>
-<dt id="spml.validation.LocalBootstrap.__init__.random_state"><span class="sig-name descname">random_state</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a>, RandomState instance, or None</span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.__init__.random_state" title="Permalink to this definition">¶</a></dt><dd><p></p>
+<dt id="spml.validation.LocalBootstrap.__init__.random_state"><span class="sig-name descname">random_state</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, RandomState instance, or None</span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.__init__.random_state" title="Permalink to this definition">¶</a></dt><dd><p></p>
 </dd>
 </dl>
 </dd>
@@ -2714,7 +2714,7 @@ routing information.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.LocalBootstrap.get_params-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.validation.LocalBootstrap.get_params-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.validation.LocalBootstrap.get_params.deep"><span class="sig-name descname">deep</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a>, default=True</span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.get_params.deep" title="Permalink to this definition">¶</a></dt><dd><p>If True, will return the parameters for this estimator and
+<dt id="spml.validation.LocalBootstrap.get_params.deep"><span class="sig-name descname">deep</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a>, default=True</span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.get_params.deep" title="Permalink to this definition">¶</a></dt><dd><p>If True, will return the parameters for this estimator and
 contained subobjects that are estimators.</p>
 </dd>
 </dl>
@@ -2723,7 +2723,7 @@ contained subobjects that are estimators.</p>
 <dd class="field-even"><p><strong>params</strong> – Parameter names mapped to their values.</p>
 </dd>
 <dt class="field-odd" id="spml.validation.LocalBootstrap.get_params-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#spml.validation.LocalBootstrap.get_params-return-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2774,7 +2774,7 @@ possible to update each component of a nested object.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.LocalBootstrap.set_params-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.validation.LocalBootstrap.set_params-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.validation.LocalBootstrap.set_params.params"><span class="sig-name descname">**params</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)">dict</a></span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.set_params.params" title="Permalink to this definition">¶</a></dt><dd><p>Estimator parameters.</p>
+<dt id="spml.validation.LocalBootstrap.set_params.params"><span class="sig-name descname">**params</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a></span></span><a class="headerlink" href="#spml.validation.LocalBootstrap.set_params.params" title="Permalink to this definition">¶</a></dt><dd><p>Estimator parameters.</p>
 </dd>
 </dl>
 </dd>

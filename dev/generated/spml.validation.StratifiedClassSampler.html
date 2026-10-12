@@ -2298,14 +2298,14 @@ labels by spatial containment – equivalent to <a class="reference internal" hr
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.StratifiedClassSampler-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.validation.StratifiedClassSampler-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.validation.StratifiedClassSampler.__init__.n_samples"><span class="sig-name descname">n_samples</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a>, default 500</span></span><a class="headerlink" href="#spml.validation.StratifiedClassSampler.__init__.n_samples" title="Permalink to this definition">¶</a></dt><dd><p>Total number of points to generate.</p>
+<dt id="spml.validation.StratifiedClassSampler.__init__.n_samples"><span class="sig-name descname">n_samples</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, default 500</span></span><a class="headerlink" href="#spml.validation.StratifiedClassSampler.__init__.n_samples" title="Permalink to this definition">¶</a></dt><dd><p>Total number of points to generate.</p>
 </dd>
-<dt id="spml.validation.StratifiedClassSampler.__init__.quasi_random"><span class="sig-name descname">quasi_random</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a> or None</span></span><a class="headerlink" href="#spml.validation.StratifiedClassSampler.__init__.quasi_random" title="Permalink to this definition">¶</a></dt><dd><p>whether to use a fully random sequence (default), or choose between
+<dt id="spml.validation.StratifiedClassSampler.__init__.quasi_random"><span class="sig-name descname">quasi_random</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a> or None</span></span><a class="headerlink" href="#spml.validation.StratifiedClassSampler.__init__.quasi_random" title="Permalink to this definition">¶</a></dt><dd><p>whether to use a fully random sequence (default), or choose between
 three supported quasi-random spatial sequences:
 the <code class="docutils literal notranslate"><span class="pre">sobol</span></code>, <code class="docutils literal notranslate"><span class="pre">halton</span></code>, or <code class="docutils literal notranslate"><span class="pre">r2</span></code> sequences. Quasi-random sequences are
 more dispersed/space-filling than truly random sequences.</p>
 </dd>
-<dt id="spml.validation.StratifiedClassSampler.__init__.random_state"><span class="sig-name descname">random_state</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a>, RandomState instance, or None</span></span><a class="headerlink" href="#spml.validation.StratifiedClassSampler.__init__.random_state" title="Permalink to this definition">¶</a></dt><dd><p>Seed / random state passed to <code class="docutils literal notranslate"><span class="pre">sklearn.utils.check_random_state</span></code>.
+<dt id="spml.validation.StratifiedClassSampler.__init__.random_state"><span class="sig-name descname">random_state</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, RandomState instance, or None</span></span><a class="headerlink" href="#spml.validation.StratifiedClassSampler.__init__.random_state" title="Permalink to this definition">¶</a></dt><dd><p>Seed / random state passed to <code class="docutils literal notranslate"><span class="pre">sklearn.utils.check_random_state</span></code>.
 TODO: all random_state docstrings across spml shoud say the same</p>
 </dd>
 </dl>
@@ -2374,7 +2374,7 @@ routing information.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.StratifiedClassSampler.get_params-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.validation.StratifiedClassSampler.get_params-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.validation.StratifiedClassSampler.get_params.deep"><span class="sig-name descname">deep</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a>, default=True</span></span><a class="headerlink" href="#spml.validation.StratifiedClassSampler.get_params.deep" title="Permalink to this definition">¶</a></dt><dd><p>If True, will return the parameters for this estimator and
+<dt id="spml.validation.StratifiedClassSampler.get_params.deep"><span class="sig-name descname">deep</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a>, default=True</span></span><a class="headerlink" href="#spml.validation.StratifiedClassSampler.get_params.deep" title="Permalink to this definition">¶</a></dt><dd><p>If True, will return the parameters for this estimator and
 contained subobjects that are estimators.</p>
 </dd>
 </dl>
@@ -2383,7 +2383,7 @@ contained subobjects that are estimators.</p>
 <dd class="field-even"><p><strong>params</strong> – Parameter names mapped to their values.</p>
 </dd>
 <dt class="field-odd" id="spml.validation.StratifiedClassSampler.get_params-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#spml.validation.StratifiedClassSampler.get_params-return-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2408,7 +2408,7 @@ contained subobjects that are estimators.</p>
 <dd class="field-even"><p>Columns: <code class="docutils literal notranslate"><span class="pre">geometry</span></code>, <code class="docutils literal notranslate"><span class="pre">class_label</span></code>.</p>
 </dd>
 <dt class="field-odd" id="spml.validation.StratifiedClassSampler.sample-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#spml.validation.StratifiedClassSampler.sample-return-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://geopandas.org/en/latest/docs/reference/api/geopandas.GeoDataFrame.html#geopandas.GeoDataFrame" title="(in GeoPandas v1.2.1.dev1.dev+gcf7059fe7)">geopandas.GeoDataFrame</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://geopandas.org/en/latest/docs/reference/api/geopandas.GeoDataFrame.html#geopandas.GeoDataFrame" title="(in GeoPandas v1.2.1.dev2.dev+g2c7a44284)">geopandas.GeoDataFrame</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2424,7 +2424,7 @@ possible to update each component of a nested object.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.StratifiedClassSampler.set_params-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.validation.StratifiedClassSampler.set_params-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.validation.StratifiedClassSampler.set_params.params"><span class="sig-name descname">**params</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)">dict</a></span></span><a class="headerlink" href="#spml.validation.StratifiedClassSampler.set_params.params" title="Permalink to this definition">¶</a></dt><dd><p>Estimator parameters.</p>
+<dt id="spml.validation.StratifiedClassSampler.set_params.params"><span class="sig-name descname">**params</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a></span></span><a class="headerlink" href="#spml.validation.StratifiedClassSampler.set_params.params" title="Permalink to this definition">¶</a></dt><dd><p>Estimator parameters.</p>
 </dd>
 </dl>
 </dd>

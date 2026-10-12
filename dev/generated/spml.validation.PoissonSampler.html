@@ -2342,16 +2342,16 @@ point pattern; a kernel-density estimate of its intensity is used.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.PoissonSampler-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.validation.PoissonSampler-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.validation.PoissonSampler.__init__.n_expected"><span class="sig-name descname">n_expected</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a> or None</span></span><a class="headerlink" href="#spml.validation.PoissonSampler.__init__.n_expected" title="Permalink to this definition">¶</a></dt><dd><p>Expected number of points per call to <a class="reference internal" href="#spml.validation.PoissonSampler.sample" title="spml.validation.PoissonSampler.sample (Python method) — Generate an inhomogeneous Poisson point pattern inside geometry."><code class="xref py py-meth docutils literal notranslate"><span class="pre">sample()</span></code></a>.  Internally
+<dt id="spml.validation.PoissonSampler.__init__.n_expected"><span class="sig-name descname">n_expected</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a> or None</span></span><a class="headerlink" href="#spml.validation.PoissonSampler.__init__.n_expected" title="Permalink to this definition">¶</a></dt><dd><p>Expected number of points per call to <a class="reference internal" href="#spml.validation.PoissonSampler.sample" title="spml.validation.PoissonSampler.sample (Python method) — Generate an inhomogeneous Poisson point pattern inside geometry."><code class="xref py py-meth docutils literal notranslate"><span class="pre">sample()</span></code></a>.  Internally
 converted to a scale factor via
 <span class="math notranslate nohighlight">\(\mathrm{scale} = n_{\mathrm{expected}} / K\)</span>, where <span class="math notranslate nohighlight">\(K\)</span> is
 the normalisation constant of the intensity surface. When <code class="docutils literal notranslate"><span class="pre">None</span></code>, the
 raw integral <span class="math notranslate nohighlight">\(K\)</span> sets <span class="math notranslate nohighlight">\(\operatorname{E}[N]\)</span>.</p>
 </dd>
-<dt id="spml.validation.PoissonSampler.__init__.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)">float</a> or None</span></span><a class="headerlink" href="#spml.validation.PoissonSampler.__init__.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Kernel bandwidth for KDE mode, in the same units as the CRS.
+<dt id="spml.validation.PoissonSampler.__init__.bandwidth"><span class="sig-name descname">bandwidth</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a> or None</span></span><a class="headerlink" href="#spml.validation.PoissonSampler.__init__.bandwidth" title="Permalink to this definition">¶</a></dt><dd><p>Kernel bandwidth for KDE mode, in the same units as the CRS.
 <code class="docutils literal notranslate"><span class="pre">None</span></code> applies Scott’s rule.</p>
 </dd>
-<dt id="spml.validation.PoissonSampler.__init__.kernel"><span class="sig-name descname">kernel</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a></span></span><a class="headerlink" href="#spml.validation.PoissonSampler.__init__.kernel" title="Permalink to this definition">¶</a></dt><dd><p>Kernel for KDE mode.  Passed to
+<dt id="spml.validation.PoissonSampler.__init__.kernel"><span class="sig-name descname">kernel</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a></span></span><a class="headerlink" href="#spml.validation.PoissonSampler.__init__.kernel" title="Permalink to this definition">¶</a></dt><dd><p>Kernel for KDE mode.  Passed to
 <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KernelDensity.html#sklearn.neighbors.KernelDensity" title="(in scikit-learn v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.neighbors.KernelDensity</span></code></a>; typical values are
 <code class="docutils literal notranslate"><span class="pre">'gaussian'</span></code> (default), <code class="docutils literal notranslate"><span class="pre">'tophat'</span></code>, <code class="docutils literal notranslate"><span class="pre">'epanechnikov'</span></code>.</p>
 </dd>
@@ -2359,7 +2359,7 @@ raw integral <span class="math notranslate nohighlight">\(K\)</span> sets <span 
 <code class="docutils literal notranslate"><span class="pre">'nearest'</span></code> uses the pixel-selection algorithm (fast).
 <code class="docutils literal notranslate"><span class="pre">'linear'</span></code> uses bilinear interpolation + Lewis-Shedler thinning.</p>
 </dd>
-<dt id="spml.validation.PoissonSampler.__init__.random_state"><span class="sig-name descname">random_state</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a>, RandomState instance, or None</span></span><a class="headerlink" href="#spml.validation.PoissonSampler.__init__.random_state" title="Permalink to this definition">¶</a></dt><dd><p>Seed / random state passed to <code class="docutils literal notranslate"><span class="pre">sklearn.utils.check_random_state</span></code>.
+<dt id="spml.validation.PoissonSampler.__init__.random_state"><span class="sig-name descname">random_state</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, RandomState instance, or None</span></span><a class="headerlink" href="#spml.validation.PoissonSampler.__init__.random_state" title="Permalink to this definition">¶</a></dt><dd><p>Seed / random state passed to <code class="docutils literal notranslate"><span class="pre">sklearn.utils.check_random_state</span></code>.
 TODO: all random_state docstrings across spml shoud say the same</p>
 </dd>
 </dl>
@@ -2414,7 +2414,7 @@ routing information.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.PoissonSampler.get_params-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.validation.PoissonSampler.get_params-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.validation.PoissonSampler.get_params.deep"><span class="sig-name descname">deep</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)">bool</a>, default=True</span></span><a class="headerlink" href="#spml.validation.PoissonSampler.get_params.deep" title="Permalink to this definition">¶</a></dt><dd><p>If True, will return the parameters for this estimator and
+<dt id="spml.validation.PoissonSampler.get_params.deep"><span class="sig-name descname">deep</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a>, default=True</span></span><a class="headerlink" href="#spml.validation.PoissonSampler.get_params.deep" title="Permalink to this definition">¶</a></dt><dd><p>If True, will return the parameters for this estimator and
 contained subobjects that are estimators.</p>
 </dd>
 </dl>
@@ -2423,7 +2423,7 @@ contained subobjects that are estimators.</p>
 <dd class="field-even"><p><strong>params</strong> – Parameter names mapped to their values.</p>
 </dd>
 <dt class="field-odd" id="spml.validation.PoissonSampler.get_params-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#spml.validation.PoissonSampler.get_params-return-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2462,7 +2462,7 @@ a KDE is fitted and used as the intensity.</p></li>
 <dd class="field-even"><p>Column: <code class="docutils literal notranslate"><span class="pre">geometry</span></code> (Point objects).</p>
 </dd>
 <dt class="field-odd" id="spml.validation.PoissonSampler.sample-return-type">Return type<span class="colon">:</span><a class="headerlink" href="#spml.validation.PoissonSampler.sample-return-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://geopandas.org/en/latest/docs/reference/api/geopandas.GeoDataFrame.html#geopandas.GeoDataFrame" title="(in GeoPandas v1.2.1.dev1.dev+gcf7059fe7)">geopandas.GeoDataFrame</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://geopandas.org/en/latest/docs/reference/api/geopandas.GeoDataFrame.html#geopandas.GeoDataFrame" title="(in GeoPandas v1.2.1.dev2.dev+g2c7a44284)">geopandas.GeoDataFrame</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2478,7 +2478,7 @@ possible to update each component of a nested object.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.PoissonSampler.set_params-parameters">Parameters<span class="colon">:</span><a class="headerlink" href="#spml.validation.PoissonSampler.set_params-parameters" title="Permalink to this headline">¶</a></dt>
 <dd class="field-odd"><dl class="simple api-field highlight">
-<dt id="spml.validation.PoissonSampler.set_params.params"><span class="sig-name descname">**params</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)">dict</a></span></span><a class="headerlink" href="#spml.validation.PoissonSampler.set_params.params" title="Permalink to this definition">¶</a></dt><dd><p>Estimator parameters.</p>
+<dt id="spml.validation.PoissonSampler.set_params.params"><span class="sig-name descname">**params</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a></span></span><a class="headerlink" href="#spml.validation.PoissonSampler.set_params.params" title="Permalink to this definition">¶</a></dt><dd><p>Estimator parameters.</p>
 </dd>
 </dl>
 </dd>

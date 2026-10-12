@@ -2358,7 +2358,7 @@ was fitted ahead of time) it is used as-is; otherwise it is cloned
 and refit on the input coordinates.  The fitted estimator is stored
 as <code class="docutils literal notranslate"><span class="pre">clusterer_</span></code>.</p>
 </dd>
-<dt id="spml.validation.ClusterStratifiedKFold.__init__.n_splits"><span class="sig-name descname">n_splits</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a>, default 5</span></span><a class="headerlink" href="#spml.validation.ClusterStratifiedKFold.__init__.n_splits" title="Permalink to this definition">¶</a></dt><dd><p>Number of folds.  Each cluster’s members are split into this many
+<dt id="spml.validation.ClusterStratifiedKFold.__init__.n_splits"><span class="sig-name descname">n_splits</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, default 5</span></span><a class="headerlink" href="#spml.validation.ClusterStratifiedKFold.__init__.n_splits" title="Permalink to this definition">¶</a></dt><dd><p>Number of folds.  Each cluster’s members are split into this many
 parts; clusters smaller than <em>n_splits</em> contribute to only the
 first <code class="docutils literal notranslate"><span class="pre">len(cluster)</span></code> folds.</p>
 </dd>
@@ -2373,10 +2373,10 @@ fold-assignment pool as a regular member.</p></li>
 </ul>
 </p>
 </dd>
-<dt id="spml.validation.ClusterStratifiedKFold.__init__.noise_label"><span class="sig-name descname">noise_label</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a>, default -1</span></span><a class="headerlink" href="#spml.validation.ClusterStratifiedKFold.__init__.noise_label" title="Permalink to this definition">¶</a></dt><dd><p>Cluster label used by density-based clusterers (HDBSCAN, OPTICS)
+<dt id="spml.validation.ClusterStratifiedKFold.__init__.noise_label"><span class="sig-name descname">noise_label</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, default -1</span></span><a class="headerlink" href="#spml.validation.ClusterStratifiedKFold.__init__.noise_label" title="Permalink to this definition">¶</a></dt><dd><p>Cluster label used by density-based clusterers (HDBSCAN, OPTICS)
 to mark noise points.</p>
 </dd>
-<dt id="spml.validation.ClusterStratifiedKFold.__init__.random_state"><span class="sig-name descname">random_state</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a>, RandomState instance, or None</span></span><a class="headerlink" href="#spml.validation.ClusterStratifiedKFold.__init__.random_state" title="Permalink to this definition">¶</a></dt><dd><p>Controls within-cluster shuffling before splitting.</p>
+<dt id="spml.validation.ClusterStratifiedKFold.__init__.random_state"><span class="sig-name descname">random_state</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, RandomState instance, or None</span></span><a class="headerlink" href="#spml.validation.ClusterStratifiedKFold.__init__.random_state" title="Permalink to this definition">¶</a></dt><dd><p>Controls within-cluster shuffling before splitting.</p>
 </dd>
 </dl>
 </dd>
@@ -2398,7 +2398,7 @@ to mark noise points.</p>
 <dd><p>Cluster labels assigned by <code class="docutils literal notranslate"><span class="pre">clusterer_</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.ClusterStratifiedKFold.labels_-type">Type<span class="colon">:</span><a class="headerlink" href="#spml.validation.ClusterStratifiedKFold.labels_-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p>ndarray of <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a>, shape (n,)</p>
+<dd class="field-odd"><p>ndarray of <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, shape (n,)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2409,7 +2409,7 @@ to mark noise points.</p>
 <dd><p>Number of distinct cluster labels (including noise if present).</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.ClusterStratifiedKFold.n_clusters_-type">Type<span class="colon">:</span><a class="headerlink" href="#spml.validation.ClusterStratifiedKFold.n_clusters_-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
 </dd>
 </dl>
 </dd></dl>

@@ -2305,7 +2305,7 @@ Block size and shape are controlled by the grid resolution.</p>
 <dt id="spml.validation.LeaveCellOut.__init__.grid"><span class="sig-name descname">grid</span><span class="p"> : </span><span class="desctype"><span class="desctype">{&quot;h3&quot;, &quot;a5&quot;, &quot;healpix&quot;, &quot;s2&quot;}, default &quot;h3&quot;</span></span><a class="headerlink" href="#spml.validation.LeaveCellOut.__init__.grid" title="Permalink to this definition">¶</a></dt><dd><p>DGGS backend. The corresponding package must be installed
 (<code class="docutils literal notranslate"><span class="pre">h3</span></code>, <code class="docutils literal notranslate"><span class="pre">pya5</span></code>, <code class="docutils literal notranslate"><span class="pre">healpy</span></code>, <code class="docutils literal notranslate"><span class="pre">s2sphere</span></code>).</p>
 </dd>
-<dt id="spml.validation.LeaveCellOut.__init__.resolution"><span class="sig-name descname">resolution</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a> or None, default None</span></span><a class="headerlink" href="#spml.validation.LeaveCellOut.__init__.resolution" title="Permalink to this definition">¶</a></dt><dd><p><p>Grid resolution. Meaning varies by backend:</p>
+<dt id="spml.validation.LeaveCellOut.__init__.resolution"><span class="sig-name descname">resolution</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a> or None, default None</span></span><a class="headerlink" href="#spml.validation.LeaveCellOut.__init__.resolution" title="Permalink to this definition">¶</a></dt><dd><p><p>Grid resolution. Meaning varies by backend:</p>
 <ul class="simple">
 <li><p><strong>h3</strong>: 0 (coarsest) – 15 (finest)</p></li>
 <li><p><strong>a5</strong>: 0 (coarsest) – 30 (finest)</p></li>
@@ -2317,7 +2317,7 @@ chosen automatically and stored as <code class="docutils literal notranslate"><s
 <a class="reference internal" href="#spml.validation.LeaveCellOut.split" title="spml.validation.LeaveCellOut.split (Python method) — Yield (train_indices, test_indices) for each occupied DGGS cell."><code class="xref py py-meth docutils literal notranslate"><span class="pre">split()</span></code></a>.</p>
 </p>
 </dd>
-<dt id="spml.validation.LeaveCellOut.__init__.min_test_size"><span class="sig-name descname">min_test_size</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a>, default 1</span></span><a class="headerlink" href="#spml.validation.LeaveCellOut.__init__.min_test_size" title="Permalink to this definition">¶</a></dt><dd><p>Cells with fewer than <em>min_test_size</em> observations are folded into
+<dt id="spml.validation.LeaveCellOut.__init__.min_test_size"><span class="sig-name descname">min_test_size</span><span class="p"> : </span><span class="desctype"><span class="desctype"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, default 1</span></span><a class="headerlink" href="#spml.validation.LeaveCellOut.__init__.min_test_size" title="Permalink to this definition">¶</a></dt><dd><p>Cells with fewer than <em>min_test_size</em> observations are folded into
 every training set and never used as a test fold. Increase this to
 avoid test folds too small to produce reliable scores.</p>
 </dd>
@@ -2330,7 +2330,7 @@ avoid test folds too small to produce reliable scores.</p>
 <dd><p>Resolution used (set after first <a class="reference internal" href="#spml.validation.LeaveCellOut.split" title="spml.validation.LeaveCellOut.split (Python method) — Yield (train_indices, test_indices) for each occupied DGGS cell."><code class="xref py py-meth docutils literal notranslate"><span class="pre">split()</span></code></a> call).</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.LeaveCellOut.resolution_-type">Type<span class="colon">:</span><a class="headerlink" href="#spml.validation.LeaveCellOut.resolution_-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2352,7 +2352,7 @@ avoid test folds too small to produce reliable scores.</p>
 <dd><p>Number of cells used as test folds (set after first <a class="reference internal" href="#spml.validation.LeaveCellOut.split" title="spml.validation.LeaveCellOut.split (Python method) — Yield (train_indices, test_indices) for each occupied DGGS cell."><code class="xref py py-meth docutils literal notranslate"><span class="pre">split()</span></code></a> call).</p>
 <dl class="field-list simple">
 <dt class="field-odd" id="spml.validation.LeaveCellOut.n_cells_-type">Type<span class="colon">:</span><a class="headerlink" href="#spml.validation.LeaveCellOut.n_cells_-type" title="Permalink to this headline">¶</a></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
