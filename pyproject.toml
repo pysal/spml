@@ -21,6 +21,7 @@ classifiers = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "esda>=2.8.0",
     "geopandas>=1.1.0",
     "joblib>=1.5.0",
     "libpysal>=4.15",
@@ -37,6 +38,7 @@ optional = [
     "s2sphere",
     "rasterio",
     "pya5",
+    "statsmodels",
 ]
 
 [project.urls]

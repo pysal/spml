@@ -4,6 +4,7 @@ channels:
   - conda-forge
 dependencies:
   - python=3.12
+  - esda=2.8.0
   - geopandas=1.1.0
   - joblib=1.5.0
   - libpysal=4.15
@@ -14,6 +15,7 @@ dependencies:
   # optional
   - h3-py
   - rasterio
+  - statsmodels
   # testing
   - geodatasets
   - mgwr

@@ -105,3 +105,28 @@ Range finders
 
    correlogram_range
    knn_range
+
+Metrics
+-------
+
+Metrics for evaluating spatial sampler and cross-validation outputs.
+Regionalization and autocorrelation metrics from ``esda`` (e.g.
+``completeness``, ``boundary_silhouette``, ``correlogram``) are also
+re-exported here.
+
+.. currentmodule:: spml.metrics
+.. autosummary::
+   :toctree: generated/
+
+   areal_entropy
+   area_of_applicability
+   boundary_silhouette
+   completeness
+   correlogram
+   correlogram_range
+   gearygram
+   homogeneity
+   knn_range
+   overlay_entropy
+   path_silhouette
+   v_measure

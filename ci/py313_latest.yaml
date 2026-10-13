@@ -10,11 +10,13 @@ dependencies:
   - scipy
   - scikit-learn
   - joblib
+  - esda
   # optional
   - h3-py
   - healpy
   - s2sphere
   - rasterio
+  - statsmodels
   # testing
   - geodatasets
   - mgwr

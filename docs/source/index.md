@@ -19,7 +19,6 @@ bandwidth_search
 network_graph
 sklearn_compatibility
 mgwr_comparison
-references
 ```
 
 ```{toctree}
@@ -41,6 +40,13 @@ validation/range_finding
 
 ```{toctree}
 :hidden:
+:caption: Metrics
+metrics/area_of_applicability
+metrics/gearygram
+```
+
+```{toctree}
+:hidden:
 :caption: API
 api
 ```
@@ -51,6 +57,5 @@ api
 contributing
 GitHub <https://github.com/pysal/spml>
 Changelog <https://github.com/pysal/spml/releases>
-
+references
 ```
-
