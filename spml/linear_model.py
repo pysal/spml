@@ -20,7 +20,7 @@ class GWLogisticRegression(BaseClassifier):
 
     Notes
     -----
-    - ``y`` must be binary (``{0, 1}`` or boolean).
+    - ``y`` may contain binary or multiclass labels.
     - To enable prediction on new data via :meth:`predict`/:meth:`predict_proba`, you
       must set ``keep_models=True`` (store in memory) or ``keep_models=Path(...)``
       (serialize to disk).
@@ -64,7 +64,8 @@ class GWLogisticRegression(BaseClassifier):
     strict : bool | None, optional
         Do not fit any models if at least one neighborhood has invariant ``y``,
         by default False. None is treated as False but provides a warning if there are
-        invariant models.
+        invariant models. For classification, also warns when neighborhoods contain
+        at least two but not all global classes.
     keep_models : bool | str | Path, optional
         Keep all local models (required for prediction), by default False. Note that
         for some models, like random forests, the objects can be large. If string or
@@ -78,15 +79,17 @@ class GWLogisticRegression(BaseClassifier):
         Number of models to process in each batch. Specify batch_size if your models do
         not fit into memory. By default None
     min_proportion : float, optional
-        Minimum proportion of minority class for a model to be fitted, by default 0.2
+        Minimum ratio of the least frequent to most frequent locally present class
+        for a model to be fitted, by default 0.2. Absent classes are ignored.
     undersample : bool | float, optional
         Whether to apply random undersampling to balance classes.
 
-        If ``True``, undersample the majority class to match the minority class
+        If ``True``, undersample all larger classes to match the smallest class
         (i.e., minority/majority ratio = 1.0).
 
         If a float ``alpha > 0``, target a minority/majority ratio of ``alpha`` after
-        resampling, i.e. ``alpha = N_min / N_resampled_majority``.
+        resampling, i.e. ``alpha = N_min / N_resampled_majority``. For multiclass
+        targets, apply this cap to every class larger than the smallest.
         By default False
     leave_out : float | int, optional
         Leave out a fraction (when float) or a set number (when int) of random
@@ -112,7 +115,7 @@ class GWLogisticRegression(BaseClassifier):
         Probability predictions for focal locations based on a local model trained
         around the point itself.
     pred_ : pd.Series
-        Binary predictions for focal locations based on a local model trained around
+        Class predictions for focal locations based on a local model trained around
         the location itself.
     hat_values_ : pd.Series
         Hat values for each location (diagonal elements of hat matrix)
@@ -129,12 +132,22 @@ class GWLogisticRegression(BaseClassifier):
         Bayesian information criterion
     local_coef_ : pd.DataFrame
         Local coefficient of the features in the decision function for each feature at
-        each location
-    local_intercept_ : pd.Series
-        Local intercept values at each location
+        each location. For multiclass classification, columns are a (class, feature)
+        MultiIndex, with NaN for locally absent classes. Binary local models use
+        symmetric logits (-coef/2, coef/2). Hat values and information criteria
+        are available only for binary classification.
+    local_intercept_ : pd.Series | pd.DataFrame
+        Local intercept values at each location. For multiclass classification, a
+        DataFrame with one column per global class.
     prediction_rate_ : float
         Proportion of models that are fitted, where the rest are skipped due to not
         fulfilling ``min_proportion``.
+    classes_ : numpy.ndarray
+        Sorted global class labels, matching probability columns.
+    local_class_presence_ : pd.DataFrame
+        Boolean presence of each global class in each original neighborhood, before
+        undersampling or leaving observations out. Absent classes have zero probability
+        in fitted models; skipped models have NaN probabilities for every class.
     local_class_support_: pd.Series
         Number of distinct class labels in each local neighborhood.
     left_out_y_ : np.ndarray
@@ -240,14 +253,34 @@ class GWLogisticRegression(BaseClassifier):
             np.array([np.nan]),
         )  # intercept
 
+        if y.nunique() > 2:
+            classes = np.unique(y)
+            self._empty_score_data = (
+                np.array([]),
+                np.array([]),
+                pd.Series(
+                    np.nan,
+                    index=pd.MultiIndex.from_product(
+                        [classes, self.feature_names_in_], names=["class", "feature"]
+                    ),
+                ),
+                pd.Series(np.nan, index=classes),
+            )
         super().fit(X=X, y=y, geometry=geometry)
 
         self.local_coef_ = pd.concat(
             [x[2] for x in self._score_data], axis=1, keys=self._names
         ).T
-        self.local_intercept_ = pd.Series(
-            np.concatenate([x[3] for x in self._score_data]), index=self._names
-        )
+        if len(self.classes_) > 2:
+            self.local_intercept_ = pd.DataFrame(
+                [x[3] for x in self._score_data],
+                index=self._names,
+                columns=self.classes_,
+            )
+        else:
+            self.local_intercept_ = pd.Series(
+                np.concatenate([x[3] for x in self._score_data]), index=self._names
+            )
 
         self._y_local = [x[0] for x in self._score_data]
         self._pred_local = [x[1] for x in self._score_data]
@@ -279,6 +312,24 @@ class GWLogisticRegression(BaseClassifier):
         local_proba = pd.DataFrame(
             local_model.predict_proba(X), columns=local_model.classes_
         )
+        if len(self.classes_) > 2:
+            coef = local_model.coef_
+            intercept = local_model.intercept_
+            if len(local_model.classes_) == 2:
+                # Symmetric logits reproduce binary sigmoid probabilities under softmax.
+                coef = np.vstack([-coef / 2, coef / 2])
+                intercept = np.concatenate([-intercept / 2, intercept / 2])
+            coefficients = pd.DataFrame(
+                coef, index=local_model.classes_, columns=self.feature_names_in_
+            ).reindex(self.classes_)
+            coefficients.index.name = "class"
+            coefficients.columns.name = "feature"
+            return (
+                y,
+                local_proba.idxmax(axis=1),
+                coefficients.stack(future_stack=True),
+                pd.Series(intercept, index=local_model.classes_).reindex(self.classes_),
+            )
         return (
             y,
             local_proba.idxmax(axis=1),

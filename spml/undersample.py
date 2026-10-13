@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 
 
-class BinaryRandomUnderSampler:
-    """Random undersampling for binary targets.
+class RandomUnderSampler:
+    """Random undersampling for classification targets.
 
     This helper implements a minimal subset of the imbalanced-learn API
     (``fit_resample``) used internally by geographically weighted classifiers.
@@ -11,22 +11,23 @@ class BinaryRandomUnderSampler:
     Parameters
     ----------
     sampling_strategy : bool | float, default=True
-        If ``True``, undersample the majority class to match the minority class
+        If ``True``, undersample all larger classes to match the smallest class
         (i.e., minority/majority ratio = 1.0).
 
         If a float ``alpha > 0``, target a minority/majority ratio of ``alpha`` after
-        resampling, i.e. ``alpha = N_min / N_resampled_majority``.
+        resampling, i.e. ``alpha = N_min / N_resampled_majority``. For multiclass
+        targets this caps each larger class at ``floor(N_min / alpha)``.
     random_state : int | numpy.random.Generator | None, default=None
-        Random seed (or RNG) used to subsample the majority class.
+        Random seed (or RNG) used to subsample larger classes.
 
     Examples
     --------
     >>> import numpy as np
     >>> import pandas as pd
-    >>> from spml.undersample import BinaryRandomUnderSampler
+    >>> from spml.undersample import RandomUnderSampler
     >>> X = pd.DataFrame({"x": [0, 1, 2, 3, 4, 5]})
     >>> y = pd.Series([0, 0, 0, 0, 1, 1])
-    >>> rus = BinaryRandomUnderSampler(random_state=0)
+    >>> rus = RandomUnderSampler(random_state=0)
     >>> X_res, y_res = rus.fit_resample(X, y)
     >>> y_res.value_counts().loc[0] == y_res.value_counts().loc[1]
     np.True_
@@ -39,14 +40,14 @@ class BinaryRandomUnderSampler:
         self.random_state = random_state
 
     def fit_resample(self, X, y):
-        """Resample ``X`` and ``y`` by undersampling the majority class.
+        """Resample ``X`` and ``y`` by undersampling classes larger than the smallest.
 
         Parameters
         ----------
         X : array-like
             Feature matrix.
         y : array-like
-            Binary target.
+            Class labels.
 
         Returns
         -------
@@ -60,9 +61,7 @@ class BinaryRandomUnderSampler:
 
         # identify minority / majority labels
         uniques, counts = np.unique(y_arr, return_counts=True)
-        order = np.argsort(counts)
-        min_label, maj_label = uniques[order[0]], uniques[order[1]]
-        n_min, n_maj = counts[order[0]], counts[order[1]]
+        n_min = counts.min()
 
         # interpret sampling_strategy as minority/majority ratio alpha
         if self.sampling_strategy is True:
@@ -78,25 +77,20 @@ class BinaryRandomUnderSampler:
         # alpha = N_min / N_resampled_majority  => N_resampled_majority = N_min / alpha
         target_maj = int(np.floor(n_min / alpha))
 
-        # if no undersampling required, return originals (preserve types)
-        if target_maj >= n_maj:
+        if target_maj >= counts.max():
             return X, y
-
-        # get indices
-        all_idx = np.arange(len(y_arr))
-        maj_idx = all_idx[y_arr == maj_label]
-        min_idx = all_idx[y_arr == min_label]
-
-        if isinstance(self.random_state, np.random.Generator):
-            rng = self.random_state
-        else:
-            rng = np.random.default_rng(self.random_state)
-        perm = rng.permutation(len(maj_idx))
-        selected_maj_idx = maj_idx[perm[:target_maj]]
-
-        keep_idx = np.concatenate([min_idx, selected_maj_idx])
-        # keep original order (optional)
-        keep_idx.sort()
+        rng = (
+            self.random_state
+            if isinstance(self.random_state, np.random.Generator)
+            else np.random.default_rng(self.random_state)
+        )
+        selected = []
+        for label, count in zip(uniques, counts, strict=True):
+            indices = np.flatnonzero(y_arr == label)
+            if count > n_min:
+                indices = rng.permutation(indices)[:target_maj]
+            selected.append(indices)
+        keep_idx = np.sort(np.concatenate(selected))
 
         # index X and y preserving types
         if isinstance(X, pd.DataFrame | pd.Series):

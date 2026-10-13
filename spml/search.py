@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from scipy.spatial.distance import pdist
 from sklearn import metrics
+from sklearn.base import is_classifier
 
 
 class BandwidthSearch:
@@ -66,7 +67,7 @@ class BandwidthSearch:
         Built-in special values:
 
         * ``"aicc"``, ``"aic"``, ``"bic"`` — information criteria;
-          **only valid for linear / logistic models**.
+          **only valid for linear regression / binary logistic models**.
         * ``"log_loss"`` — cross-entropy loss; for classifiers only.
         * ``"prediction_rate"`` — proportion of fitted locations; classifiers.
         * ``"rmse"`` — root mean squared error of focal residuals; regressors.
@@ -215,21 +216,33 @@ class BandwidthSearch:
         ``minimize=True``, otherwise as the index of the maximum score.
         """
         self.geometry = geometry
+        estimator = self.model()
+        self._supports_ic = estimator._supports_ic and not (
+            is_classifier(estimator) and y.nunique() > 2
+        )
 
         if self.criterion is None:
             if self._supports_ic:
                 self.criterion = "aicc"
             else:
-                self.criterion = "rmse"
+                self.criterion = "log_loss" if is_classifier(estimator) else "rmse"
                 if self.metrics is not None and self.criterion not in self.metrics:
                     self.metrics.append(self.criterion)
                 else:
                     self.metrics = [self.criterion]
 
         _ic_criteria = {"aicc", "aic", "bic"}
-        if self.criterion in _ic_criteria and not self._supports_ic:
+        if not self._supports_ic and (
+            self.criterion in _ic_criteria
+            or _ic_criteria.intersection(self.metrics or [])
+        ):
+            requested = (
+                f"criterion='{self.criterion}'"
+                if self.criterion in _ic_criteria
+                else f"metrics={self.metrics}"
+            )
             raise ValueError(
-                f"criterion='{self.criterion}' requires information criteria "
+                f"{requested} requires information criteria "
                 f"(AIC/AICc/BIC) which are not valid for "
                 f"'{self.model.__name__}'. "
                 f"For regression models use criterion='rmse' or criterion='mae'; "
