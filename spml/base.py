@@ -279,7 +279,7 @@ class _BaseModel(BaseEstimator):
             # kernel(0, bw) = 1 so the full formula gives the same result.
             hat_value = focal_with_intercept.T @ XtWX_inv @ focal_with_intercept
 
-            return hat_value
+            return float(hat_value)
 
         except (np.linalg.LinAlgError, ValueError):
             # Return NaN if computation fails (singular matrix, etc.)
