@@ -4,8 +4,16 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "monthly"
+    commit-message:
+      prefix: "grouped dependabot commit"
     groups:
-      github-actions:
+      all-actions:
         patterns:
-          - '*'
+          - "*"
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"
+    cooldown:
+      default-days: 7
