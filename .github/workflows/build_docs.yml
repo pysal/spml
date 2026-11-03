@@ -1,6 +1,8 @@
 ---
 name: Build Docs
 
+permissions: {}
+
 on:
   push:
     branches: [main]
@@ -39,6 +41,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup micromamba
         uses: mamba-org/setup-micromamba@f457c30a868e4760d3a6fcea5f25dc655b8edf39 # v3.2.1
@@ -97,7 +100,7 @@ jobs:
           git pull
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          python update_version_json.py --version ${{ github.ref_name }}
+          python update_version_json.py --version ${GITHUB_REF_NAME}
           git add versions.json
           git commit -m "Update versions switcher"
           git push
