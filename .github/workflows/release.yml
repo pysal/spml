@@ -1,6 +1,8 @@
 ---
 name: Release Package
 
+permissions: {}
+
 on:
     push:
         # Sequence of patterns matched against refs/tags
@@ -16,6 +18,8 @@ on:
 jobs:
     pypi-publish:
         name: upload release to PyPI
+        env:
+            REF: ${{ github.ref }}
         runs-on: ubuntu-latest
         permissions:
             id-token: write # MANDATORY for trusted publishing to PyPI
@@ -24,6 +28,7 @@ jobs:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   fetch-depth: 0
+                  persist-credentials: false
 
             - name: Set up Python
               uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -43,7 +48,7 @@ jobs:
                   github-token: ${{secrets.GITHUB_TOKEN}}
                   script: |
                       await github.request(`POST /repos/${{ github.repository }}/releases`, {
-                          tag_name: "${{ github.ref }}",
+                          tag_name: "$REF",
                           generate_release_notes: true
                       });
 
