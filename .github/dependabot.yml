@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: "monthly"
     commit-message:
-      prefix: "grouped dependabot commit"
+      prefix: "GHA:"
     groups:
       all-actions:
         patterns:
