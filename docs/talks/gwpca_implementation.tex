@@ -1,0 +1,405 @@
+\documentclass[10pt]{beamer}
+\usetheme{Madrid}
+\usecolortheme{seahorse}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{booktabs}
+
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{purple},
+  showstringspaces=false,
+  breaklines=true,
+  language=Python,
+}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+\title[GWPCA in spml]{Geographically Weighted PCA for \texttt{spml}}
+\subtitle{A suggested implementation}
+\author{}
+\institute{PySAL --- SDSU spatial-ML group}
+\date{}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+  \begin{center}
+    \small A 10-minute walk-through of the design, the maths, and what is
+    already on the \texttt{gwpca} branch.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}{The request}
+  \textbf{Extend the GW framework to unsupervised models,
+  starting with GWPCA.}
+  \begin{itemize}
+    \item Today \texttt{spml} fits one \emph{supervised} scikit-learn
+      estimator per location: \texttt{GWLinearRegression},
+      \texttt{GWLogisticRegression}, GW random forests, GW gradient boosting.
+    \item All operate on pairs $(X, y)$.
+    \item We want a branch that works on the \textbf{feature matrix $X$
+      alone} and decomposes its \emph{local} covariance structure.
+    \item First estimator: \textbf{Geographically Weighted PCA}
+      \footnotesize (Harris, Brunsdon \& Charlton, 2011).
+  \end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}{Recap: the ``map of models'' idea}
+  For each location $i$:
+  \begin{enumerate}
+    \item Build spatial weights $w_{ij}$ from a \textbf{kernel} and a
+      \textbf{bandwidth} (fixed distance or adaptive $k$-NN), via
+      \texttt{libpysal.graph}.
+    \item Fit a local model at $i$, weighting each observation $j$ by
+      $w_{ij}$.
+    \item Store the local parameters for $i$.
+  \end{enumerate}
+  \vspace{0.6em}
+  GWPCA keeps steps 1 and 3 unchanged. Only \textbf{step 2} is different:
+  no target, no \texttt{.fit(X, y)} --- a direct eigendecomposition instead.
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}{What GWPCA produces}
+  A principal components analysis whose loadings and variances
+  \textbf{vary across space}:
+  \begin{itemize}
+    \item local loadings --- how variables combine into components
+      \emph{here}
+    \item local explained variance --- how much structure each component
+      captures \emph{here}
+    \item the \textbf{winning variable} --- which variable dominates
+      component 1 at each location (the classic GWPCA map)
+    \item proportion of total variation (PTV) retained by the first
+      $k$ components
+  \end{itemize}
+  \vfill
+  \centering
+  \textit{One global rotation $\Rightarrow$ a surface of rotations.}
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}{The one real wrinkle}
+  \begin{block}{\texttt{sklearn.decomposition.PCA} has no \texttt{sample\_weight}}
+    We cannot just hand weighted rows to scikit-learn.
+  \end{block}
+  \vspace{0.5em}
+  So the local model is \textbf{not} an sklearn estimator fit --- it is a
+  weighted covariance matrix built directly and eigendecomposed with NumPy.
+  \begin{itemize}
+    \item cheap: one $p \times p$ symmetric eigen-problem per location
+    \item deterministic --- no solver, no \texttt{random\_state}
+    \item the global baseline \emph{is} a plain \texttt{PCA}, for comparison
+  \end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}{The maths (per location $i$)}
+  Geographically weighted mean of variable $k$:
+  \[
+    \bar{x}_k(i) \;=\; \frac{\sum_j w_{ij}\, x_{jk}}{\sum_j w_{ij}}
+  \]
+  Geographically weighted covariance:
+  \[
+    \Sigma_{k\ell}(i) \;=\;
+      \frac{\sum_j w_{ij}\,\bigl(x_{jk}-\bar{x}_k(i)\bigr)
+                          \bigl(x_{j\ell}-\bar{x}_\ell(i)\bigr)}
+           {\sum_j w_{ij}}
+  \]
+  With \texttt{standardize=True} (the default), $x$ is first z-scored
+  \textbf{globally}, once, with the population SD:
+  \[
+    x_{jk} \;\leftarrow\; \frac{x_{jk} - \bar{x}_k}{\operatorname{sd}(x_k)}
+  \]
+  \footnotesize This is \emph{not} a local correlation matrix: the diagonal of
+  $\Sigma(i)$ is not forced to 1. It only becomes a correlation matrix in the
+  large-bandwidth limit.
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}{The maths --- decomposition and outputs}
+  Symmetric eigendecomposition:
+  \[
+    \Sigma(i) \;=\; V(i)\,\Lambda(i)\,V(i)^{\!\top},
+    \qquad \lambda_1(i) \ge \dots \ge \lambda_p(i)
+  \]
+  \begin{itemize}
+    \item columns of $V(i)$ --- local loadings; $\Lambda(i)$ --- local
+      variances
+    \item explained-variance ratio: $\lambda_m(i) / \sum_m \lambda_m(i)$
+    \item score for each neighbour $j$ of $i$ (raw, \emph{not}
+      mean-centered --- matches \texttt{GWmodel}, more shortly):
+      $s_j(i) = x_j^{\!\top} V(i)_{[:,\,1:k]}$
+    \item winning variable: $\displaystyle \arg\max_k \bigl|V_{k1}(i)\bigr|$
+  \end{itemize}
+  \vspace{0.4em}
+  \footnotesize Sign convention: force the largest-magnitude loading of
+  each component positive (per location).
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}{How it fits the existing architecture}
+  \begin{center}
+  \small
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    \textbf{Existing piece} & \textbf{In GWPCA} \\
+    \midrule
+    \texttt{\_build\_weights} & reuse as-is (kernel graph, adaptive/fixed) \\
+    parallel neighbourhood fan-out & reuse (drop the \texttt{\_y} column) \\
+    \texttt{\_fit\_local} & generic; calls \texttt{\_decompose\_local} \\
+    prediction helpers & reuse later for \texttt{transform} \\
+    \texttt{keep\_models} (mem / disk) & reuse: store local mean + loadings \\
+    IC / hat-matrix / AIC code & \textbf{skip} (\texttt{\_model\_type = "gwpca"}) \\
+    \texttt{fit\_global\_model} & reuse: baseline is a plain \texttt{PCA} \\
+    \texttt{BandwidthSearch} & extend later (CV reconstruction error) \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \vfill
+  \centering
+  \normalsize Net new code is small and localised in one module.
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}[fragile]{New module: \texttt{spml/decomposition.py}}
+\begin{lstlisting}
+from spml.decomposition import GWPCA
+
+gwpca = GWPCA(
+    n_components=2,
+    bandwidth=30,
+    fixed=False,          # adaptive k-NN
+    kernel="bisquare",
+    standardize=True,     # global z-score + local cov (see R note)
+    keep_models=True,     # needed for transform() later
+).fit(X, geometry=gdf.representative_point())  # points only
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{fit(X, geometry)} --- no \texttt{y}; geometry must be
+      points
+    \item Same split as \texttt{BaseRegressor} $\to$
+      \texttt{GWLinearRegression}: generic machinery in the base class,
+      method-specific code in the subclass (next slide)
+  \end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}{Base class vs \texttt{GWPCA}}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \textbf{\texttt{BaseGWDecomposition}}
+      \begin{itemize}\small
+        \item validation, global standardization
+        \item weights, parallel loop, model storage
+        \item \texttt{\_fit\_local}: weights + local mean, then calls
+          \texttt{\_decompose\_local}
+        \item \texttt{\_scale\_eigenvalues}: divide by each location's
+          \emph{own} weight sum
+        \item generic attributes: \texttt{components\_},
+          \texttt{explained\_variance[\_ratio]\_}
+        \item \texttt{model=} builds the global baseline
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \textbf{\texttt{GWPCA}}
+      \begin{itemize}\small
+        \item \texttt{\_\_init\_\_} with \texttt{model=PCA}
+        \item \texttt{\_decompose\_local}: scatter matrix, \texttt{eigh},
+          sign rule, neighbour scores
+        \item \texttt{\_scale\_eigenvalues} override: the GWmodel bug
+          (shared divisor)
+        \item \texttt{fit} wrapper: \texttt{local\_scores\_},
+          \texttt{local\_loadings\_}, PTV, winning variable
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \vfill
+  \centering
+  \footnotesize The GWmodel bug lives in one method: dropping it means
+  deleting the override.
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}[fragile]{Fitted attributes (scikit-learn flavoured)}
+\begin{lstlisting}
+gwpca.components_               # (n_samples, n_components, n_features)
+gwpca.explained_variance_       # (n_samples, n_components)
+gwpca.explained_variance_ratio_ # (n_samples, n_components)
+gwpca.local_eigenvalues_        # all eigenvalues, descending
+gwpca.proportion_total_var_     # PTV of the first k components
+gwpca.winning_variable_         # argmax |loading| on PC1
+gwpca.local_scores_             # per-neighbour scores (see R note)
+gwpca.local_loadings_           # tidy MultiIndex (location, component)
+gwpca.global_model_             # sklearn PCA baseline
+\end{lstlisting}
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}{What is on the \texttt{gwpca} branch now}
+  \textbf{Implemented (the unambiguous core):}
+  \begin{itemize}
+    \item weighted mean / covariance, global standardization, \texttt{eigh},
+      descending sort, per-location sign convention
+    \item all the attributes on the previous slide
+    \item \texttt{graph=} and \texttt{geometry+bandwidth} paths; fixed and
+      adaptive; \texttt{keep\_models}; global baseline
+    \item \textbf{19 tests}; rebased on current \texttt{main}, full suite
+      green (405 passed, 3 skipped)
+    \item user-guide notebook (Guerry data), \texttt{api.rst}, references
+  \end{itemize}
+  \textbf{Verified against ground truth:}
+  \begin{itemize}
+    \item matches a hand-rolled weighted covariance $+$ \texttt{eigh}
+    \item \texttt{boxcar} kernel $+$ huge bandwidth reproduces global
+      \texttt{sklearn} PCA loadings and ratios to machine precision
+  \end{itemize}
+  \vspace{0.3em}
+  \footnotesize Since: code-reviewed and hardened --- bandwidth input
+  validation (matching the supervised GW models), dead-code/lint cleanup,
+  vectorized attribute assembly, doc fixes. All six review findings closed.
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}{A wrinkle found while cross-checking against R}
+  Went a step further than the checks on the previous slide: ran real
+  \texttt{GWmodel::gwpca} (R) on identical data and diffed the output
+  directly --- and found a genuine bug in the reference implementation.
+  \begin{block}{The bug}
+    \texttt{gwpca()} normalises every location's reported eigenvalues by
+    \texttt{sum(wt)} taken from whichever neighbourhood was \emph{last
+    processed} in the input's row order (a stray/reused loop variable in the
+    R source) --- \textbf{not} that location's own neighbourhood weight-sum.
+  \end{block}
+  \begin{itemize}
+    \item Harmless only when every neighbourhood has the same weight-sum,
+      which in practice means an adaptive \texttt{boxcar} kernel.
+    \item Wrong for any distance-decay kernel, \textbf{including the default
+      adaptive bisquare} (Guerry, 30 neighbours: weight-sums range from 8.6 to
+      13.9), and for fixed kernels over irregular points: eigenvalue
+      \emph{magnitudes} are mis-scaled for every location except the one
+      processed last.
+    \item Loadings and \texttt{explained\_variance\_ratio\_}/PTV are
+      \textbf{unaffected} --- the shared divisor cancels out of any
+      within-row ratio and never touches the eigenvectors.
+  \end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}[fragile]{Our call: replicate it, on purpose}
+  \texttt{spml} now deliberately reproduces this exact behaviour, for
+  numerical parity with the reference implementation:
+  \begin{itemize}
+    \item \texttt{local\_eigenvalues\_} / \texttt{explained\_variance\_}
+      share one divisor (the last-processed neighbourhood's weight-sum)
+      $\Rightarrow$ now \textbf{depend on \texttt{X}'s row order} at fit time.
+    \item Documented in \texttt{decomposition.py}'s module docstring
+      (``Deliberate parity with \texttt{GWmodel::gwpca}'') and locked in by
+      \texttt{test\_gwpca\_eigenvalue\_scale\_depends\_on\_row\_order}.
+    \item \texttt{test\_gwpca\_matches\_r\_gwmodel\_reference}: eigenvalues,
+      loadings and per-neighbour scores match real \texttt{GWmodel::gwpca}
+      output.
+    \item \texttt{gwpca()} has no \texttt{scale.vars} argument; users call
+      \texttt{scale()} first. \texttt{standardize=True} does the same with
+      the population SD: same loadings, eigenvalues differ by $(n-1)/n$.
+    \item ``Last processed'' is looked up by \texttt{X}'s last row label, not
+      the spatial graph's internal order.
+  \end{itemize}
+  \vfill
+  \centering
+  \footnotesize Worth reporting upstream to the \texttt{GWmodel} maintainer.
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}[fragile]{Two more GWmodel bugs: bandwidth cross-validation}
+  \texttt{gwpca.cv} (bandwidth score) and \texttt{gwpca.cv.contrib}
+  (per-observation residuals, used for outliers) compute, for each left-out
+  $i$:
+\begin{lstlisting}[language=R]
+v <- v %*% t(v)                               # projector V_k V_k^T
+score <- score + sum((x[i, ] - x[i, ] %*% v))^2
+\end{lstlisting}
+  \begin{itemize}
+    \item \textbf{Uncentred:} reconstructs raw $x_i$, while the loadings come
+      from data centred on the local mean.
+    \item \textbf{\texttt{sum(r)\^{}2}, not \texttt{sum(r\^{}2)}:} squares the
+      \emph{sum} of the residuals, so positive and negative residuals cancel.
+    \item On Guerry: the textbook score picks \textbf{14} neighbours, the
+      GWmodel score \textbf{44}.
+    \item Brunsdon's tutorial supplies a ``fixed'' \texttt{gwpca.cv.contrib},
+      but it has the same bug.
+  \end{itemize}
+  \vfill
+  \centering
+  \footnotesize Unlike the eigenvalue bug, this changes \emph{which bandwidth
+  and which outliers} are chosen, so the proposal is a correct score by
+  default, with GWmodel's version as an option.
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}{Open decisions --- need the API owners}
+  \begin{itemize}
+    \item \textbf{Base-class name} (\texttt{BaseGWDecomposition} or
+      \texttt{BaseDecomposition}) and whether \texttt{model=} stays (it now
+      builds the global baseline).
+    \item \textbf{GWmodel eigenvalue bug:} keep it as the default, put it
+      behind an option, or drop it.
+    \item \textbf{\texttt{local\_scores\_}:} keep GWmodel's per-neighbour,
+      uncentred scores, or also offer one centred score per location.
+    \item \textbf{CV score} for bandwidth selection: textbook or GWmodel.
+    \item \textbf{Cross-location sign \& order} --- eigenvectors are defined
+      up to sign, and component order can swap between neighbours.
+      Per-location convention is in; \emph{aligning across space} (Procrustes
+      rotation to the global solution) is still open --- and the usual
+      critique of GWPCA maps.
+    \item \textbf{Fixed vs adaptive \texttt{n\_components}} --- fixed for now.
+  \end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}{Roadmap}
+  \textbf{First PR (this branch):} \texttt{BaseGWDecomposition} $+$
+  \texttt{GWPCA} $+$ core attributes $+$ tests $+$ user-guide notebook,
+  \texttt{api.rst} and references. \emph{Code done; PR to
+  \texttt{pysal/spml} not yet opened.}
+  \vspace{0.6em}
+
+  \textbf{Follow-up PRs:}
+  \begin{enumerate}
+    \item \texttt{BandwidthSearch} integration --- leave-one-out CV
+      (the notebook computes it by hand for now)
+    \item Monte Carlo test of local variation
+    \item cross-location alignment (Procrustes)
+    \item \texttt{transform()} on new data --- nearest / ensemble local
+      models (reuse the prediction helpers)
+    \item \texttt{batch\_size} for large samples; robust GWPCA and outliers
+  \end{enumerate}
+\end{frame}
+
+% ---------------------------------------------------------
+\begin{frame}{Get involved}
+  \begin{itemize}
+    \item Branch: \texttt{gwpca}; upstream PR to \texttt{pysal/spml} in
+      preparation
+    \item Start with the user-guide notebook,
+      \texttt{docs/source/gwpca.ipynb}
+    \item Good pickups for the group: bandwidth search (CV), the Monte Carlo
+      test, the alignment question, \texttt{transform}
+  \end{itemize}
+  \vfill
+  \centering
+  \Large \texttt{from spml.decomposition import GWPCA}
+\end{frame}
+
+\end{document}
