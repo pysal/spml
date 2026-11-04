@@ -18,6 +18,12 @@ estimators.
    BaseClassifier
    BaseRegressor
 
+.. currentmodule:: spml.decomposition
+.. autosummary::
+   :toctree: generated/
+
+   BaseGWDecomposition
+
 Linear models
 -------------
 
@@ -46,6 +52,18 @@ feature importance).
    GWGradientBoostingRegressor
    GWRandomForestClassifier
    GWRandomForestRegressor
+
+Decomposition
+-------------
+
+Unsupervised geographically weighted decomposition of a feature matrix, with
+access to spatially varying loadings, eigenvalues and scores.
+
+.. currentmodule:: spml.decomposition
+.. autosummary::
+   :toctree: generated/
+
+   GWPCA
 
 
 Bandwidth search
