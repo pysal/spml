@@ -158,7 +158,7 @@
     \midrule
     \texttt{\_build\_weights} & reuse as-is (kernel graph, adaptive/fixed) \\
     parallel neighbourhood fan-out & reuse (drop the \texttt{\_y} column) \\
-    \texttt{\_fit\_local} & generic; calls \texttt{\_decompose\_local} \\
+    \texttt{\_fit\_local} & replaced by \texttt{\_fit\_neighborhood} \\
     prediction helpers & reuse later for \texttt{transform} \\
     \texttt{keep\_models} (mem / disk) & reuse: store local mean + loadings \\
     IC / hat-matrix / AIC code & \textbf{skip} (\texttt{\_model\_type = "gwpca"}) \\
@@ -203,7 +203,7 @@ gwpca = GWPCA(
       \begin{itemize}\small
         \item validation, global standardization
         \item weights, parallel loop, model storage
-        \item \texttt{\_fit\_local}: weights + local mean, then calls
+        \item \texttt{\_fit\_neighborhood}: weights + local mean, then calls
           \texttt{\_decompose\_local}
         \item \texttt{\_scale\_eigenvalues}: divide by each location's
           \emph{own} weight sum
