@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 import geopandas as gpd
 import numpy as np
@@ -262,7 +263,12 @@ def test_gwpca_reduces_to_global_pca(toy_data):
 # --------------------------------------------------------------- parameters ---
 def test_gwpca_standardize_flag_changes_result(toy_data):
     X, geometry = toy_data
-    common = {"n_components": 2, "bandwidth": 4.0, "fixed": True, "n_jobs": 1}
+    common: dict[str, Any] = {
+        "n_components": 2,
+        "bandwidth": 4.0,
+        "fixed": True,
+        "n_jobs": 1,
+    }
     corr = GWPCA(standardize=True, **common).fit(X, geometry=geometry)
     cov = GWPCA(standardize=False, **common).fit(X, geometry=geometry)
     assert not np.allclose(corr.components_, cov.components_)
@@ -313,7 +319,7 @@ def test_gwpca_loadings_and_ratio_are_index_order_invariant(toy_data):
     )
 
     got_ratio = shuffled.explained_variance_ratio_.copy()
-    got_ratio.index = pd.Index(order)[got_ratio.index]
+    got_ratio.index = np.asarray(order)[got_ratio.index.to_numpy()]
     np.testing.assert_allclose(
         base.explained_variance_ratio_.sort_index().to_numpy(),
         got_ratio.sort_index().to_numpy(),
@@ -348,7 +354,7 @@ def test_gwpca_eigenvalue_scale_depends_on_row_order(toy_data):
     )
 
     got_eig = shuffled.local_eigenvalues_.copy()
-    got_eig.index = pd.Index(order)[got_eig.index]
+    got_eig.index = np.asarray(order)[got_eig.index.to_numpy()]
 
     scale = (
         base.local_eigenvalues_.sort_index().to_numpy()

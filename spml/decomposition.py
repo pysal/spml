@@ -91,7 +91,7 @@ class BaseGWDecomposition(_BaseModel):
     do for the supervised estimators: input validation, optional global
     standardization, building the spatial weights, the parallel loop over
     neighbourhoods, local model storage, and assembly of the generic
-    per-location outputs. For each neighbourhood, :meth:`_fit_local` computes
+    per-location outputs. For each neighbourhood, :meth:`_fit_neighborhood` computes
     the kernel weights and the weighted local mean, then hands the data to
     :meth:`_decompose_local`, which concrete subclasses such as :class:`GWPCA`
     must implement.
@@ -223,7 +223,10 @@ class BaseGWDecomposition(_BaseModel):
 
     # ------------------------------------------------------------------ fit ---
     def fit(
-        self, X: pd.DataFrame, geometry: gpd.GeoSeries | None = None
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,  # noqa: ARG002 - sklearn API convention
+        geometry: gpd.GeoSeries | None = None,
     ) -> BaseGWDecomposition:
         """Fit local decompositions.
 
@@ -231,6 +234,9 @@ class BaseGWDecomposition(_BaseModel):
         ----------
         X : pandas.DataFrame
             Feature matrix.
+        y : None
+            Ignored. Not used, present for API consistency with scikit-learn
+            and the supervised geographically weighted models.
         geometry : geopandas.GeoSeries | None
             Point geometries of the observations.  Required unless ``graph``
             was supplied; required in any case to enable :meth:`transform`.
@@ -333,7 +339,7 @@ class BaseGWDecomposition(_BaseModel):
         return [f"{self._component_prefix}{j + 1}" for j in range(n)]
 
     def _fit_local_batch(self, X: pd.DataFrame, weights: graph.Graph) -> list:
-        """Iterate neighbourhoods and dispatch :meth:`_fit_local` in parallel.
+        """Iterate neighbourhoods and dispatch :meth:`_fit_neighborhood` in parallel.
 
         Mirrors :meth:`_BaseModel._batch_fit` without the ``_y`` column.
         """
@@ -354,11 +360,14 @@ class BaseGWDecomposition(_BaseModel):
         grouper = data.groupby(index.get_level_values(0), sort=False)
 
         return Parallel(n_jobs=self.n_jobs, temp_folder=self.temp_folder)(
-            delayed(self._fit_local)(group, name) for name, group in grouper
+            delayed(self._fit_neighborhood)(group, name) for name, group in grouper
         )
 
-    def _fit_local(self, data: pd.DataFrame, name: Hashable) -> tuple:
+    def _fit_neighborhood(self, data: pd.DataFrame, name: Hashable) -> tuple:
         """Fit a single neighbourhood.
+
+        Named differently from :meth:`_BaseModel._fit_local`, which fits one
+        supervised estimator with a different signature and is not used here.
 
         Computes the kernel weights and the weighted local mean, centres the
         data, and delegates the decomposition itself to
@@ -615,13 +624,21 @@ class GWPCA(BaseGWDecomposition):
         )
         self._model_type = "gwpca"
 
-    def fit(self, X: pd.DataFrame, geometry: gpd.GeoSeries | None = None) -> GWPCA:
+    def fit(
+        self,
+        X: pd.DataFrame,
+        y: pd.Series | None = None,  # noqa: ARG002 - sklearn API convention
+        geometry: gpd.GeoSeries | None = None,
+    ) -> GWPCA:
         """Fit GWPCA.
 
         Parameters
         ----------
         X : pandas.DataFrame
             Feature matrix.
+        y : None
+            Ignored. Not used, present for API consistency with scikit-learn
+            and the supervised geographically weighted models.
         geometry : geopandas.GeoSeries | None
             Point geometries of the observations.  Required unless ``graph``
             was supplied; required in any case to enable :meth:`transform`.
