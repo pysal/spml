@@ -4,8 +4,16 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "monthly"
+    commit-message:
+      prefix: "GHA:"
     groups:
-      github-actions:
+      all-actions:
         patterns:
-          - '*'
+          - "*"
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"
+    cooldown:
+      default-days: 7
