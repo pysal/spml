@@ -38,4 +38,4 @@ jobs:
                   uv pip install .[optional]
 
             - name: Run checks
-              run: uv run ty check spml
+              run: uv run ty check spml --output-format github
