@@ -10,7 +10,7 @@ on:
         branches:
             - "*"
     schedule:
-        - cron: "59 23 * * *"
+        - cron: "59 23 * * 3"
     workflow_dispatch:
         inputs:
             version:
@@ -38,4 +38,4 @@ jobs:
                   uv pip install .[optional]
 
             - name: Run checks
-              run: uv run ty check spml
+              run: uv run ty check spml --output-format github

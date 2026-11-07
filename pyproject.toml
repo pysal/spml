@@ -79,7 +79,7 @@ ignore = [
 [tool.ty.rules]
 unresolved-attribute = "ignore"
 no-matching-overload = "ignore"
-unresolved-import = "ignore"
+import-not-found = "ignore"
 
 [tool.coverage.run]
 source = ["./spml"]
