@@ -10,7 +10,7 @@ on:
     branches:
       - "*"
   schedule:
-    - cron: "59 23 * * *"
+    - cron: "59 23 * * 3"
   workflow_dispatch:
     inputs:
       version:
