@@ -32,6 +32,9 @@ jobs:
         os: ["ubuntu-latest"]
         environment-file: [docs/environment.yaml]
         experimental: [false]
+    permissions:
+      contents: write
+      id-token: write
     defaults:
       run:
         shell: bash -l {0}
@@ -69,8 +72,6 @@ jobs:
       - name: Publish to Github Pages on main (dev)
         if: ${{ github.ref == 'refs/heads/main' }}
         uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
-        permissions:
-          contents: write
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/build/html/
@@ -80,8 +81,6 @@ jobs:
       - name: Publish to Github Pages on release (versioned)
         if: ${{ github.ref_type == 'tag' }}
         uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
-        permissions:
-          contents: write
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/build/html/
@@ -90,8 +89,6 @@ jobs:
       - name: Publish to Github Pages on release (stable)
         if: ${{ github.ref_type == 'tag' }}
         uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
-        permissions:
-          contents: write
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/build/html/
