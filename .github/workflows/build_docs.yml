@@ -32,6 +32,9 @@ jobs:
         os: ["ubuntu-latest"]
         environment-file: [docs/environment.yaml]
         experimental: [false]
+    permissions:
+      contents: write
+      id-token: write
     defaults:
       run:
         shell: bash -l {0}
