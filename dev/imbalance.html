@@ -2516,7 +2516,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/668f6cb5ec48f2b9c442c1574cb8056279c7be719b227ce9987853a9b328164c.png" src="_images/668f6cb5ec48f2b9c442c1574cb8056279c7be719b227ce9987853a9b328164c.png" />
+<img alt="_images/7d02c5d7db8d9444332519ba7a215c91c5647d4052ecfe635eaf9e8b725e3c66.png" src="_images/7d02c5d7db8d9444332519ba7a215c91c5647d4052ecfe635eaf9e8b725e3c66.png" />
 </div>
 </div>
 <p>The local performance for such a model then looks like this.</p>
@@ -2529,7 +2529,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/79bb4af9e87a8678ee92783ff73d834ba1481eb24bf4e1a6eba2591522101ceb.png" src="_images/79bb4af9e87a8678ee92783ff73d834ba1481eb24bf4e1a6eba2591522101ceb.png" />
+<img alt="_images/a48d23643a2f55eb215c52c16dbf2bfc4a3b20f5e0d06c02c9d5cf6b2effc46a.png" src="_images/a48d23643a2f55eb215c52c16dbf2bfc4a3b20f5e0d06c02c9d5cf6b2effc46a.png" />
 </div>
 </div>
 <h2 id="adapting-the-allowed-proportion">Adapting the allowed proportion<a class="headerlink" href="#adapting-the-allowed-proportion" title="Link to this heading">¶</a></h2>
@@ -2546,10 +2546,6 @@ forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
-  warn(
-</code></pre></div>
-</div>
 <div class="output text_html"><style>.sk-global {
   /* Definition of color scheme common for light and dark mode */
   --sklearn-color-text: #000;
@@ -3742,7 +3738,7 @@ forceTheme('sk-container-id-2');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/c2cdf1d188aca05b9cb8995948019f600b127b8f6b9104914920e2f44d36c90e.png" src="_images/c2cdf1d188aca05b9cb8995948019f600b127b8f6b9104914920e2f44d36c90e.png" />
+<img alt="_images/19d979c7f55630d8e027025eb7f98f2729eef070e6b8493a85360bdf9f122336.png" src="_images/19d979c7f55630d8e027025eb7f98f2729eef070e6b8493a85360bdf9f122336.png" />
 </div>
 </div>
 <h2 id="undersampling">Undersampling<a class="headerlink" href="#undersampling" title="Link to this heading">¶</a></h2>
@@ -3764,6 +3760,12 @@ forceTheme('sk-container-id-2');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><code>/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
+  warn(
+/home/runner/micromamba/envs/py314-latest/lib/python3.14/site-packages/sklearn/ensemble/_forest.py:589: UserWarning: Some inputs do not have OOB scores. This probably means too few trees were used to compute any reliable OOB estimates.
+  warn(
+</code></pre></div>
+</div>
 <div class="output text_html"><style>.sk-global {
   /* Definition of color scheme common for light and dark mode */
   --sklearn-color-text: #000;
@@ -4971,7 +4973,7 @@ forceTheme('sk-container-id-3');</script></body></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/4bf4d54ea7a5ba1075b743b505e55e30923c03feda29c4526e228cf99b99f646.png" src="_images/4bf4d54ea7a5ba1075b743b505e55e30923c03feda29c4526e228cf99b99f646.png" />
+<img alt="_images/cbaa708ef599f2f8489452d02314ac4a09ebb56cf81c81cf4a6982bd26d65f8a.png" src="_images/cbaa708ef599f2f8489452d02314ac4a09ebb56cf81c81cf4a6982bd26d65f8a.png" />
 </div>
 </div>
 <p>Keep in mind that for models like this one, where we use only 25 observations in each local model, undersampling can have a severe efect on the model robustness in a negative way, as it may reduce the number of observations that are actually used by quite a lot. Use with caution and ideally in situations where you rely on a larger number of neighbors.</p>
