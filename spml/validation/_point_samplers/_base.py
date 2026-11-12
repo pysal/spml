@@ -13,7 +13,7 @@ class BasePointSampler(BaseEstimator):
     """
 
     @abstractmethod
-    def sample(self, geometry, **kwargs) -> gpd.GeoDataFrame:
+    def sample(self, geometry) -> gpd.GeoDataFrame:
         """Generate sampled point locations.
 
         Parameters

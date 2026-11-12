@@ -44,7 +44,7 @@ class PointSampler(BasePointSampler):
         self,
         geometry,
         n_samples: int | None = None,
-    ) -> gpd.GeoDataFrame:  # ty:ignore[invalid-method-override]
+    ) -> gpd.GeoDataFrame:
         """Sample ``n_samples`` points uniformly inside ``geometry``.
 
         Parameters

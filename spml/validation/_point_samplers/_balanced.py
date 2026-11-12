@@ -49,7 +49,7 @@ class ConstantClassSampler(BasePointSampler):
         self.quasi_random = quasi_random
         self.random_state = random_state
 
-    def sample(self, geometry, labels=None) -> gpd.GeoDataFrame:  # ty:ignore[invalid-method-override]
+    def sample(self, geometry, labels=None) -> gpd.GeoDataFrame:
         """Generate balanced class samples.
 
         Parameters

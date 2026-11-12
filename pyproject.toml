@@ -76,11 +76,6 @@ ignore = [
     "A001",  # Variable is shadowing a Python builtin (Sphinx requires `copyright`)
 ]
 
-[tool.ty.rules]
-unresolved-attribute = "ignore"
-no-matching-overload = "ignore"
-import-not-found = "ignore"
-
 [tool.coverage.run]
 source = ["./spml"]
 
