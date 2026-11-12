@@ -42,7 +42,7 @@ def _assign_cells(lonlat, grid, resolution):
         import a5
 
         return np.array(
-            [a5.lonlat_to_cell([lon, lat], resolution) for lon, lat in lonlat]
+            [a5.lonlat_to_cell([lon, lat], resolution) for lon, lat in lonlat]  # type: ignore
         )
     if grid == "healpix":
         import healpy
