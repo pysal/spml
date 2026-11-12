@@ -77,7 +77,7 @@ ignore = [
 ]
 
 [tool.ty.rules]
-unresolved-attribute = "ignore"
+missing-attribute = "ignore"
 no-matching-overload = "ignore"
 import-not-found = "ignore"
 
