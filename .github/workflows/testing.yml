@@ -48,13 +48,13 @@ jobs:
 
     steps:
       - name: checkout repo
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0 # Fetch all history for all branches and tags.
           persist-credentials: false
 
       - name: setup micromamba
-        uses: mamba-org/setup-micromamba@f457c30a868e4760d3a6fcea5f25dc655b8edf39 # v3.2.1
+        uses: mamba-org/setup-micromamba@v3.2.1
         with:
           environment-file: ci/${{ matrix.environment-file }}.yaml
           micromamba-version: "latest"
@@ -96,6 +96,6 @@ jobs:
           pytest -v --color=yes --doctest-only spml
 
       - name: codecov
-        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        uses: codecov/codecov-action@v7.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
