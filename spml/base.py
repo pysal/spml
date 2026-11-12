@@ -4,7 +4,7 @@ from collections.abc import Callable, Hashable
 from numbers import Integral, Real
 from pathlib import Path
 from time import time
-from typing import Literal
+from typing import Any, Literal
 
 import geopandas as gpd
 import numpy as np
@@ -68,7 +68,7 @@ class _BaseModel(BaseEstimator):
         self.batch_size = batch_size
         self.coplanar = coplanar
         self.verbose = verbose
-        self._model_type = None
+        self._model_type: str | None = None
 
     def _validate_geometry(self, geometry):
         """Validate that geometry contains only Point geometries"""
@@ -309,10 +309,7 @@ class _BaseModel(BaseEstimator):
 
             # Bayesian Information Criterion
             # Cast n to float to avoid overload resolution issues with numpy.log
-            self.bic_ = (
-                np.log(float(n)) * (k + 1)  # ty:ignore[invalid-argument-type]
-                - 2 * self.log_likelihood_
-            )
+            self.bic_ = np.log(float(n)) * (k + 1) - 2 * self.log_likelihood_
 
             # Corrected AIC — GWR/MGWR form (Fotheringham et al. 2002).
             # Uses p = k+1 consistently in both the AIC and the small-sample
@@ -322,12 +319,8 @@ class _BaseModel(BaseEstimator):
             # Compare the Burnham & Anderson (2002) general formula which would give
             # AIC + 2p(p+1)/(n-p-1) with p = k+1: same result.
             if n - k - 2 > 0:
-                self.aicc_ = (
-                    -2.0 * self.log_likelihood_
-                    + 2.0
-                    * n  # ty:ignore[unsupported-operator]
-                    * (k + 1.0)
-                    / (n - k - 2.0)
+                self.aicc_ = -2.0 * self.log_likelihood_ + 2.0 * n * (k + 1.0) / (
+                    n - k - 2.0
                 )
             else:
                 self.aicc_ = np.nan
@@ -796,8 +789,11 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         self.undersample = undersample
         self.random_state = random_state
         self.leave_out = leave_out
-        self._empty_score_data = (np.array([]), np.array([]))
-        self._empty_feature_imp = None
+        self._empty_score_data: tuple[Any, ...] | float = (
+            np.array([]),
+            np.array([]),
+        )
+        self._empty_feature_imp: np.ndarray | None = None
 
     def fit(
         self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
@@ -876,7 +872,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         if self.keep_models:
             (
                 self._names,
-                self._n_labels,
+                n_labels,
                 self._score_data,
                 self._feature_importances,
                 focal_proba,
@@ -888,7 +884,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         else:
             (
                 self._names,
-                self._n_labels,
+                n_labels,
                 self._score_data,
                 self._feature_importances,
                 focal_proba,
@@ -896,7 +892,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
                 left_out_proba,
             ) = zip(*training_output, strict=False)
 
-        self._n_labels = pd.Series(self._n_labels, index=self._names)
+        self._n_labels = pd.Series(n_labels, index=self._names)
         self.local_class_support_ = self._n_labels.copy()
         self.proba_ = pd.DataFrame(focal_proba, index=self._names)
 
@@ -1146,17 +1142,17 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
 
         probabilities = []
         if bandwidth == "nearest":
-            local_model_ids = self._prepare_prediction_nearest(geometry)
+            nearest_model_ids = self._prepare_prediction_nearest(geometry)
 
-            for x_, model_id in zip(data, local_model_ids, strict=True):
+            for x_, model_id in zip(data, nearest_model_ids, strict=True):
                 probabilities.append(self._predict_local_nearest(x_, model_id))
         else:
-            local_model_ids, distances = self._prepare_prediction_neighborhoods(
+            neighborhood_model_ids, distances = self._prepare_prediction_neighborhoods(
                 geometry, bandwidth=bandwidth
             )
 
             for x_, models_, distances_ in zip(
-                data, local_model_ids, distances, strict=True
+                data, neighborhood_model_ids, distances, strict=True
             ):
                 probabilities.append(
                     self._predict_local_ensemble(x_, models_, distances_)
@@ -1313,7 +1309,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         geometry: gpd.GeoSeries,
         bandwidth: Literal["nearest"] | int | float | None = "nearest",
         global_model_weight: float = 0,
-    ) -> float:  # ty:ignore[incompatible-method-override]
+    ) -> float:
         """Return the mean accuracy on the given test data and labels.
 
         Parameters
@@ -1531,7 +1527,10 @@ class BaseRegressor(_BaseModel, RegressorMixin):
             **kwargs,
         )
         self.random_state = random_state
-        self._empty_score_data = (np.array([]), np.array([]))
+        self._empty_score_data: tuple[Any, ...] | float = (
+            np.array([]),
+            np.array([]),
+        )
 
     def fit(
         self, X: pd.DataFrame, y: pd.Series, geometry: gpd.GeoSeries | None = None
@@ -1695,17 +1694,17 @@ class BaseRegressor(_BaseModel, RegressorMixin):
 
         predictions = []
         if bandwidth == "nearest":
-            local_model_ids = self._prepare_prediction_nearest(geometry)
+            nearest_model_ids = self._prepare_prediction_nearest(geometry)
 
-            for x_, model_id in zip(data, local_model_ids, strict=True):
+            for x_, model_id in zip(data, nearest_model_ids, strict=True):
                 predictions.append(self._predict_local_nearest(x_, model_id))
         else:
-            local_model_ids, distances = self._prepare_prediction_neighborhoods(
+            neighborhood_model_ids, distances = self._prepare_prediction_neighborhoods(
                 geometry, bandwidth=bandwidth
             )
 
             for x_, models_, distances_ in zip(
-                data, local_model_ids, distances, strict=True
+                data, neighborhood_model_ids, distances, strict=True
             ):
                 predictions.append(
                     self._predict_local_ensemble(x_, models_, distances_)
@@ -1740,12 +1739,12 @@ class BaseRegressor(_BaseModel, RegressorMixin):
             else:
                 pred.append(np.nan)
 
-        pred = np.array(pred)
-        mask = np.isnan(pred)
+        predictions = np.array(pred)
+        mask = np.isnan(predictions)
         if mask.all():
             return np.nan
 
-        weighted = np.average(pred[~mask], weights=distances_[~mask])
+        weighted = np.average(predictions[~mask], weights=distances_[~mask])
         return weighted
 
     def _predict_local_nearest(self, x_: pd.DataFrame, model_id: Hashable) -> float:
@@ -1864,7 +1863,7 @@ class BaseRegressor(_BaseModel, RegressorMixin):
         geometry: gpd.GeoSeries,
         bandwidth: Literal["nearest"] | int | float | None = "nearest",
         global_model_weight: float = 0,
-    ) -> float:  # ty:ignore[incompatible-method-override]
+    ) -> float:
         """Return the coefficient of determination R^2 of the prediction.
 
         Parameters

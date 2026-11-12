@@ -73,7 +73,7 @@ class MultinomialSampler(BasePointSampler):
         self.quasi_random = quasi_random
         self.random_state = random_state
 
-    def sample(self, geometry, labels=None, weights=None) -> gpd.GeoDataFrame:  # ty:ignore[incompatible-method-override]
+    def sample(self, geometry, labels=None, weights=None) -> gpd.GeoDataFrame:
         """Generate multinomially allocated class samples.
 
         Parameters
@@ -109,7 +109,7 @@ class MultinomialSampler(BasePointSampler):
                 else geometry
             )
             labels_arr = np.asarray(labels)
-            weights_arr = (
+            weights_arr: np.ndarray | None = (
                 np.asarray(weights, dtype=float)
                 if weights is not None
                 else np.ones(len(labels_arr), dtype=float)

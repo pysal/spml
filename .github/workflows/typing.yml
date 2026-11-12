@@ -1,41 +1,49 @@
 ---
-name: Typing
+name: Type checking
 
 permissions: {}
 
-on:
-    push:
-        branches: [main]
-    pull_request:
-        branches:
-            - "*"
-    schedule:
-        - cron: "59 23 * * 3"
-    workflow_dispatch:
-        inputs:
-            version:
-                description: Manual CI Run
-                default: test
-                required: false
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches: [main]
+  pull_request:
+    branches:
+      - "*"
+  schedule:
+    - cron: "0 0 * * 1,4"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Manual test execution
+        default: test
+        required: false
 
 jobs:
-    ty-check:
-        name: Type checking
-        runs-on: ubuntu-latest
+  mypy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
 
-        steps:
-            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-              with:
-                persist-credentials: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0  # Fetch all history for all branches and tags.
+          persist-credentials: false
 
-            - name: Install uv
-              uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - name: setup micromamba
+        uses: mamba-org/setup-micromamba@f457c30a868e4760d3a6fcea5f25dc655b8edf39 # v3.2.1
+        with:
+          environment-file: ci/py314_latest.yaml
+          create-args: >-
+            mypy
 
-            - name: Install spml
-              run: |
-                  uv venv
-                  uv pip install ty
-                  uv pip install .[optional]
+      - name: Install spml
+        run: pip install .
 
-            - name: Run checks
-              run: uv run ty check spml --output-format github
+      - name: Check spml
+        run: |
+            mypy spml/ \
+            --install-types \
+            --ignore-missing-imports \
+            --non-interactive
