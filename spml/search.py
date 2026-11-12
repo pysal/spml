@@ -396,7 +396,7 @@ class BandwidthSearch:
 
         diff = 1.0e9
         iters = 0
-        scores = {}
+        scores: dict[float | int, float] = {}
         metrics = {}
         while diff > tolerance and iters < self.max_iterations and a != np.inf:
             if not self.fixed:  # ensure we use int as possible bandwidth

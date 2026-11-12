@@ -94,21 +94,11 @@ def test_interval_search_basic(sample_data):  # noqa: F811
 
     # Check that optimal bandwidth was found
     assert hasattr(search, "optimal_bandwidth_")
-    assert (
-        search.min_bandwidth
-        <= search.optimal_bandwidth_  # ty:ignore[unsupported-operator]
-        <= search.max_bandwidth
-    )
+    assert search.min_bandwidth <= search.optimal_bandwidth_ <= search.max_bandwidth
 
     # Check the number of bandwidths tested
     expected_n_bandwidths = (
-        int(
-            (
-                search.max_bandwidth - search.min_bandwidth  # ty:ignore[unsupported-operator]
-            )
-            / search.interval
-        )
-        + 1
+        int((search.max_bandwidth - search.min_bandwidth) / search.interval) + 1
     )
     assert len(search.scores_) == expected_n_bandwidths
 
@@ -140,11 +130,7 @@ def test_golden_section_search_basic(sample_data):  # noqa: F811
 
     # Check that optimal bandwidth was found
     assert hasattr(search, "optimal_bandwidth_")
-    assert (
-        search.min_bandwidth
-        <= search.optimal_bandwidth_  # ty:ignore[unsupported-operator]
-        <= search.max_bandwidth
-    )
+    assert search.min_bandwidth <= search.optimal_bandwidth_ <= search.max_bandwidth
     # Golden section should evaluate fewer points than interval search
     assert len(search.scores_) <= search.max_iterations * 2
 
@@ -466,7 +452,7 @@ def test_maximize_custom_metric(sample_data):
     search.fit(X, y, geometry)
 
     # Check that metrics were tracked correctly
-    assert search.optimal_bandwidth_ > 400000  # ty:ignore[unsupported-operator]
+    assert search.optimal_bandwidth_ > 400000
 
 
 def test_bandwidth_search_global_invariant_y():
