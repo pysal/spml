@@ -1313,7 +1313,7 @@ class BaseClassifier(ClassifierMixin, _BaseModel):
         geometry: gpd.GeoSeries,
         bandwidth: Literal["nearest"] | int | float | None = "nearest",
         global_model_weight: float = 0,
-    ) -> float:  # ty:ignore[invalid-method-override]
+    ) -> float:  # ty:ignore[incompatible-method-override]
         """Return the mean accuracy on the given test data and labels.
 
         Parameters
@@ -1864,7 +1864,7 @@ class BaseRegressor(_BaseModel, RegressorMixin):
         geometry: gpd.GeoSeries,
         bandwidth: Literal["nearest"] | int | float | None = "nearest",
         global_model_weight: float = 0,
-    ) -> float:  # ty:ignore[invalid-method-override]
+    ) -> float:  # ty:ignore[incompatible-method-override]
         """Return the coefficient of determination R^2 of the prediction.
 
         Parameters
