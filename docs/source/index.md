@@ -13,6 +13,7 @@ installation
 introduction
 linear
 ensemble
+Dimensionality reduction <gwpca>
 predict
 imbalance
 bandwidth_search
